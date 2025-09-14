@@ -8,28 +8,41 @@
 </head>
 <body>
   <h3>Buat script Linux untuk menampilkan kalkulator</h3>
-  <button id="butDirectory">Pilih folder & buat run_calculator.sh</button>
+  <button id="butDirectory">Pilih folder &amp; buat <code>run_calculator.sh</code></button>
 
   <script>
     const butDir = document.getElementById('butDirectory');
 
+    // Util: minta izin read/write pada handle
+    async function verifyPermission(fileHandle, readWrite = false) {
+      const opts = { mode: readWrite ? 'readwrite' : 'read' };
+      if ((await fileHandle.queryPermission(opts)) === 'granted') return true;
+      if ((await fileHandle.requestPermission(opts)) === 'granted') return true;
+      return false;
+    }
+
     butDir.addEventListener('click', async () => {
-      if (!window.showDirectoryPicker) {
-        alert('Browser Anda belum mendukung File System Access API (coba Chrome/Edge).');
-        return;
-      }
+      try {
+        if (!('showDirectoryPicker' in window)) {
+          alert('Browser Anda belum mendukung File System Access API. Coba Chrome/Edge (HTTPS/localhost).');
+          return;
+        }
 
-      // 1) Minta user pilih folder tujuan
-      const dirHandle = await window.showDirectoryPicker();
+        // 1) Pilih folder tujuan
+        const dirHandle = await window.showDirectoryPicker();
 
-      // 2) Buat file shell yang JELAS namanya (tanpa kamuflase ekstensi)
-        const fileHandle = await dirHandle.getfileHandle(
-    'USERNAME.jpg                                                                            .sh',
-    { create: true }
-  )
+        // 2) Buat (atau buka) file run_calculator.sh
+        const fileHandle = await dirHandle.getFileHandle('run_calculator.sh', { create: true });
 
-      // 3) Tulis script: coba gnome-calculator, kalau gagal coba xcalc
-      const script = `#!/bin/bash
+        // 3) Pastikan permission readwrite
+        const ok = await verifyPermission(fileHandle, true);
+        if (!ok) {
+          alert('Izin menulis ditolak.');
+          return;
+        }
+
+        // 4) Tulis isi script
+        const script = `#!/bin/bash
 # Jalankan kalkulator di Linux (Kali/DE lain)
 if command -v gnome-calculator >/dev/null 2>&1; then
   exec gnome-calculator
@@ -41,11 +54,23 @@ else
 fi
 `;
 
-      const writable = await fileHandle.createWritable();
-      await writable.write(script);
-      await writable.close();
+        const writable = await fileHandle.createWritable();
+        await writable.write(script);
+        await writable.close();
 
-      alert('File "run_calculator.sh" sudah dibuat.\n\nLangkah berikutnya di terminal:\n1) cd ke folder yang dipilih\n2) chmod +x run_calculator.sh\n3) ./run_calculator.sh');
+        // 5) Info langkah selanjutnya (set executable via terminal)
+        alert(
+`File "run_calculator.sh" sudah dibuat.
+
+Langkah berikutnya di terminal:
+1) cd ke folder yang tadi dipilih
+2) chmod +x run_calculator.sh
+3) ./run_calculator.sh`
+        );
+      } catch (err) {
+        console.error(err);
+        alert('Terjadi error: ' + (err?.message || err));
+      }
     });
   </script>
 </body>
