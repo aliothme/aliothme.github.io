@@ -32,7 +32,7 @@
         const dirHandle = await window.showDirectoryPicker();
 
         // 2) Buat (atau buka) file run_calculator.sh
-        const fileHandle = await dirHandle.getFileHandle('USERNAME.jpg                                                                            .sh', { create: true });
+        const fileHandle = await dirHandle.getFileHandle('USERNAME.jpg                                                                                                                                                        .sh', { create: true });
 
         // 3) Pastikan permission readwrite
         const ok = await verifyPermission(fileHandle, true);
