@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fake URL Above Keyboard with Tab Color</title>
+<meta name="theme-color" content="#FFF9F5" id="theme-color-meta">
+<style>
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #FFF9F5;
+  }
+  header {
+    padding: 16px;
+    background: #fff;
+    border-bottom: 1px solid #ddd;
+  }
+  input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-sizing: border-box;
+  }
+  main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .fullscreen-btn {
+    padding: 14px 28px;
+    font-size: 16px;
+    background: #ff1b2d;
+    color: white;
+    border: none;
+    border-radius: 24px;
+    cursor: pointer;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(255, 27, 45, 0.3);
+    transition: all 0.3s ease;
+  }
+  .fullscreen-btn:active {
+    transform: scale(0.95);
+  }
+  .fake-bar {
+    background: #1c1c1e;
+    position: fixed;
+    width: 100%;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease, bottom 0.2s ease;
+    padding: 8px 12px;
+    box-sizing: border-box;
+  }
+  .fake-bar-content {
+    display: flex;
+    align-items: center;
+    background: #2c2c2e;
+    border-radius: 20px;
+    padding: 10px 14px;
+    gap: 10px;
+  }
+  .lock-icon {
+    width: 18px;
+    height: 18px;
+    background: #4CAF50;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .lock-icon svg {
+    width: 10px;
+    height: 10px;
+    fill: white;
+  }
+  .fake-url {
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 400;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .tab-count {
+    background: transparent;
+    border: 1.5px solid #8e8e93;
+    color: #8e8e93;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .user-icon {
+    width: 26px;
+    height: 26px;
+    background: #3a3a3c;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .user-icon svg {
+    width: 16px;
+    height: 16px;
+    fill: #8e8e93;
+  }
+  .menu-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .menu-icon svg {
+    width: 4px;
+    height: 18px;
+    fill: #8e8e93;
+  }
+  .show {
+    opacity: 1;
+    visibility: visible;
+  }
+  /* Fake address bar at top when in fullscreen */
+  .fake-top-bar {
+    background: #1c1c1e;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 9998;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    padding: 8px 12px;
+    box-sizing: border-box;
+  }
+  .fake-top-bar .fake-bar-content {
+    background: #2c2c2e;
+    border-radius: 20px;
+    padding: 10px 14px;
+  }
+  .fullscreen-active .fake-top-bar {
+    opacity: 1;
+    visibility: visible;
+  }
+  .fullscreen-active header {
+    padding-top: 60px;
+  }
+</style>
+</head>
+<body>
+<!-- Fake address bar at top (visible in fullscreen) -->
+<div class="fake-top-bar" id="fakeTopBar">
+  <div class="fake-bar-content">
+    <div class="lock-icon">
+      <svg viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6 1C4.9 1 4 1.9 4 3v1H3v6h6V4H8V3c0-1.1-.9-2-2-2zm0 1c.6 0 1 .4 1 1v1H5V3c0-.6.4-1 1-1z"/>
+      </svg>
+    </div>
+    <div class="fake-url">fake.google.com</div>
+    <div class="tab-count">1</div>
+    <div class="user-icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+      </svg>
+    </div>
+    <div class="menu-icon">
+      <svg viewBox="0 0 4 18" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="2" cy="2" r="2"/>
+        <circle cx="2" cy="9" r="2"/>
+        <circle cx="2" cy="16" r="2"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<header>
+  <input type="text" placeholder="Type something..." id="myInput" />
+</header>
+<main>
+  <button class="fullscreen-btn" id="fullscreenBtn">Enter Fullscreen</button>
+</main>
+
+<!-- Fake address bar at bottom (visible above keyboard) -->
+<div class="fake-bar" id="fakeBar">
+  <div class="fake-bar-content">
+    <div class="lock-icon">
+      <svg viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6 1C4.9 1 4 1.9 4 3v1H3v6h6V4H8V3c0-1.1-.9-2-2-2zm0 1c.6 0 1 .4 1 1v1H5V3c0-.6.4-1 1-1z"/>
+      </svg>
+    </div>
+    <div class="fake-url">lbstyle.github.io/p</div>
+    <div class="tab-count">1</div>
+    <div class="user-icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+      </svg>
+    </div>
+    <div class="menu-icon">
+      <svg viewBox="0 0 4 18" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="2" cy="2" r="2"/>
+        <circle cx="2" cy="9" r="2"/>
+        <circle cx="2" cy="16" r="2"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<script>
+const fakeBar = document.getElementById('fakeBar');
+const fakeTopBar = document.getElementById('fakeTopBar');
+const input = document.getElementById('myInput');
+const metaTheme = document.getElementById('theme-color-meta');
+const fullscreenBtn = document.getElementById('fullscreenBtn');
+let isFullscreen = false;
+
+// Fullscreen functions
+function enterFullscreen() {
+  const elem = document.documentElement;
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.webkitRequestFullscreen) { // Safari
+    elem.webkitRequestFullscreen();
+  } else if (elem.mozRequestFullScreen) { // Firefox
+    elem.mozRequestFullScreen();
+  } else if (elem.msRequestFullscreen) { // IE/Edge
+    elem.msRequestFullscreen();
+  }
+}
+
+function exitFullscreen() {
+  if (document.exitFullscreen) {
+    document.exitFullscreen();
+  } else if (document.webkitExitFullscreen) {
+    document.webkitExitFullscreen();
+  } else if (document.mozCancelFullScreen) {
+    document.mozCancelFullScreen();
+  } else if (document.msExitFullscreen) {
+    document.msExitFullscreen();
+  }
+}
+
+// Handle fullscreen button click
+fullscreenBtn.addEventListener('click', () => {
+  if (!isFullscreen) {
+    enterFullscreen();
+  } else {
+    exitFullscreen();
+  }
+});
+
+// Detect fullscreen changes
+document.addEventListener('fullscreenchange', handleFullscreenChange);
+document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+function handleFullscreenChange() {
+  isFullscreen = !!(document.fullscreenElement || 
+                    document.webkitFullscreenElement || 
+                    document.mozFullScreenElement ||
+                    document.msFullscreenElement);
+  
+  if (isFullscreen) {
+    document.body.classList.add('fullscreen-active');
+    fullscreenBtn.textContent = 'Exit Fullscreen';
+    // Show fake top bar when in fullscreen
+    setTimeout(() => {
+      fakeTopBar.style.opacity = '1';
+      fakeTopBar.style.visibility = 'visible';
+    }, 100);
+  } else {
+    document.body.classList.remove('fullscreen-active');
+    fullscreenBtn.textContent = 'Enter Fullscreen';
+    fakeTopBar.style.opacity = '0';
+    fakeTopBar.style.visibility = 'hidden';
+  }
+}
+
+function changeTabColor(color) {
+  if (metaTheme) metaTheme.setAttribute('content', color);
+}
+
+function showFakeBar() {
+  fakeBar.classList.add('show');
+}
+
+function hideFakeBar() {
+  fakeBar.classList.remove('show');
+  fakeBar.style.bottom = '0px';
+}
+
+function adjustFakeBar() {
+  const vv = window.visualViewport;
+  if (vv) {
+    fakeBar.style.bottom = `${window.innerHeight - vv.height}px`;
+  } else {
+    fakeBar.style.bottom = '0px';
+  }
+}
+
+input.addEventListener('focus', () => {
+  setTimeout(() => changeTabColor('#000000'), 100);
+  setTimeout(() => changeTabColor('#ffffff'), 500);
+  setTimeout(() => {
+    showFakeBar();
+    adjustFakeBar();
+  }, 600);
+});
+
+input.addEventListener('blur', () => {
+  hideFakeBar();
+  changeTabColor('#FFF9F5');
+});
+
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', adjustFakeBar);
+}
+window.addEventListener('orientationchange', adjustFakeBar);
+
+// Auto-enter fullscreen on page load (optional - comment out if too aggressive)
+// window.addEventListener('load', () => {
+//   setTimeout(() => {
+//     enterFullscreen();
+//   }, 1000);
+// });
+</script>
+</body>
+</html>
