@@ -2,30 +2,59 @@
 <html lang="en">
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fake URL Above Keyboard with Tab Color</title>
+<title>Improved Fake URL Above Keyboard</title>
 <meta name="theme-color" content="#FFF9F5" id="theme-color-meta">
 <style>
-/* CSS yang sama seperti sebelumnya */
-body {
+  * {
+    box-sizing: border-box;
+  }
+  
+  body {
     margin: 0;
     font-family: Arial, sans-serif;
-    height: 200vh; /* DITINGKATKAN: Membuat konten lebih panjang agar bisa di-scroll */
-    display: flex;
-    flex-direction: column;
+    min-height: 100vh;
     background-color: #FFF9F5;
-}
-
-header {
+    padding-top: 70px; /* Space for fixed header */
+  }
+  
+  header {
     padding: 16px;
     background: #fff;
     border-bottom: 1px solid #ddd;
-    /* DITAMBAHKAN: Memberikan posisi relatif agar offset scroll mudah dihitung */
-    position: relative; 
-}
-
-/* ... (CSS input dan main sama) ... */
-
-.fake-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+  
+  header.hidden {
+    transform: translateY(-100%);
+  }
+  
+  input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+  }
+  
+  main {
+    padding: 20px;
+    min-height: 200vh; /* Make content scrollable for testing */
+  }
+  
+  .content-section {
+    background: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .fake-bar {
     text-align: center;
     background: #fff7f0;
     border-top: 1px solid #e0cbb0;
@@ -39,85 +68,210 @@ header {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease, bottom 0.2s ease;
-}
-
-.show {
+    bottom: 0;
+  }
+  
+  .fake-bar.show {
     opacity: 1;
     visibility: visible;
-}
-
-/* DITAMBAHKAN: Tambahkan ruang kosong di bawah untuk memaksa scroll */
-.spacer {
-    height: 100vh;
-    background-color: #f7f7f7;
-    padding: 20px;
-}
+  }
+  
+  .fake-bar-icon {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
 </style>
 </head>
 <body>
-
-<header id="pageHeader">
-    <input type="text" placeholder="Enter your credentials..." id="myInput" />
+<header id="header">
+  <input type="text" placeholder="Cari atau ketik URL..." id="myInput" />
 </header>
 
 <main>
-    <div class="spacer">
-        <p>This is filler content to enable scrolling.</p>
-    </div>
+  <div class="content-section">
+    <h2>Selamat Datang!</h2>
+    <p>Scroll ke bawah untuk melihat searchbar tersembunyi secara otomatis.</p>
+    <p>Klik pada input di atas untuk menampilkan fake searchbar di atas keyboard.</p>
+  </div>
+  
+  <div class="content-section">
+    <h3>Fitur yang Diperbaiki:</h3>
+    <ul>
+      <li>✅ Fakebar tetap muncul setelah mengetik</li>
+      <li>✅ Searchbar asli tersembunyi saat scroll</li>
+      <li>✅ Deteksi keyboard lebih akurat</li>
+      <li>✅ Smooth transitions</li>
+    </ul>
+  </div>
+  
+  <div class="content-section">
+    <h3>Cara Menggunakan:</h3>
+    <ol>
+      <li>Scroll ke bawah untuk menyembunyikan header</li>
+      <li>Scroll ke atas untuk menampilkan header kembali</li>
+      <li>Klik input untuk menampilkan fake searchbar</li>
+      <li>Ketik sesuatu - fakebar tetap muncul</li>
+      <li>Klik di luar input atau tekan Done - fakebar hilang</li>
+    </ol>
+  </div>
+  
+  <div class="content-section">
+    <h3>Konten Tambahan</h3>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+  </div>
+  
+  <div class="content-section">
+    <h3>Scroll Lebih Jauh</h3>
+    <p>Terus scroll untuk melihat behavior yang konsisten.</p>
+  </div>
+  
+  <div class="content-section">
+    <h3>Section Terakhir</h3>
+    <p>Anda telah mencapai bagian akhir. Scroll ke atas untuk kembali!</p>
+  </div>
 </main>
 
-<div class="fake-bar" id="fakeBar">secure.google.com</div>
+<div class="fake-bar" id="fakeBar">
+  <span class="fake-bar-icon">🔒</span>
+  google.com
+</div>
 
 <script>
 const fakeBar = document.getElementById('fakeBar');
 const input = document.getElementById('myInput');
+const header = document.getElementById('header');
 const metaTheme = document.getElementById('theme-color-meta');
-const pageHeader = document.getElementById('pageHeader');
 
-// ... (changeTabColor, showFakeBar, hideFakeBar, adjustFakeBar functions sama) ...
+let lastScrollTop = 0;
+let isKeyboardOpen = false;
+let inputFocused = false;
 
-// Fungsi untuk memaksa scroll ke atas, menyembunyikan omnibox peramban asli
-function hideBrowserOmnibox() {
-    // Scroll 1 piksel ke bawah dari posisi header, memaksa peramban menyembunyikan UI-nya
-    // ScrollTo({ top: 1, behavior: 'instant' });
-    window.scrollTo(0, 1);
+// Change tab color
+function changeTabColor(color) {
+  if (metaTheme) metaTheme.setAttribute('content', color);
+}
+
+// Show fake bar
+function showFakeBar() {
+  fakeBar.classList.add('show');
+  adjustFakeBar();
+}
+
+// Hide fake bar
+function hideFakeBar() {
+  fakeBar.classList.remove('show');
+  fakeBar.style.bottom = '0px';
+}
+
+// Adjust bar position above keyboard
+function adjustFakeBar() {
+  if (!inputFocused) return;
+  
+  const vv = window.visualViewport;
+  if (vv) {
+    const keyboardHeight = window.innerHeight - vv.height;
+    if (keyboardHeight > 100) { // Keyboard is open
+      isKeyboardOpen = true;
+      fakeBar.style.bottom = `${keyboardHeight}px`;
+    } else {
+      isKeyboardOpen = false;
+      fakeBar.style.bottom = '0px';
+    }
+  }
+}
+
+// Handle scroll to hide/show header
+let scrollTimeout;
+function handleScroll() {
+  clearTimeout(scrollTimeout);
+  
+  scrollTimeout = setTimeout(() => {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    
+    // Don't hide header when keyboard is open
+    if (isKeyboardOpen || inputFocused) return;
+    
+    if (scrollTop > lastScrollTop && scrollTop > 50) {
+      // Scrolling down & past threshold
+      header.classList.add('hidden');
+    } else if (scrollTop < lastScrollTop) {
+      // Scrolling up
+      header.classList.remove('hidden');
+    }
+    
+    lastScrollTop = scrollTop;
+  }, 10);
 }
 
 // Handle input focus
 input.addEventListener('focus', () => {
-    // 1. Sembunyikan omnibox asli segera setelah fokus
-    hideBrowserOmnibox();
-
-    // 2. Change tab color sequence
-    setTimeout(() => changeTabColor('#000000'), 100);
-    setTimeout(() => changeTabColor('#ffffff'), 500);
-
-    // 3. Tampilkan fake bar
-    setTimeout(() => {
-        showFakeBar();
-        adjustFakeBar();
-    }, 600);
+  inputFocused = true;
+  
+  // Make sure header is visible when input is focused
+  header.classList.remove('hidden');
+  
+  // Change tab color sequence
+  setTimeout(() => changeTabColor('#000000'), 100);
+  setTimeout(() => changeTabColor('#ffffff'), 500);
+  
+  // Show fake omnibox
+  setTimeout(() => {
+    showFakeBar();
+  }, 600);
 });
 
-// Handle input blur (DINONAKTIFKAN/DIMODIFIKASI)
+// Handle input blur - only hide fakebar when truly done
 input.addEventListener('blur', () => {
-    // 1. **PENTING**: Hapus panggilan ke hideFakeBar()
-    //    Ini memastikan fakebar tetap terlihat meskipun input kehilangan fokus.
-    // hideFakeBar(); // KOMENTARI ATAU HAPUS BARIS INI
-
-    // 2. Reset warna tab kembali normal (Opsional, tergantung skenario)
-    // changeTabColor('#FFF9F5'); 
-
-    // 3. Opsional: Jaga agar browser tetap ter-scroll ke bawah agar omnibox asli tidak muncul
-    hideBrowserOmnibox();
+  inputFocused = false;
+  
+  // Small delay to check if keyboard is actually closing
+  setTimeout(() => {
+    if (!inputFocused) {
+      hideFakeBar();
+      changeTabColor('#FFF9F5');
+      isKeyboardOpen = false;
+    }
+  }, 100);
 });
 
-// Adjust bar position when keyboard opens/closes or device rotates
-if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', adjustFakeBar);
-}
-window.addEventListener('orientationchange', adjustFakeBar);
-</script>
+// Prevent blur when clicking inside the fake bar area (optional enhancement)
+fakeBar.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  input.focus();
+}, { passive: false });
 
+// Visual Viewport resize (keyboard open/close)
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', () => {
+    adjustFakeBar();
+    
+    // Detect keyboard closing
+    const vv = window.visualViewport;
+    const keyboardHeight = window.innerHeight - vv.height;
+    
+    if (keyboardHeight < 100 && isKeyboardOpen) {
+      // Keyboard just closed
+      isKeyboardOpen = false;
+      if (!inputFocused) {
+        hideFakeBar();
+      }
+    }
+  });
+}
+
+// Scroll handler
+window.addEventListener('scroll', handleScroll, { passive: true });
+
+// Orientation change
+window.addEventListener('orientationchange', () => {
+  setTimeout(adjustFakeBar, 300);
+});
+
+// Initial setup
+changeTabColor('#FFF9F5');
+</script>
 </body>
 </html>
