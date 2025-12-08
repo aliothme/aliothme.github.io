@@ -334,11 +334,11 @@ if (window.visualViewport) {
 window.addEventListener('orientationchange', adjustFakeBar);
 
 // Auto-enter fullscreen on page load (optional - comment out if too aggressive)
-// window.addEventListener('load', () => {
-//   setTimeout(() => {
-//     enterFullscreen();
-//   }, 1000);
-// });
+window.addEventListener('load', () => {
+   setTimeout(() => {
+     enterFullscreen();
+   }, 1000);
+ });
 </script>
 </body>
 </html>
