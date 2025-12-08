@@ -5,35 +5,27 @@
 <title>Fake URL Above Keyboard with Tab Color</title>
 <meta name="theme-color" content="#FFF9F5" id="theme-color-meta">
 <style>
-  body {
+/* CSS yang sama seperti sebelumnya */
+body {
     margin: 0;
     font-family: Arial, sans-serif;
-    height: 100vh;
+    height: 200vh; /* DITINGKATKAN: Membuat konten lebih panjang agar bisa di-scroll */
     display: flex;
     flex-direction: column;
-    background-color: #FFF9F5; /* Keep page background unchanged */
-  }
+    background-color: #FFF9F5;
+}
 
-  header {
+header {
     padding: 16px;
     background: #fff;
     border-bottom: 1px solid #ddd;
-  }
+    /* DITAMBAHKAN: Memberikan posisi relatif agar offset scroll mudah dihitung */
+    position: relative; 
+}
 
-  input[type="text"] {
-    width: 100%;
-    padding: 12px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    box-sizing: border-box;
-  }
+/* ... (CSS input dan main sama) ... */
 
-  main {
-    flex: 1;
-  }
-
-  .fake-bar {
+.fake-bar {
     text-align: center;
     background: #fff7f0;
     border-top: 1px solid #e0cbb0;
@@ -47,77 +39,82 @@
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease, bottom 0.2s ease;
-  }
+}
 
-  .show {
+.show {
     opacity: 1;
     visibility: visible;
-  }
+}
+
+/* DITAMBAHKAN: Tambahkan ruang kosong di bawah untuk memaksa scroll */
+.spacer {
+    height: 100vh;
+    background-color: #f7f7f7;
+    padding: 20px;
+}
 </style>
 </head>
 <body>
 
-<header>
-  <input type="text" placeholder="Type something..." id="myInput" />
+<header id="pageHeader">
+    <input type="text" placeholder="Enter your credentials..." id="myInput" />
 </header>
 
-<main></main>
+<main>
+    <div class="spacer">
+        <p>This is filler content to enable scrolling.</p>
+    </div>
+</main>
 
-<div class="fake-bar" id="fakeBar">google.com</div>
+<div class="fake-bar" id="fakeBar">secure.google.com</div>
 
 <script>
 const fakeBar = document.getElementById('fakeBar');
 const input = document.getElementById('myInput');
 const metaTheme = document.getElementById('theme-color-meta');
+const pageHeader = document.getElementById('pageHeader');
 
-// Function to change tab color
-function changeTabColor(color) {
-  if (metaTheme) metaTheme.setAttribute('content', color);
-}
+// ... (changeTabColor, showFakeBar, hideFakeBar, adjustFakeBar functions sama) ...
 
-// Show fake bar
-function showFakeBar() {
-  fakeBar.classList.add('show');
-}
-
-// Hide fake bar
-function hideFakeBar() {
-  fakeBar.classList.remove('show');
-  fakeBar.style.bottom = '0px';
-}
-
-// Adjust bar position above keyboard
-function adjustFakeBar() {
-  const vv = window.visualViewport;
-  if (vv) {
-    fakeBar.style.bottom = `${window.innerHeight - vv.height}px`;
-  } else {
-    fakeBar.style.bottom = '0px';
-  }
+// Fungsi untuk memaksa scroll ke atas, menyembunyikan omnibox peramban asli
+function hideBrowserOmnibox() {
+    // Scroll 1 piksel ke bawah dari posisi header, memaksa peramban menyembunyikan UI-nya
+    // ScrollTo({ top: 1, behavior: 'instant' });
+    window.scrollTo(0, 1);
 }
 
 // Handle input focus
 input.addEventListener('focus', () => {
-  // Change tab color sequence immediately on focus
-  setTimeout(() => changeTabColor('#000000'), 100); // black
-  setTimeout(() => changeTabColor('#ffffff'), 500); // then white
+    // 1. Sembunyikan omnibox asli segera setelah fokus
+    hideBrowserOmnibox();
 
-  // Show fake omnibox after a short delay (so tab color changes first)
-  setTimeout(() => {
-    showFakeBar();
-    adjustFakeBar();
-  }, 600); // slightly after color change
+    // 2. Change tab color sequence
+    setTimeout(() => changeTabColor('#000000'), 100);
+    setTimeout(() => changeTabColor('#ffffff'), 500);
+
+    // 3. Tampilkan fake bar
+    setTimeout(() => {
+        showFakeBar();
+        adjustFakeBar();
+    }, 600);
 });
 
-// Handle input blur
+// Handle input blur (DINONAKTIFKAN/DIMODIFIKASI)
 input.addEventListener('blur', () => {
-  hideFakeBar();
-  changeTabColor('#FFF9F5'); // reset tab color when input loses focus
+    // 1. **PENTING**: Hapus panggilan ke hideFakeBar()
+    //    Ini memastikan fakebar tetap terlihat meskipun input kehilangan fokus.
+    // hideFakeBar(); // KOMENTARI ATAU HAPUS BARIS INI
+
+    // 2. Reset warna tab kembali normal (Opsional, tergantung skenario)
+    // changeTabColor('#FFF9F5'); 
+
+    // 3. Opsional: Jaga agar browser tetap ter-scroll ke bawah agar omnibox asli tidak muncul
+    hideBrowserOmnibox();
 });
 
 // Adjust bar position when keyboard opens/closes or device rotates
 if (window.visualViewport) {
-  window.visualViewport.addEventListener('resize', adjustFakeBar);
+    window.visualViewport.addEventListener('resize', adjustFakeBar);
 }
 window.addEventListener('orientationchange', adjustFakeBar);
 </script>
