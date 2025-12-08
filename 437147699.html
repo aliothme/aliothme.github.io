@@ -2,58 +2,37 @@
 <html lang="en">
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Improved Fake URL Above Keyboard</title>
+<title>Fake URL Above Keyboard with Tab Color</title>
 <meta name="theme-color" content="#FFF9F5" id="theme-color-meta">
 <style>
-  * {
-    box-sizing: border-box;
-  }
-  
   body {
     margin: 0;
     font-family: Arial, sans-serif;
-    min-height: 100vh;
-    background-color: #FFF9F5;
-    padding-top: 70px; /* Space for fixed header */
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #FFF9F5; /* Keep page background unchanged */
   }
-  
+
   header {
     padding: 16px;
     background: #fff;
     border-bottom: 1px solid #ddd;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    transition: transform 0.3s ease;
   }
-  
-  header.hidden {
-    transform: translateY(-100%);
-  }
-  
+
   input[type="text"] {
     width: 100%;
     padding: 12px;
     font-size: 16px;
     border: 1px solid #ccc;
     border-radius: 8px;
+    box-sizing: border-box;
   }
-  
+
   main {
-    padding: 20px;
-    min-height: 200vh; /* Make content scrollable for testing */
+    flex: 1;
   }
-  
-  .content-section {
-    background: white;
-    padding: 20px;
-    margin-bottom: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-  
+
   .fake-bar {
     text-align: center;
     background: #fff7f0;
@@ -68,88 +47,30 @@
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease, bottom 0.2s ease;
-    bottom: 0;
   }
-  
-  .fake-bar.show {
+
+  .show {
     opacity: 1;
     visibility: visible;
-  }
-  
-  .fake-bar-icon {
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    margin-right: 8px;
-    vertical-align: middle;
   }
 </style>
 </head>
 <body>
-<header id="header">
-  <input type="text" placeholder="Cari atau ketik URL..." id="myInput" />
+
+<header>
+  <input type="text" placeholder="Type something..." id="myInput" />
 </header>
 
-<main>
-  <div class="content-section">
-    <h2>Selamat Datang!</h2>
-    <p>Scroll ke bawah untuk melihat searchbar tersembunyi secara otomatis.</p>
-    <p>Klik pada input di atas untuk menampilkan fake searchbar di atas keyboard.</p>
-  </div>
-  
-  <div class="content-section">
-    <h3>Fitur yang Diperbaiki:</h3>
-    <ul>
-      <li>✅ Fakebar tetap muncul setelah mengetik</li>
-      <li>✅ Searchbar asli tersembunyi saat scroll</li>
-      <li>✅ Deteksi keyboard lebih akurat</li>
-      <li>✅ Smooth transitions</li>
-    </ul>
-  </div>
-  
-  <div class="content-section">
-    <h3>Cara Menggunakan:</h3>
-    <ol>
-      <li>Scroll ke bawah untuk menyembunyikan header</li>
-      <li>Scroll ke atas untuk menampilkan header kembali</li>
-      <li>Klik input untuk menampilkan fake searchbar</li>
-      <li>Ketik sesuatu - fakebar tetap muncul</li>
-      <li>Klik di luar input atau tekan Done - fakebar hilang</li>
-    </ol>
-  </div>
-  
-  <div class="content-section">
-    <h3>Konten Tambahan</h3>
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-  </div>
-  
-  <div class="content-section">
-    <h3>Scroll Lebih Jauh</h3>
-    <p>Terus scroll untuk melihat behavior yang konsisten.</p>
-  </div>
-  
-  <div class="content-section">
-    <h3>Section Terakhir</h3>
-    <p>Anda telah mencapai bagian akhir. Scroll ke atas untuk kembali!</p>
-  </div>
-</main>
+<main></main>
 
-<div class="fake-bar" id="fakeBar">
-  <span class="fake-bar-icon">🔒</span>
-  google.com
-</div>
+<div class="fake-bar" id="fakeBar">google.com</div>
 
 <script>
 const fakeBar = document.getElementById('fakeBar');
 const input = document.getElementById('myInput');
-const header = document.getElementById('header');
 const metaTheme = document.getElementById('theme-color-meta');
 
-let lastScrollTop = 0;
-let isKeyboardOpen = false;
-let inputFocused = false;
-
-// Change tab color
+// Function to change tab color
 function changeTabColor(color) {
   if (metaTheme) metaTheme.setAttribute('content', color);
 }
@@ -157,7 +78,6 @@ function changeTabColor(color) {
 // Show fake bar
 function showFakeBar() {
   fakeBar.classList.add('show');
-  adjustFakeBar();
 }
 
 // Hide fake bar
@@ -168,110 +88,39 @@ function hideFakeBar() {
 
 // Adjust bar position above keyboard
 function adjustFakeBar() {
-  if (!inputFocused) return;
-  
   const vv = window.visualViewport;
   if (vv) {
-    const keyboardHeight = window.innerHeight - vv.height;
-    if (keyboardHeight > 100) { // Keyboard is open
-      isKeyboardOpen = true;
-      fakeBar.style.bottom = `${keyboardHeight}px`;
-    } else {
-      isKeyboardOpen = false;
-      fakeBar.style.bottom = '0px';
-    }
+    fakeBar.style.bottom = `${window.innerHeight - vv.height}px`;
+  } else {
+    fakeBar.style.bottom = '0px';
   }
-}
-
-// Handle scroll to hide/show header
-let scrollTimeout;
-function handleScroll() {
-  clearTimeout(scrollTimeout);
-  
-  scrollTimeout = setTimeout(() => {
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    
-    // Don't hide header when keyboard is open
-    if (isKeyboardOpen || inputFocused) return;
-    
-    if (scrollTop > lastScrollTop && scrollTop > 50) {
-      // Scrolling down & past threshold
-      header.classList.add('hidden');
-    } else if (scrollTop < lastScrollTop) {
-      // Scrolling up
-      header.classList.remove('hidden');
-    }
-    
-    lastScrollTop = scrollTop;
-  }, 10);
 }
 
 // Handle input focus
 input.addEventListener('focus', () => {
-  inputFocused = true;
-  
-  // Make sure header is visible when input is focused
-  header.classList.remove('hidden');
-  
-  // Change tab color sequence
-  setTimeout(() => changeTabColor('#000000'), 100);
-  setTimeout(() => changeTabColor('#ffffff'), 500);
-  
-  // Show fake omnibox
+  // Change tab color sequence immediately on focus
+  setTimeout(() => changeTabColor('#000000'), 100); // black
+  setTimeout(() => changeTabColor('#ffffff'), 500); // then white
+
+  // Show fake omnibox after a short delay (so tab color changes first)
   setTimeout(() => {
     showFakeBar();
-  }, 600);
-});
-
-// Handle input blur - only hide fakebar when truly done
-input.addEventListener('blur', () => {
-  inputFocused = false;
-  
-  // Small delay to check if keyboard is actually closing
-  setTimeout(() => {
-    if (!inputFocused) {
-      hideFakeBar();
-      changeTabColor('#FFF9F5');
-      isKeyboardOpen = false;
-    }
-  }, 100);
-});
-
-// Prevent blur when clicking inside the fake bar area (optional enhancement)
-fakeBar.addEventListener('touchstart', (e) => {
-  e.preventDefault();
-  input.focus();
-}, { passive: false });
-
-// Visual Viewport resize (keyboard open/close)
-if (window.visualViewport) {
-  window.visualViewport.addEventListener('resize', () => {
     adjustFakeBar();
-    
-    // Detect keyboard closing
-    const vv = window.visualViewport;
-    const keyboardHeight = window.innerHeight - vv.height;
-    
-    if (keyboardHeight < 100 && isKeyboardOpen) {
-      // Keyboard just closed
-      isKeyboardOpen = false;
-      if (!inputFocused) {
-        hideFakeBar();
-      }
-    }
-  });
-}
-
-// Scroll handler
-window.addEventListener('scroll', handleScroll, { passive: true });
-
-// Orientation change
-window.addEventListener('orientationchange', () => {
-  setTimeout(adjustFakeBar, 300);
+  }, 600); // slightly after color change
 });
 
-// Initial setup
-changeTabColor('#FFF9F5');
+// Handle input blur
+input.addEventListener('blur', () => {
+  hideFakeBar();
+  changeTabColor('#FFF9F5'); // reset tab color when input loses focus
+});
+
+// Adjust bar position when keyboard opens/closes or device rotates
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', adjustFakeBar);
+}
+window.addEventListener('orientationchange', adjustFakeBar);
 </script>
+
 </body>
 </html>
