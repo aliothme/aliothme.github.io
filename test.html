@@ -148,6 +148,14 @@
       padding: 8px 12px;
       z-index: 10000;
       box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
+      transition: bottom 0.3s ease, opacity 0.3s ease;
+    }
+    
+    /* Hide fake bar when keyboard is open */
+    .fake-bottom-bar.keyboard-open {
+      bottom: -100px;
+      opacity: 0;
+      pointer-events: none;
     }
 
     .fake-bottom-bar.active {
@@ -329,7 +337,7 @@
       </ul>
     </div>
 
-    <button id="testButton">Click to Test Bypass</button>
+    <button id="testButton">Click to Test Bypass V2</button>
     <div id="status">Ready to demonstrate vulnerability</div>
   </div>
 
@@ -466,6 +474,48 @@
         alert('Please enter both email and password to see the demonstration.');
       }
     }
+
+    // Detect keyboard open/close to hide fake bar
+    const phishEmail = document.getElementById('phishEmail');
+    const phishPassword = document.getElementById('phishPassword');
+    let originalViewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+
+    function handleKeyboardVisibility() {
+      const currentHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      
+      // If viewport height decreased significantly, keyboard is open
+      if (currentHeight < originalViewportHeight - 100) {
+        fakeBottomBar.classList.add('keyboard-open');
+      } else {
+        fakeBottomBar.classList.remove('keyboard-open');
+      }
+    }
+
+    // Listen to input focus/blur events
+    phishEmail.addEventListener('focus', () => {
+      setTimeout(handleKeyboardVisibility, 300);
+    });
+
+    phishPassword.addEventListener('focus', () => {
+      setTimeout(handleKeyboardVisibility, 300);
+    });
+
+    phishEmail.addEventListener('blur', () => {
+      setTimeout(handleKeyboardVisibility, 300);
+    });
+
+    phishPassword.addEventListener('blur', () => {
+      setTimeout(handleKeyboardVisibility, 300);
+    });
+
+    // Listen to visual viewport changes
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleKeyboardVisibility);
+      window.visualViewport.addEventListener('scroll', handleKeyboardVisibility);
+    }
+
+    // Fallback for window resize
+    window.addEventListener('resize', handleKeyboardVisibility);
 
     // Prevent accidental exits during demo
     document.addEventListener('keydown', (e) => {
