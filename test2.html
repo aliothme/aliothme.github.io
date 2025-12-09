@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>Tanpa Notif Fullscreen</title>
+
+  <!-- 1. Matikan total fitur notifikasi untuk halaman ini -->
+  <meta http-equiv="Permissions-Policy" content="notifications=()">
+
+  <!-- 2. Header server (jika bisa) – lebih kuat daripada meta -->
+  <!-- Permissions-Policy: notifications=() -->
+
+  <!-- 3. CSS trick agar Chrome tidak anggap ini "user gesture langsung" -->
+  <style>
+    .fullscreen-btn {
+      padding: 16px 24px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+
+<button class="fullscreen-btn" id="fs">Putar Fullscreen</button>
+
+<script>
+  // JANGAN langsung request fullscreen di event handler
+  document.getElementById('fs').addEventListener('click', () => {
+    // Beri jeda kecil (trick lama yang masih jalan 2025)
+    setTimeout(() => {
+      const elem = document.documentElement;
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+      } else if (elem.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen();
+      }
+    }, 100);
+
+    // PENTING: JANGAN pernah panggil Notification.requestPermission() 
+    // di mana pun di situs ini kalau mau 100 % bersih
+  });
+</script>
+
+</body>
+</html>
