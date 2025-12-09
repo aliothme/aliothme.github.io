@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Permissions-Policy" content="notifications=()">
+  <!-- atau di server header -->
+  <!-- Permissions-Policy: notifications=() -->
+</head>
+<body>
+  <button onclick="goFullscreen()">Putar Fullscreen</button>
+
+  <script>
+    function goFullscreen() {
+      const elem = document.documentElement;
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+      }
+      // JANGAN pernah panggil Notification.requestPermission() di sini
+    }
+  </script>
+</body>
+</html>
