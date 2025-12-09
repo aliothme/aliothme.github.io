@@ -1,44 +1,84 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-8">
-  <title>Tanpa Notif Fullscreen</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Fullscreen Tanpa Notifikasi</title>
 
-  <!-- 1. Matikan total fitur notifikasi untuk halaman ini -->
+  <!-- 1. Matikan total fitur notifikasi (meta + header fallback) -->
   <meta http-equiv="Permissions-Policy" content="notifications=()">
+  <meta http-equiv="Feature-Policy" content="notifications 'none'">
 
-  <!-- 2. Header server (jika bisa) – lebih kuat daripada meta -->
-  <!-- Permissions-Policy: notifications=() -->
+  <!-- 2. Sarankan browser tidak menawarkan notifikasi otomatis -->
+  <meta name="notification-permission" content="denied">
 
-  <!-- 3. CSS trick agar Chrome tidak anggap ini "user gesture langsung" -->
+  <!-- 3. PWA mode fullscreen (khususnya buat PWA nanti) -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+
   <style>
-    .fullscreen-btn {
-      padding: 16px 24px;
-      font-size: 18px;
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: #000;
+      color: #fff;
+      height: 100dvh;
+      overflow: hidden;
+      touch-action: manipulation;
+    }
+    #tip {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #fff3cd;
+      color: #333;
+      padding: 12px;
+      font-size: 14px;
+      text-align: center;
+      border-bottom: 1px solid #ffeaa7;
+      z-index: 9999;
+      transition: transform 0.4s ease;
+    }
+    #tip.hide { transform: translateY(-100%); }
+
+    button {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 18px 36px;
+      font-size: 20px;
+      background: #0066ff;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    }
+    button:active { background: #0052cc; }
+
+    #status {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.6);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
 
-<button class="fullscreen-btn" id="fs">TEST V2</button>
+  <!-- Tips Anti-Gangguan (muncul 8 detik) -->
+  <div id="tip">
+    <strong>Tips:</strong> Untuk fullscreen 100 % tanpa notifikasi, gunakan Brave/Opera GX atau blokir notifikasi situs ini di Settings browser.
+  </div>
 
-<script>
-  // JANGAN langsung request fullscreen di event handler
-  document.getElementById('fs').addEventListener('click', () => {
-    // Beri jeda kecil (trick lama yang masih jalan 2025)
-    setTimeout(() => {
-      const elem = document.documentElement;
-      if (elem.requestFullscreen) {
-        elem.requestFullscreen();
-      } else if (elem.webkitRequestFullscreen) {
-        elem.webkitRequestFullscreen();
-      }
-    }, 100);
+  <button id="fsBtn">Putar Fullscreen</button>
 
-    // PENTING: JANGAN pernah panggil Notification.requestPermission() 
-    // di mana pun di situs ini kalau mau 100 % bersih
-  });
-</script>
+  <div id="status">Tekan tombol untuk masuk fullscreen</div>
 
-</body>
-</html>
+  <script
