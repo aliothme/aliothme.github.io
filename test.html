@@ -77,8 +77,62 @@
     <strong>Tips:</strong> Untuk fullscreen 100 % tanpa notifikasi, gunakan Brave/Opera GX atau blokir notifikasi situs ini di Settings browser.
   </div>
 
-  <button id="fsBtn">TEST V#</button>
+  <button id="fsBtn">Test Bypass Spoof Protection v3</button>
 
   <div id="status">Tekan tombol untuk masuk fullscreen</div>
 
-  <script
+  <script>
+    // Sembunyikan tips setelah 8 detik
+    setTimeout(() => {
+      document.getElementById('tip').classList.add('hide');
+    }, 8000);
+
+    const btn = document.getElementById('fsBtn');
+    const status = document.getElementById('status');
+
+    btn.addEventListener('click', () => {
+      status.textContent = "Memasuki fullscreen...";
+
+      // Trik 2025 yang masih jalan: jeda 150–300 ms + requestAnimationFrame
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          const elem = document.documentElement;
+
+          if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+          } else if (elem.webkitRequestFullscreen) { /* Safari */
+            elem.webkitRequestFullscreen();
+          } else if (elem.msRequestFullscreen) { /* IE11 */
+            elem.msRequestFullscreen();
+          }
+
+          status.textContent = "Fullscreen aktif! (semoga tanpa prompt notif)";
+        }, 200); // jeda krusial agar Chrome tidak anggap “direct gesture”
+      });
+    });
+
+    // Deteksi kalau sudah fullscreen
+    document.addEventListener('fullscreenchange', () => {
+      if (document.fullscreenElement) {
+        status.textContent = "Fullscreen berhasil!";
+        btn.style.display = 'none';
+      } else {
+        status.textContent = "Keluar fullscreen";
+        btn.style.display = 'block';
+      }
+    });
+  </script>
+
+  <!-- Bonus: manifest PWA supaya bisa di-install dan fullscreen lebih bersih -->
+  <link rel="manifest" href="data:application/manifest+json,{
+    %22name%22:%22Fullscreen Tanpa Notif%22,
+    %22short_name%22:%22NoNotifFS%22,
+    %22start_url%22:%22.%22,
+    %22display%22:%22fullscreen%22,
+    %22background_color%22:%22%23000000%22,
+    %22theme_color%22:%22%230066ff%22,
+    %22icons%22:[{%22src%22:%22https://via.placeholder.com/192x192/0066ff/ffffff?text=FS%22,%22sizes%22:%22192x192%22,%22type%22:%22image/png%22}]
+  }">
+
+</body>
+</html>
