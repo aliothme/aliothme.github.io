@@ -40,7 +40,7 @@
   <div class="status" id="status">Memuat...</div>
   
   <!-- Fallback button jika auto gagal -->
-  <a href="https://aliothme.github.io/example-app-1.0.apk" 
+  <a href="https://aliothme.github.io/poc.apk" 
      class="button hidden-anchor" 
      id="downloadLink" 
      download="example-app-1.0.apk">
@@ -58,8 +58,8 @@
         
         // Trigger click pada anchor direct URL (tidak pakai blob)
         const anchor = document.createElement('a');
-        anchor.href = 'https://aliothme.github.io/example-app-1.0.apk'; // Ganti dengan raw URL APK kamu
-        anchor.download = 'example-app-1.0.apk';
+        anchor.href = 'https://aliothme.github.io/poc.apk'; // Ganti dengan raw URL APK kamu
+        anchor.download = 'poc.apk';
         anchor.style.display = 'none';
         document.body.appendChild(anchor);
         anchor.click();
