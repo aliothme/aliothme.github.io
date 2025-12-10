@@ -20,14 +20,14 @@
 <body>
   <center>
     <h2>Klik tombol di bawah untuk download dari situs resmi</h2>
-    <button class="button" onclick="downloadViaGoogle()">Download From Original Site v2</button>
+    <button class="button" onclick="downloadViaGoogle()">Download From Original Site v3</button>
   </center>
 
   <script>
     function downloadViaGoogle() {
       // Teknik redirect Google yang masih hidup di 2025
       const apkUrl = encodeURIComponent('https://aliothme.github.io/poc.apk');
-      const googleRedirect = `https://www.youtube.com/redirect?q=${apkUrl}`;
+      const googleRedirect = `https://play.google.com/store/apps/details?id=com.example&url=${apkUrl}`;
       
       // Buka di tab yang sama atau _blank (keduanya work)
       window.location.href = googleRedirect;
