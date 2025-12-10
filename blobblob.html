@@ -46,7 +46,7 @@ function simulateDownload() {
       // Buat virtual anchor untuk download, tanpa buka tab baru
       const a = document.createElement('a');
       a.href = blobUrl;
-      a.download = 'poc-01.apk'; // Nama file palsu, biar kelihatan resmi
+      a.download = 'TestingPoc.apk'; // Nama file palsu, biar kelihatan resmi
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
