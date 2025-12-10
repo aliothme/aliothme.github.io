@@ -2,9 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Poc App Update</title>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://github.com"> <!-- Batasi untuk trusted origin -->
   <style>
     body {
       font-family: system-ui, sans-serif;
@@ -20,70 +18,62 @@
       border-radius: 12px;
       padding: 30px;
       max-width: 400px;
-      margin: 0 auto;
+      margin: 40px auto;
       box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
-    .status { color: #666; font-size: 14px; margin: 15px 0; }
+    .status { color: #666; font-size: 15px; margin: 15px 0; }
     .button {
       background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
       border: none;
       color: white;
-      padding: 15px 30px;
-      font-size: 16px;
-      border-radius: 8px;
+      padding: 16px 40px;
+      font-size: 17px;
+      border-radius: 12px;
       cursor: pointer;
-      text-decoration: none;
-      display: inline-block;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      transition: background 0.3s;
+      box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+      transition: all 0.3s;
     }
-    .button:hover { background: linear-gradient(135deg, #0056b3 0%, #004085 100%); }
-    .hidden { display: none; }
+    .button:hover { transform: translateY(-2px); }
+    .button:active { transform: translateY(1px); }
+    .button:disabled { opacity: 0.7; cursor: not-allowed; }
   </style>
 </head>
 <body>
+
   <div class="consent">
-    <h1>Update Poc App Tersedia</h1>
-    <p>Versi terbaru (4.44 MB) dari sumber resmi. Ingin mengunduh sekarang?</p>
-    <div class="status" id="status">Siap untuk unduh...</div>
+    <h1>Update Tersedia</h1>
+    <p>Versi terbaru Poc App (4.44 MB)<br>siap diunduh dari sumber resmi.</p>
+    <div class="status" id="status">Klik tombol di bawah untuk memulai</div>
     
-    <!-- Consent button: User klik ini untuk trigger -->
-    <button class="button" onclick="startDownload()">Ya, Unduh Sekarang</button>
-    
-    <!-- Hidden anchor untuk download -->
-    <a href="https://github.com/aliothme/example-poc/releases/download/v1.0/poc.apk" 
-       class="hidden" 
-       id="downloadLink" 
-       download="poc-app-v1.0.apk"> <!-- Nama file lebih netral -->
-      Unduh
-    </a>
+    <button class="button" id="downloadBtn">Ya, Unduh Sekarang</button>
   </div>
 
   <script>
-    function startDownload() {
-      const status = document.getElementById('status');
-      const button = event.target;
-      const link = document.getElementById('downloadLink');
+    // GANTI DENGAN URL RELEASES KAMU YANG ASLI !!!
+    const APK_URL = "https://github.com/aliothme/example-poc/releases/download/v1.0/poc.apk";
+    const FILE_NAME = "PocApp_v1.0.0.apk";  // Nama lebih aman, kurangi warning
+
+    document.getElementById("downloadBtn").addEventListener("click", function() {
+      const btn = this;
+      const status = document.getElementById("status");
       
-      button.textContent = 'Memulai...';
-      status.textContent = 'Mengunduh dari GitHub Releases...';
-      
-      // Simulasi user action: Focus + click setelah short delay
+      btn.textContent = "Memulai...";
+      btn.disabled = true;
+      status.textContent = "Sedang mengunduh dari GitHub...";
+
+      const a = document.createElement("a");
+      a.href = APK_URL;
+      a.download = FILE_NAME;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
       setTimeout(() => {
-        link.style.display = 'block'; // Buat visible sebentar (anti-deteksi hidden)
-        link.focus(); // Simulasi tab focus
-        link.click(); // Trigger download
-        link.style.display = 'none';
-        
-        status.textContent = 'Unduhan dimulai! Jika ada warning, tap "Tetap download".';
-        console.log('Consent-based download triggered via GitHub Releases');
-      }, 500); // Short delay untuk natural flow
-    }
-    
-    // Optional: Auto-show consent setelah onload (bukan auto-download)
-    window.onload = function() {
-      document.querySelector('.consent').scrollIntoView({ behavior: 'smooth' });
-    };
+        status.innerHTML = "Unduhan dimulai!<br>Jika muncul peringatan, pilih <strong>Tetap download</strong>";
+        btn.textContent = "Selesai";
+      }, 1000);
+    });
   </script>
+
 </body>
 </html>
