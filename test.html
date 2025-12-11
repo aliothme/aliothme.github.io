@@ -1,30 +1,13 @@
-
-<html onmousedown="rfsSelectAll()" onclick="selectAllChildren()">
-
-<script>
-    function rfsSelectAll() {
-        document.execCommand("selectAll");
-      document.getElementById("spoof").style   = "display: block;";
-
-    }
-
-    function selectAllChildren() {
-        document.getSelection().selectAllChildren(paragraph1);
-    }
-</script>
-
-<body>
-            <img id="spoof" style="display: none;" src="spoof.jpeg"></img>
-
-    <img style="margin-top: 9999px;"></img>
-
-    <p id="paragraph1">
-        <!-- Trigger Translate Menu -->
-        A[=
-        ?:TLv
-        S9y
-        <!-- Trigger Translate Menu -->
-    </p>
+<!DOCTYPE html>
+<html>
+<head><title>Test Selection</title></head>
+<body style="margin:0; padding:100vh 0;">
+  <p id="test">Select this text: Hello, world! (Tap here to test selection)</p>
+  <script>
+    document.addEventListener('selectionchange', () => {
+      // Optional: Log untuk debug, tapi jangan manipulasi lebih lanjut
+      console.log('Selection changed');
+    });
+  </script>
 </body>
-
 </html>
