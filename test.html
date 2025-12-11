@@ -1,13 +1,49 @@
 <!DOCTYPE html>
-<html>
-<head><title>Test Selection</title></head>
-<body style="margin:0; padding:100vh 0;">
-  <p id="test">Select this text: Hello, world! (Tap here to test selection)</p>
-  <script>
-    document.addEventListener('selectionchange', () => {
-      // Optional: Log untuk debug, tapi jangan manipulasi lebih lanjut
-      console.log('Selection changed');
-    });
-  </script>
+<html lang="en">
+<head>
+    <title>Selection Overlap Test (2025 Edition)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { margin: 0; padding: 200vh 20px; font-family: sans-serif; }
+        #trigger { 
+            position: fixed; bottom: 20px; left: 20px; right: 20px; 
+            background: #f0f0f0; padding: 20px; border: 1px solid #ccc; 
+            text-align: center; cursor: pointer;
+        }
+        /* Trigger long scroll buat hide URL bar */
+        .spacer { height: 100vh; }
+    </style>
+</head>
+<body>
+    <div class="spacer"></div> <!-- Spacer buat scroll panjang -->
+    
+    <div id="trigger">
+        <!-- Teks aneh buat trigger Translate menu (mirip original, tapi lebih reliable) -->
+        <p id="text">Tap/long-press here: Ελληνικά κείμενο για μετάφραση (Greek text to trigger Translate). Or normal: Select this English sentence.</p>
+    </div>
+    
+    <script>
+        // Modern Selection API, bukan execCommand (deprecated)
+        const trigger = document.getElementById('trigger');
+        const text = document.getElementById('text');
+        
+        trigger.addEventListener('touchstart', (e) => {
+            // Prevent default buat force long-press simulation, tapi biarin native handle
+            setTimeout(() => {
+                // Buat range selection kecil buat trigger menu
+                const selection = window.getSelection();
+                const range = document.createRange();
+                range.selectNodeContents(text);
+                selection.removeAllRanges();
+                selection.addRange(range);
+                console.log('Selection triggered - check if menu overlaps URL bar');
+            }, 500); // Delay buat mimic long-press
+        }, { passive: false });
+        
+        // Listener buat debug (liat di console)
+        document.addEventListener('selectionchange', () => {
+            console.log('Native selection menu should appear now');
+        });
+    </script>
 </body>
 </html>
