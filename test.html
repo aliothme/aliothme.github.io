@@ -1,21 +1,26 @@
-<!DOCTYPE HTML>
-<html lang="en-US">
+<!DOCTYPE html>
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no">
-    <title>URL Spoofing</title>
-    <script>
-        function openWin() {
-            var width=500, height=180, top=0, left=(screen.width/2)-(width/2);
-            window.open("opener.html", "first", `width=${width},height=${height},top=${top},left=${left}`);
-        }
-    </script>
+<meta charset="UTF-8">
+<title>Popup Fullscreen Test</title>
+
+<script>
+function spoof() {
+
+    // --- buka popup ---
+    const popup = window.open(
+        "popup.html",
+        "_blank",
+        "width=600,height=500"
+    );
+
+    // tutup halaman asli
+    window.close();
+}
+</script>
 </head>
 
 <body>
-    <center>
-        <br>
-        <h1><a href="#" onclick="openWin();">Click here to sign in into your Google Account</a></h1>
-    </center>
+    <button onclick="spoof()">Confirm</button>
 </body>
 </html>
