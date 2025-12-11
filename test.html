@@ -1,49 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Selection Overlap Test (2025 Edition)</title>
+    <title>Selection Overlap Test v2 (Dec 2025)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body { margin: 0; padding: 200vh 20px; font-family: sans-serif; }
-        #trigger { 
-            position: fixed; bottom: 20px; left: 20px; right: 20px; 
-            background: #f0f0f0; padding: 20px; border: 1px solid #ccc; 
-            text-align: center; cursor: pointer;
+        body { 
+            margin: 0; 
+            padding: 200vh 20px; 
+            font-family: sans-serif; 
+            background: #fff;
         }
-        /* Trigger long scroll buat hide URL bar */
+        #trigger { 
+            position: fixed; 
+            bottom: 20px; 
+            left: 20px; 
+            right: 20px; 
+            background: #f0f0f0; 
+            padding: 20px; 
+            border: 1px solid #ccc; 
+            text-align: center; 
+            z-index: 1;
+        }
         .spacer { height: 100vh; }
+        /* Fake URL bar untuk test spoofing impact */
+        #fake-url { 
+            position: fixed; top: 0; left: 0; right: 0; 
+            height: 56px; background: #f1f3f4; 
+            z-index: 10; display: flex; align-items: center; padding: 0 16px;
+        }
     </style>
 </head>
 <body>
-    <div class="spacer"></div> <!-- Spacer buat scroll panjang -->
+    <div id="fake-url">Fake URL Bar: https://example.com (for spoof test)</div>
+    <div class="spacer"></div> <!-- Spacer untuk scroll & hide real URL bar -->
     
     <div id="trigger">
-        <!-- Teks aneh buat trigger Translate menu (mirip original, tapi lebih reliable) -->
-        <p id="text">Tap/long-press here: Ελληνικά κείμενο για μετάφραση (Greek text to trigger Translate). Or normal: Select this English sentence.</p>
+        <!-- Teks multibahasa untuk trigger Translate agresif -->
+        <p id="text">Long-press/tap here: Ελληνικά κείμενο για μετάφραση (Greek: Test selection overlap). Or: Sélectionnez ce texte français pour menu. English: Select all.</p>
+        <button onclick="manualSelect()">Manual Trigger Select</button>
     </div>
     
     <script>
-        // Modern Selection API, bukan execCommand (deprecated)
         const trigger = document.getElementById('trigger');
         const text = document.getElementById('text');
         
+        // Auto-trigger on long-press simulation
+        let pressTimer;
         trigger.addEventListener('touchstart', (e) => {
-            // Prevent default buat force long-press simulation, tapi biarin native handle
-            setTimeout(() => {
-                // Buat range selection kecil buat trigger menu
-                const selection = window.getSelection();
-                const range = document.createRange();
-                range.selectNodeContents(text);
-                selection.removeAllRanges();
-                selection.addRange(range);
-                console.log('Selection triggered - check if menu overlaps URL bar');
-            }, 500); // Delay buat mimic long-press
-        }, { passive: false });
-        
-        // Listener buat debug (liat di console)
-        document.addEventListener('selectionchange', () => {
-            console.log('Native selection menu should appear now');
+            pressTimer = setTimeout(() => {
+                forceSelection();
+            }, 600); // Longer delay for reliable long-press
         });
+        trigger.addEventListener('touchend', () => {
+            clearTimeout(pressTimer);
+        });
+        
+        function forceSelection() {
+            const selection = window.getSelection();
+            const range = document.createRange();
+            range.selectNodeContents(text); // Select full node
+            selection.removeAllRanges();
+            selection.addRange(range);
+            console.log('Forced selection - Check console & inspect menu position vs URL bar');
+        }
+        
+        function manualSelect() {
+            forceSelection();
+        }
+        
+        // Debug listener
+        document.addEventListener('selectionchange', () => {
+            const sel = window.getSelection().toString();
+            if (sel.length > 0) {
+                console.log('Native menu triggered - Screenshot now: Does it overlap URL bar or fake bar?');
+                console.log('Device info:', navigator.userAgent);
+            }
+        });
+        
+        // Test fullscreen on load
+        if (document.fullscreenEnabled) {
+            document.addEventListener('click', () => document.documentElement.requestFullscreen());
+        }
     </script>
 </body>
 </html>
