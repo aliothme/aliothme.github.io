@@ -4,10 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, user-scalable=no">
     <title>URL Spoofing</title>
+
     <script>
         function openWin() {
-            var width=500, height=180, top=0, left=(screen.width/2)-(width/2);
-            window.open("opener.html", "first", `width=${width},height=${height},top=${top},left=${left}`);
+            var width = 500, height = 180;
+            var left = (screen.width / 2) - (width / 2);
+
+            window.open(
+                "opener.html",
+                "first",
+                `width=${width},height=${height},top=50,left=${left}`
+            );
         }
     </script>
 </head>
@@ -15,7 +22,11 @@
 <body>
     <center>
         <br>
-        <h1><a href="#" onclick="openWin();">Click here to sign in into your Google Account</a></h1>
+        <h1>
+            <a href="#" onclick="openWin();">
+                Click here to sign in into your Google Account V2
+            </a>
+        </h1>
     </center>
 </body>
 </html>
