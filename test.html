@@ -6,20 +6,19 @@
     <title>URL TESTING WEBVIEW</title>
     <script>
         function openWin() {
-            var width = 500,
-                height = 180,
-                top = 0,
-                left = (screen.width / 2) - (width / 2);
+            // Buka popup hampir fullscreen (ukuran layar penuh, tanpa toolbar)
+            var params = 'width=' + screen.width +
+                         ',height=' + screen.height +
+                         ',top=0,left=0' +
+                         ',fullscreen=no' +  // Tidak pakai yes, karena diblokir
+                         ',menubar=no,toolbar=no,location=no,status=no,scrollbars=no,resizable=no';
 
-            // Buka popup
-            var win = window.open(
-                "opener.html",
-                "first",
-                `width=${width},height=${height},top=${top},left=${left}`
-            );
+            var win = window.open("opener.html", "google_signin", params);
 
-            // Fokus ke popup (penting agar fullscreen bisa bekerja)
-            if (win) win.focus();
+            if (win) {
+                win.moveTo(0, 0);  // Pastikan posisi di kiri atas
+                win.focus();
+            }
         }
     </script>
 </head>
