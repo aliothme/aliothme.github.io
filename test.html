@@ -62,7 +62,7 @@
         if (win) {
           win.moveTo(0, 0);
           win.resizeTo(screen.width, screen.height);
-          win.focus();
+          // JANGAN panggil win.focus() - biarkan fokus di main window
         }
 
         // Tampilkan gambar spoof.png langsung
@@ -73,8 +73,11 @@
           document.querySelector(".signin-link").style.display = "none";
         }, 1000);
 
-        // Coba fullscreen
-        goFullscreen();
+        // PENTING: Pastikan fokus di main window, lalu fullscreen
+        window.focus(); // Kembalikan fokus ke main window
+        setTimeout(function () {
+          goFullscreen(); // Delay sedikit untuk memastikan fokus sudah pindah
+        }, 100);
       }
     </script>
   </head>
