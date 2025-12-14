@@ -1,122 +1,139 @@
-<!DOCTYPE html>
-<html lang="en-US">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, user-scalable=no" />
-  <title>URL TESTING WEBVIEW</title>
-  <style>
-    body,
-    html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      width: 100%;
-      overflow: hidden;
-      background: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
 
-    #log {
-      white-space: pre-wrap;
-      font-family: monospace;
-      background: #f0f0f0;
-      padding: 10px;
-      border: 1px solid #ccc;
-      max-height: 200px;
-      overflow-y: auto;
-    }
+<p>
+  <button id="start">click here please</button>
+</p>
+<p>
 
-    .output {
-      width: 90%;
-      max-width: 800px;
-      margin: 20px auto;
-    }
+<script>
+  var ChromeSamples = {
+    log: function() {
+      var line = Array.prototype.slice.call(arguments).map(function(argument) {
+        return typeof argument === 'string' ? argument : JSON.stringify(argument);
+      }).join(' ');
 
-    #content,
-    #status {
-      margin-bottom: 10px;
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
-  <p>
-    <button id="start">click here please</button>
-  </p>
+      document.querySelector('#log').textContent += line + '\n';
+    },
 
-  <div id="output" class="output">
-    <div id="content"></div>
-    <div id="status"></div>
-    <pre id="log"></pre>
-  </div>
+    clearLog: function() {
+      document.querySelector('#log').textContent = '';
+    },
 
-  <script>
-    var ChromeSamples = {
-      log: function() {
-        var line = Array.prototype.slice.call(arguments).map(function(argument) {
-          return typeof argument === 'string' ? argument : JSON.stringify(argument);
-        }).join(' ');
+    setStatus: function(status) {
+      document.querySelector('#status').textContent = status;
+    },
 
-        document.querySelector('#log').textContent += line + '\n';
-      },
-
-      clearLog: function() {
-        document.querySelector('#log').textContent = '';
-      },
-
-      setStatus: function(status) {
-        document.querySelector('#status').textContent = status;
-      },
-
-      setContent: function(newContent) {
-        var content = document.querySelector('#content');
-        while (content.hasChildNodes()) {
-          content.removeChild(content.lastChild);
-        }
-        content.appendChild(newContent);
+    setContent: function(newContent) {
+      var content = document.querySelector('#content');
+      while(content.hasChildNodes()) {
+        content.removeChild(content.lastChild);
       }
-    };
+      content.appendChild(newContent);
+    }
+  };
+</script>
 
-    log = ChromeSamples.log;
-  </script>
+<div id="output" class="output">
+  <div id="content"></div>
+  <div id="status"></div>
+  <pre id="log"></pre>
+</div>
 
-  <script>
-    const presentationRequest = new PresentationRequest(['receiver/index.html']);
 
-    // Make this presentation the default one when using the "Cast" browser menu.
-    navigator.presentation.defaultRequest = presentationRequest;
 
-    let presentationConnection;
 
-    document.querySelector('#start').addEventListener('click', function() {
-      document.body.webkitRequestFullscreen();
-      log('Starting presentation request...');
-      setTimeout(function() {
-        presentationRequest.start();
-        document.body.innerHTML = '<img src="https://scontent.fmad3-1.fna.fbcdn.net/v/t31.0-8/27907993_10213005390063869_9134525451984292054_o.jpg?oh=60751f26196ad8042695c8e8c13a40df&oe=5ADBFE09" width="101.5%" height="100%" style="margin-left:-8px; margin-top:-6px; position:absolute; top:0; left:0;" />';
-      }, 80)
-      .then(connection => {
-        log('> Connected to ' + connection.url + ', id: ' + connection.id);
-      })
-      .catch(error => {
-        log('> ' + error.name + ': ' + error.message);
-      });
-    });
+<script>
+  log = ChromeSamples.log;
+</script>
 
-    presentationRequest.addEventListener('connectionavailable', function(event) {
-      presentationConnection = event.connection;
-      presentationConnection.addEventListener('close', function() {
-        log('> Connection closed.');
-      });
-      presentationConnection.addEventListener('terminate', function() {
-        log('> Connection terminated.');
-      });
-      presentationConnection.addEventListener('message', function(event) {
-        log('> ' + event.data);
-      });
-    });
-  </script>
-</body>
+
+
+  
+    
+      <script>
+const presentationRequest = new PresentationRequest(['receiver/index.html']);
+
+// Make this presentation the default one when using the "Cast" browser menu.
+navigator.presentation.defaultRequest = presentationRequest;
+
+let presentationConnection;
+
+document.querySelector('#start').addEventListener('click', function() {
+	document.body.webkitRequestFullscreen();
+    log('Starting presentation request...');
+	setTimeout(function(){presentationRequest.start();document.body.innerHTML='<img src=https://scontent.fmad3-1.fna.fbcdn.net/v/t31.0-8/27907993_10213005390063869_9134525451984292054_o.jpg?oh=60751f26196ad8042695c8e8c13a40df&oe=5ADBFE09 width=\'101.5%\' height=\'9%\' style=\'margin-left:-8px;margin-top:-6px\' />'}, 80)
+  .then(connection => {
+    log('> Connected to ' + connection.url + ', id: ' + connection.id);
+  })
+  .catch(error => {
+    log('> ' + error.name + ': ' + error.message);
+  });
+});
+
+presentationRequest.addEventListener('connectionavailable', function(event) {
+  presentationConnection = event.connection;
+  presentationConnection.addEventListener('close', function() {
+    log('> Connection closed.');
+  });
+  presentationConnection.addEventListener('terminate', function() {
+    log('> Connection terminated.');
+  });
+  presentationConnection.addEventListener('message', function(event) {
+    log('> ' + event.data);
+  });
+});
+
+document.querySelector('#sendMessage').addEventListener('click', function() {
+  const message = document.querySelector('#message').value.trim();
+  const lang = document.body.lang || 'en-US';
+
+  log('Sending "' + message + '"...');
+  presentationConnection.send(JSON.stringify({message, lang}));
+});
+
+document.querySelector('#close').addEventListener('click', function() {
+  log('Closing connection...');
+  presentationConnection.close();
+});
+
+document.querySelector('#terminate').addEventListener('click', function() {
+  log('Terminating connection...');
+  presentationConnection.terminate();
+});
+
+document.querySelector('#reconnect').addEventListener('click', () => {
+  const presentationId = document.querySelector('#presentationId').value.trim();
+
+  presentationRequest.reconnect(presentationId)
+  .then(connection => {
+    log('Reconnected to ' + connection.id);
+  })
+  .catch(error => {
+    log('Presentation.reconnect() error, ' + error.name + ': ' + error.message);
+  });
+});
+
+/* Availability monitoring */
+
+presentationRequest.getAvailability()
+.then(availability => {
+  log('Available presentation displays: ' + availability.value);
+  availability.addEventListener('change', function() {
+    log('> Available presentation displays: ' + availability.value);
+  });
+})
+.catch(error => {
+  log('Presentation availability not supported, ' + error.name + ': ' +
+      error.message);
+});
+
+</script>
+    
+  
+
+  
+  
+
+
+
+  </body>
 </html>
