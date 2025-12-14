@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <script>
+    let prepared = false;
+    
+    // Listen for messages from parent
+    window.addEventListener("message", function(event) {
+      if (event.data === "prepare") {
+        prepared = true;
+        console.log("iframe ready to fullscreen");
+      }
+      
+      if (event.data === "fullscreen" && prepared) {
+        // This will be called WITH user gesture
+        // because the message was sent in response to user click
+        goFullscreen();
+      }
+    });
+    
+    // Also listen for direct click (if overlay forwards it)
+    document.addEventListener("click", function() {
+      if (prepared) {
+        goFullscreen();
+      }
+    });
+    
+    function goFullscreen() {
+      let elem = window.frameElement; // The iframe itself
+      // OR: let elem = window.parent.document.documentElement;
+      
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen().then(() => {
+          console.log("Fullscreen activated from iframe!");
+          
+          // Notify parent
+          window.parent.postMessage("fullscreen-active", "*");
+        }).catch(err => {
+          console.error("Fullscreen failed:", err);
+        });
+      }
+    }
+  </script>
+</body>
+</html>
