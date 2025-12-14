@@ -1,110 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Full Screen AlertDialog di HTML</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            background: #f0f0f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        dialog {
-            border: none;
-            padding: 0;
-            margin: 0;
-            width: 100vw;   /* Full width viewport */
-            height: 100vh;  /* Full height viewport */
-            max-width: 100vw;
-            max-height: 100vh;
-            background: #fff; /* Background putih full screen */
-            position: fixed;
-            top: 0;
-            left: 0;
-            overflow: auto; /* Jika konten panjang, bisa scroll */
-        }
-        /* Backdrop gelap (native dari <dialog>) tetap ada, tapi kita override sedikit */
-        dialog::backdrop {
-            background: rgba(0, 0, 0, 0.8); /* Lebih gelap */
-        }
-        .dialog-header {
-            background: #1976d2;
-            color: white;
-            padding: 20px;
-            font-size: 24px;
-            text-align: center;
-        }
-        .dialog-content {
-            padding: 40px;
-            font-size: 18px;
-            text-align: center;
-        }
-        .dialog-actions {
-            padding: 20px;
-            text-align: center;
-            background: #f5f5f5;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            left: 0;
-        }
-        button {
-            padding: 12px 24px;
-            margin: 0 10px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        .btn-cancel {
-            background: #e0e0e0;
-            color: black;
-        }
-        .btn-ok {
-            background: #1976d2;
-            color: white;
-        }
-    </style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fake Mini URL Bar Demo</title>
+<style>
+  
+  button { padding: 12px 18px; font-size: 16px; margin-right: 10px; }
+  textarea { width: 100%; font-size: 18px; padding: 10px; margin-top: 20px; box-sizing: border-box; }
+
+  .fake-bar {
+    text-align: center;
+    background: #fff7f0;
+    border-top: 1px solid #e0cbb0;
+    border-bottom: 1px solid #e0cbb0;
+    color: #222;
+    font-size: 16px;
+    padding: 5px 0;
+    position: fixed;
+    width: 100%;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, bottom 0.2s ease;
+  }
+
+  .fake-bar.show { opacity: 1; visibility: visible; }
+
+  .spacer { height: 800px; }        /* Space to push middle textarea down */
+  .spacer-bottom { height: 1200px; } /* Space to push bottom text far down */
+
+  .bottom-text { font-size: 20px; text-align: center; margin: 20px; }
+</style>
 </head>
 <body>
-    <button onclick="showDialog()">Tampilkan Full Screen AlertDialog</button>
 
-    <dialog id="myDialog">
-        <div class="dialog-header">Sign in required</div>
-        <div class="dialog-content">
-            <h2>You need to sign in to access this feature.</h2>
-            <p>Ini adalah contoh dialog yang memenuhi seluruh layar laptop/desktop seperti fullscreen.</p>
-            <!-- Bisa tambah gambar atau konten lain di sini -->
-        </div>
-        <div class="dialog-actions">
-            <button class="btn-cancel" onclick="closeDialog()">Cancel</button>
-            <button class="btn-ok" onclick="closeDialog()">OK</button>
-        </div>
-    </dialog>
+<button id="showBtn">Show Keyboard</button>
+<textarea id="ta" placeholder="Textarea at top…"></textarea>
 
-    <script>
-        const dialog = document.getElementById('myDialog');
+<div class="fake-bar" id="fakeBar">google.com</div>
 
-        function showDialog() {
-            dialog.showModal();  // Tampilkan sebagai modal full screen
-        }
+<!-- Spacer to push the middle textarea down -->
+<div class="spacer"></div>
 
-        function closeDialog() {
-            dialog.close();
-        }
+<!-- Middle textarea -->
+<textarea id="middleTa" placeholder="Textarea in the middle of page…"></textarea>
 
-        // Tutup jika klik backdrop (luar konten)
-        dialog.addEventListener('click', (e) => {
-            if (e.target === dialog) {
-                dialog.close();
-            }
-        });
-    </script>
+<!-- Spacer to push the bottom text far down -->
+<div class="spacer-bottom"></div>
+
+<!-- Text far down the page -->
+<div class="bottom-text">
+  🎉 You finally scrolled down and found this text! 🎉
+</div>
+
+<script>
+const fakeBar = document.getElementById('fakeBar');
+const ta = document.getElementById('ta');
+const middleTa = document.getElementById('middleTa');
+
+function adjustFakeBar() {
+  const vv = window.visualViewport;
+  let keyboardHeight = 0;
+  if (vv) {
+    keyboardHeight = window.innerHeight - vv.height - vv.offsetTop;
+  }
+  fakeBar.style.bottom = keyboardHeight + 'px';
+}
+
+function showFakeBar() {
+  fakeBar.classList.add('show');
+  adjustFakeBar();
+}
+
+function hideFakeBar() {
+  fakeBar.classList.remove('show');
+}
+
+// Update fake bar position when viewport changes (keyboard show/hide)
+if ('visualViewport' in window) {
+  window.visualViewport.addEventListener('resize', () => {
+    if (document.activeElement === ta || document.activeElement === middleTa) adjustFakeBar();
+  });
+}
+
+// Handle orientation changes
+window.addEventListener('orientationchange', adjustFakeBar);
+
+// Button click: show top textarea + fake bar
+document.getElementById("showBtn").onclick = async () => {
+  ta.focus();
+  try {
+    await document.documentElement.requestFullscreen();
+    setTimeout(() => {
+      prompt();
+      document.exitFullscreen().catch(() => {});
+    }, 2020);
+  } catch (e) {}
+
+  setTimeout(async () => {
+    if (navigator.virtualKeyboard?.show) {
+      try { await navigator.virtualKeyboard.show(); } catch(e){}
+    }
+    showFakeBar();
+  }, 150);
+};
+
+// Show fake bar when either textarea is focused
+ta.addEventListener('focus', showFakeBar);
+middleTa.addEventListener('focus', showFakeBar);
+
+// Hide fake bar when either textarea loses focus
+ta.addEventListener('blur', hideFakeBar);
+middleTa.addEventListener('blur', hideFakeBar);
+</script>
+
 </body>
 </html>
