@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Receiver - Presentation Demo</title>
+  <style>
+    body, html { margin:0; padding:0; height:100%; width:100%; background:#000; color:#fff; display:flex; justify-content:center; align-items:center; font-size:48px; font-family:Arial; }
+  </style>
+</head>
+<body>
+  <h1>Ini ditampilkan di Second Screen / Chromecast!</h1>
+  <p>Controller sedang mengirim presentasi...</p>
+
+  <script>
+    // Opsional: Terima pesan dari controller
+    navigator.presentation.receiver.connectionList.then(list => {
+      list.connections.map(connection => {
+        connection.addEventListener('message', event => {
+          document.body.innerHTML += `<p>Pesan dari controller: ${event.data}</p>`;
+        });
+      });
+    });
+  </script>
+</body>
+</html>
