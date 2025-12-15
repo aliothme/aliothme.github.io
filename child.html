@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h3>Child Window</h3>
+<script>
+if (window.opener === null) {
+  document.body.innerHTML += "<p>✔ opener blocked by browser</p>"
+} else {
+  document.body.innerHTML += "<p>❌ opener still accessible</p>"
+}
+</script>
+</body>
+</html>
