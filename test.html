@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API PopUp & Pointer Lock</title>
+    <title>API PopUp & Pointer Lock & Fullscreen</title>
 </head>
 <body>
-    <button id="btnPopup">Buka PopUp (Delay 0.5 ms)</button>
+    <button id="btnPopup">Buka PopUp (Delay 0.5ms)</button>
     <button id="btnPointerLock">Aktifkan Pointer Lock</button>
+    <button id="btnFullscreen">Aktifkan Fullscreen</button>
 
     <script>
         // API PopUp Window dengan delay 2 detik
@@ -28,6 +29,15 @@
                 console.log('Pointer Lock aktif');
             } else {
                 console.log('Pointer Lock nonaktif');
+            }
+        });
+
+        // API Fullscreen
+        document.getElementById('btnFullscreen').addEventListener('click', function() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
             }
         });
     </script>
