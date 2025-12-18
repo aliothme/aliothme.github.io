@@ -1,137 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Double Click: Pointer Lock + Popup</title>
-  <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      width: 100%;
-      background: #000;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-family: Arial, sans-serif;
-      overflow: hidden;
-    }
-    button {
-      padding: 20px 40px;
-      font-size: 20px;
-      background: #4285f4;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      z-index: 100;
-    }
-    #status {
-      position: absolute;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 18px;
-      background: rgba(0,0,0,0.7);
-      padding: 10px 20px;
-      border-radius: 6px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API PopUp & Pointer</title>
 </head>
 <body>
+    <button id="btnPopup">Buka PopUp (Delay 2 detik)</button>
+    <button id="btnPointer">Ubah Pointer</button>
 
-  <div id="status">Double click tombol di bawah ini</div>
+    <script>
+        // API PopUp Window dengan delay 2 detik
+        document.getElementById('btnPopup').addEventListener('click', function() {
+            setTimeout(function() {
+                window.open('https://www.google.com', 'popup', 'width=600,height=400');
+            }, 2000);
+        });
 
-  <button id="triggerBtn">
-    DOUBLE CLICK DI SINI
-  </button>
-
-  <script>
-    const btn = document.getElementById('triggerBtn');
-    const status = document.getElementById('status');
-    let clickCount = 0;
-    let lastClickTime = 0;
-    const doubleClickDelay = 500; // ms, batas waktu untuk dianggap double click
-
-    // Fungsi Pointer Lock
-    function requestPointerLock() {
-      const element = document.body;
-
-      element.requestPointerLock = element.requestPointerLock ||
-                                  element.mozRequestPointerLock ||
-                                  element.webkitRequestPointerLock;
-
-      if (element.requestPointerLock) {
-        element.requestPointerLock();
-        status.textContent = "Pointer Lock aktif (klik kedua untuk popup)";
-      } else {
-        status.textContent = "Pointer Lock tidak didukung di browser ini";
-      }
-
-      // Listener perubahan status pointer lock
-      document.addEventListener('pointerlockchange', onPointerLockChange);
-      document.addEventListener('mozpointerlockchange', onPointerLockChange);
-      document.addEventListener('webkitpointerlockchange', onPointerLockChange);
-    }
-
-    function onPointerLockChange() {
-      if (document.pointerLockElement || document.mozPointerLockElement || document.webkitPointerLockElement) {
-        console.log("Pointer Lock aktif");
-        document.body.style.cursor = 'none'; // sembunyikan kursor
-      } else {
-        console.log("Pointer Lock keluar (tekan Esc untuk keluar manual)");
-        document.body.style.cursor = 'auto';
-      }
-    }
-
-    // Fungsi buka popup
-    function openPopup() {
-      const params = [
-        'width=' + screen.width,
-        'height=' + screen.height,
-        'top=0',
-        'left=0',
-        'menubar=no',
-        'toolbar=no',
-        'location=no',
-        'status=no',
-        'scrollbars=yes',
-        'resizable=yes'
-      ].join(',');
-
-      const popup = window.open('about:blank', 'myPopup', params);
-
-      if (popup) {
-        popup.moveTo(0, 0);
-        popup.resizeTo(screen.width, screen.height);
-        // Bisa isi konten popup di sini jika perlu
-        popup.document.write('<h1 style="text-align:center;margin-top:200px;">Ini adalah Popup Window</h1>');
-        status.textContent = "Popup berhasil dibuka!";
-      } else {
-        status.textContent = "Popup diblokir! Izinkan popup di browser.";
-      }
-    }
-
-    // Handler klik pada tombol
-    btn.addEventListener('click', function(e) {
-      const currentTime = Date.now();
-
-      // Cek apakah ini klik pertama atau kedua dalam rentang double click
-      if (currentTime - lastClickTime < doubleClickDelay) {
-        // Ini klik KEDUA → buka popup
-        openPopup();
-        clickCount = 0; // reset
-      } else {
-        // Ini klik PERTAMA → aktifkan pointer lock
-        clickCount = 1;
-        requestPointerLock();
-      }
-
-      lastClickTime = currentTime;
-    });
-  </script>
-
+        // API Pointer
+        document.getElementById('btnPointer').addEventListener('click', function() {
+            if (document.body.style.cursor === 'pointer') {
+                document.body.style.cursor = 'default';
+            } else {
+                document.body.style.cursor = 'pointer';
+            }
+        });
+    </script>
 </body>
 </html>
