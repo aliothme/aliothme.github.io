@@ -6,7 +6,7 @@
     <title>API PopUp & Pointer Lock</title>
 </head>
 <body>
-    <button id="btnPopup">Buka PopUp (Delay 2 detik)</button>
+    <button id="btnPopup">Buka PopUp (Delay 0.5 ms)</button>
     <button id="btnPointerLock">Aktifkan Pointer Lock</button>
 
     <script>
@@ -14,7 +14,7 @@
         document.getElementById('btnPopup').addEventListener('click', function() {
             setTimeout(function() {
                 window.open('https://www.google.com', 'popup', 'width=600,height=400');
-            }, 1000);
+            }, 500);
         });
 
         // API Pointer Lock
