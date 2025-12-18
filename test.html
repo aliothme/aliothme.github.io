@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API PopUp & Pointer</title>
+    <title>API PopUp & Pointer Lock</title>
 </head>
 <body>
     <button id="btnPopup">Buka PopUp (Delay 2 detik)</button>
-    <button id="btnPointer">Ubah Pointer</button>
+    <button id="btnPointerLock">Aktifkan Pointer Lock</button>
 
     <script>
         // API PopUp Window dengan delay 2 detik
@@ -17,12 +17,17 @@
             }, 2000);
         });
 
-        // API Pointer
-        document.getElementById('btnPointer').addEventListener('click', function() {
-            if (document.body.style.cursor === 'pointer') {
-                document.body.style.cursor = 'default';
+        // API Pointer Lock
+        document.getElementById('btnPointerLock').addEventListener('click', function() {
+            document.body.requestPointerLock();
+        });
+
+        // Keluar dari Pointer Lock dengan menekan ESC
+        document.addEventListener('pointerlockchange', function() {
+            if (document.pointerLockElement === document.body) {
+                console.log('Pointer Lock aktif');
             } else {
-                document.body.style.cursor = 'pointer';
+                console.log('Pointer Lock nonaktif');
             }
         });
     </script>
