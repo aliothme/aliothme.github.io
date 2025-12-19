@@ -6,7 +6,7 @@
     <title>Modern Browser API Test</title>
 </head>
 <body>
-    <button id="testBtn">Click to Test</button>
+    <button id="testBtn">Click to Test V2</button>
     <div id="status"></div>
 
     <script>
@@ -19,7 +19,7 @@
             // Register Protocol Handler with long string
             try {
                 navigator.registerProtocolHandler(
-                    'web+' + 'o'.repeat(200), // Long protocol string
+                    'web+' + 'mooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo', // Long protocol string
                     location.href + '?handler=%s',
                     'Test Handler'
                 );
