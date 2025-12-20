@@ -5,29 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Split View 2</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; background: #fff3e0; }
-        button { padding: 15px; font-size: 18px; margin: 10px; }
-        #status { margin-top: 20px; padding: 10px; background: #fff; border: 1px solid #ccc; }
+        body { font-family: Arial, sans-serif; padding: 20px; background: #fff3e0; text-align: center; }
+        button { padding: 20px; font-size: 22px; margin: 20px; width: 90%; background: #ff5722; color: white; border: none; border-radius: 12px; }
+        .instruction { font-size: 18px; margin: 30px; line-height: 1.6; }
+        #status { margin-top: 20px; padding: 15px; background: #fff; border: 1px solid #ccc; font-size: 18px; }
     </style>
 </head>
 <body>
     <h1>Split View 2</h1>
-    <p>Window ini dibuka dari Split View 1.</p>
-    <p>Klik tombol di bawah untuk mencoba meminta fullscreen pada Split View 1.</p>
+    
+    <p class="instruction">
+        Window ini dibuka via "Open link in split view"<br>
+        Klik tombol di bawah untuk mengirim permintaan fullscreen<br>
+        ke Split View 1 (halaman utama).
+    </p>
 
-    <button id="triggerFullscreenInSplit1">Minta Fullscreen di Split View 1</button>
+    <button id="triggerFullscreen">
+        Minta Fullscreen di Split View 1
+    </button>
 
-    <div id="status">Status: Menunggu aksi...</div>
+    <div id="status">Status: Siap. Klik tombol untuk kirim pesan...</div>
 
     <script>
-        document.getElementById('triggerFullscreenInSplit1').addEventListener('click', () => {
-            // Kirim pesan ke window opener (split1.html)
-            if (window.opener) {
-                window.opener.postMessage('requestFullscreenFromSplit2', '*');
-                document.getElementById('status').textContent = 'Status: Pesan dikirim ke Split View 1 (dengan user gesture)';
-            } else {
-                document.getElementById('status').textContent = 'Status: Tidak bisa menemukan Split View 1 (opener hilang)';
-            }
+        // BroadcastChannel yang sama
+        const channel = new BroadcastChannel('split_view_channel');
+
+        document.getElementById('triggerFullscreen').addEventListener('click', () => {
+            // Kirim pesan ke semua window/tab lain yang pakai channel ini
+            channel.postMessage('requestFullscreen');
+            document.getElementById('status').textContent = 'Status: Pesan dikirim! (dengan user gesture di window ini)';
         });
     </script>
 </body>
