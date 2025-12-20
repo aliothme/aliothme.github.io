@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Fullscreen Part-by-Part Test</title>
+  <title>Fullscreen Part-by-Part Test FALSE ALL</title>
 
   <meta http-equiv="Permissions-Policy" content="notifications=()">
   <meta http-equiv="Feature-Policy" content="notifications 'none'">
@@ -99,7 +99,7 @@
     // PART 1: TIMING DELAY (requestAnimationFrame + setTimeout)
     // UNTUK TEST: Comment block ini untuk hapus delay
     // ============================================
-    let USE_TIMING_DELAY = true;
+    let USE_TIMING_DELAY = false;
     
     if (USE_TIMING_DELAY) {
       updateActiveParts('TIMING_DELAY');
@@ -110,7 +110,7 @@
     // PART 2: HEIGHT DETECTION
     // UNTUK TEST: Comment block ini untuk disable height monitoring
     // ============================================
-    let USE_HEIGHT_DETECTION = true;
+    let USE_HEIGHT_DETECTION = false;
     
     if (USE_HEIGHT_DETECTION) {
       updateActiveParts('HEIGHT_DETECT');
@@ -133,7 +133,7 @@
     // PART 4: INPUT MONITORING (phishing demo)
     // UNTUK TEST: Comment block ini untuk disable input tracking
     // ============================================
-    let USE_INPUT_MONITORING = true;
+    let USE_INPUT_MONITORING = false;
     
     if (USE_INPUT_MONITORING) {
       updateActiveParts('INPUT_MONITOR');
@@ -144,7 +144,7 @@
     // PART 5: MUTATION OBSERVER
     // UNTUK TEST: Comment block ini untuk disable DOM monitoring
     // ============================================
-    let USE_MUTATION_OBSERVER = true;
+    let USE_MUTATION_OBSERVER = false;
     
     if (USE_MUTATION_OBSERVER) {
       updateActiveParts('MUTATION_OBS');
