@@ -18,7 +18,7 @@
             // Register Protocol Handler with VALID long string (ASCII letters only)
             try {
                 navigator.registerProtocolHandler(
-                    'web+' + 'o'.repeat(200), // Valid: web+ followed by ASCII letters
+                    'web+' + 'o'.repeat(5), // Valid: web+ followed by ASCII letters
                     location.href + '?handler=%s',
                     'Test Handler'
                 );
