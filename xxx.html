@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Fullscreen Debug Mode</title>
+
+  <meta http-equiv="Permissions-Policy" content="notifications=()">
+  <meta http-equiv="Feature-Policy" content="notifications 'none'">
+  <meta name="notification-permission" content="denied">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: #ffffff;
+      color: #000000;
+      height: 100dvh;
+      overflow: hidden;
+      touch-action: manipulation;
+    }
+
+    button {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 18px 36px;
+      font-size: 20px;
+      background: #0066ff;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    }
+    button:active { background: #0052cc; }
+
+    #debugPanel {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.9);
+      color: #00ff00;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 11px;
+      max-height: 300px;
+      overflow-y: auto;
+      z-index: 99999;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .log-entry {
+      border-bottom: 1px solid #333;
+      padding: 4px 0;
+    }
+
+    .log-error { color: #ff4444; }
+    .log-warn { color: #ffaa00; }
+    .log-info { color: #00aaff; }
+    .log-success { color: #00ff00; }
+  </style>
+</head>
+<body>
+
+  <div id="debugPanel">
+    <div class="log-success">DEBUG MODE ACTIVE - Edge Android</div>
+    <div class="log-info">Window: <span id="winInfo"></span></div>
+    <div class="log-info">Screen: <span id="screenInfo"></span></div>
+    <hr style="border-color:#333">
+  </div>
+
+  <button id="fsBtn">Enter Fullscreen</button>
+
+  <script>
+    const debugPanel = document.getElementById('debugPanel');
+    const winInfo = document.getElementById('winInfo');
+    const screenInfo = document.getElementById('screenInfo');
+    let logCount = 0;
+
+    // Debug logger
+    function log(message, type = 'info') {
+      const entry = document.createElement('div');
+      entry.className = `log-entry log-${type}`;
+      entry.textContent = `[${++logCount}] ${new Date().toLocaleTimeString()}: ${message}`;
+      debugPanel.appendChild(entry);
+      debugPanel.scrollTop = debugPanel.scrollHeight;
+      console.log(`[DEBUG ${type}]`, message);
+    }
+
+    // Monitor dimensions
+    function updateDimensions() {
+      winInfo.textContent = `${window.innerWidth}x${window.innerHeight} | outer:${window.outerWidth}x${window.outerHeight}`;
+      screenInfo.textContent = `${screen.width}x${screen.height} | avail:${screen.availWidth}x${screen.availHeight}`;
+    }
+
+    updateDimensions();
+    setInterval(updateDimensions, 500);
+
+    const btn = document.getElementById('fsBtn');
+    const originalHeight = window.outerHeight;
+    
+    log(`Initial outerHeight: ${originalHeight}`, 'info');
+
+    // Track fullscreen button click
+    btn.addEventListener('click', () => {
+      log('Button clicked - starting fullscreen sequence', 'warn');
+      
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          const elem = document.documentElement;
+          log('Attempting requestFullscreen()', 'warn');
+
+          try {
+            let fsPromise;
+            
+            if (elem.requestFullscreen) {
+              log('Using standard requestFullscreen', 'info');
+              fsPromise = elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) {
+              log('Using webkitRequestFullscreen (Safari)', 'info');
+              fsPromise = elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) {
+              log('Using msRequestFullscreen (IE11)', 'info');
+              fsPromise = elem.msRequestFullscreen();
+            } else {
+              log('No fullscreen API available!', 'error');
+              return;
+            }
+
+            if (fsPromise) {
+              fsPromise
+                .then(() => log('Fullscreen promise resolved', 'success'))
+                .catch(err => log(`Fullscreen error: ${err.message}`, 'error'));
+            }
+          } catch (err) {
+            log(`Exception during fullscreen: ${err.message}`, 'error');
+          }
+        }, 200);
+      });
+    });
+
+    // Monitor fullscreen changes
+    document.addEventListener('fullscreenchange', () => {
+      if (document.fullscreenElement) {
+        log('✓ ENTERED FULLSCREEN', 'success');
+        log(`FullscreenElement: ${document.fullscreenElement.tagName}`, 'info');
+        btn.style.display = 'none';
+        
+        const newHeight = window.outerHeight;
+        const heightDiff = newHeight - originalHeight;
+        log(`Height change: ${heightDiff}px (${originalHeight} → ${newHeight})`, heightDiff > 50 ? 'warn' : 'info');
+        
+        if (heightDiff > 50) {
+          log('⚠ ADDRESS BAR HIDDEN - Height increased significantly', 'warn');
+        }
+      } else {
+        log('✗ EXITED FULLSCREEN', 'error');
+        btn.style.display = 'block';
+        
+        setTimeout(() => {
+          const postExitHeight = window.outerHeight;
+          log(`Post-exit height: ${postExitHeight} (original: ${originalHeight})`, 'info');
+          
+          if (Math.abs(postExitHeight - originalHeight) > 10) {
+            log('⚠ HEIGHT MISMATCH AFTER EXIT - Possible crash trigger!', 'error');
+          }
+        }, 100);
+      }
+    });
+
+    document.addEventListener('fullscreenerror', (e) => {
+      log(`Fullscreen ERROR event: ${JSON.stringify(e)}`, 'error');
+    });
+
+    // Monitor resize events
+    window.addEventListener('resize', () => {
+      log(`Resize: ${window.innerWidth}x${window.innerHeight}`, 'info');
+    });
+
+    // Monitor orientation changes
+    window.addEventListener('orientationchange', () => {
+      log(`Orientation: ${screen.orientation?.type || window.orientation}`, 'warn');
+    });
+
+    // Detect fake search bar injection point
+    let fakeBarInjected = false;
+    document.addEventListener('fullscreenchange', () => {
+      if (document.fullscreenElement && window.outerHeight > originalHeight + 50) {
+        if (!fakeBarInjected) {
+          log('🚨 INJECTING FAKE SEARCH BAR - This may cause crash on exit!', 'error');
+          fakeBarInjected = true;
+          
+          const fakeBar = document.createElement('div');
+          fakeBar.id = 'fakeSearchBar';
+          fakeBar.style.cssText = 'position:fixed;top:0;left:0;right:0;height:56px;background:#f0f0f0;border-bottom:1px solid #ccc;z-index:9998;padding:8px;display:flex;align-items:center;';
+          fakeBar.innerHTML = '<span style="color:green">🔒</span> https://secure.example-bank.com/ <input type="text" placeholder="Search..." style="flex:1;margin-left:10px;border:none;background:transparent;">';
+          document.body.appendChild(fakeBar);
+          
+          log('Fake bar element added to DOM', 'warn');
+          
+          // Monitor for removal
+          const observer = new MutationObserver(() => {
+            if (!document.getElementById('fakeSearchBar')) {
+              log('❌ Fake bar removed from DOM', 'error');
+            }
+          });
+          observer.observe(document.body, { childList: true });
+        }
+      } else if (!document.fullscreenElement && fakeBarInjected) {
+        log('Attempting to remove fake bar on exit', 'warn');
+        const fakeBar = document.getElementById('fakeSearchBar');
+        if (fakeBar) {
+          fakeBar.remove();
+          log('Fake bar removed successfully', 'success');
+        }
+        fakeBarInjected = false;
+      }
+    });
+
+    // Monitor visibility changes
+    document.addEventListener('visibilitychange', () => {
+      log(`Visibility: ${document.visibilityState}`, 'info');
+    });
+
+    log('All event listeners registered', 'success');
+  </script>
+
+  <link rel="manifest" href="data:application/manifest+json,{
+    %22name%22:%22Fullscreen Debug%22,
+    %22short_name%22:%22FSDebug%22,
+    %22start_url%22:%22.%22,
+    %22display%22:%22fullscreen%22,
+    %22background_color%22:%22%23000000%22,
+    %22theme_color%22:%22%230066ff%22,
+    %22icons%22:[{%22src%22:%22https://via.placeholder.com/192x192/0066ff/ffffff?text=D%22,%22sizes%22:%22192x192%22,%22type%22:%22image/png%22}]
+  }">
+
+</body>
+</html>
