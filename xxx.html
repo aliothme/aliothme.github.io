@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Test 1 - Minimal</title>
+  <title>Fixed Version</title>
   <style>
     body { margin: 0; font-family: sans-serif; }
     button { 
@@ -17,11 +17,26 @@
   </style>
 </head>
 <body>
-  <button id="fs">Test 1 - Fullscreen</button>
+  <button id="fs">Fullscreen</button>
   <script>
-    document.getElementById('fs').onclick = () => {
+    const btn = document.getElementById('fs');
+    
+    btn.onclick = () => {
       document.documentElement.requestFullscreen();
     };
+
+    // FIX: Add cleanup handler untuk prevent crash
+    document.addEventListener('fullscreenchange', () => {
+      if (document.fullscreenElement) {
+        btn.style.display = 'none';
+      } else {
+        // Force UI repaint untuk fix address bar
+        btn.style.display = 'block';
+        document.body.style.display = 'none';
+        document.body.offsetHeight; // Trigger reflow
+        document.body.style.display = 'block';
+      }
+    });
   </script>
 </body>
 </html>
