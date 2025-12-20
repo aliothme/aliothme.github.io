@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Android Calculator Opener</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Roboto', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        .method-card {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+        }
+        .method-card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        button, .link-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        button:active, .link-button:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .code {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+        .info-box {
+            background: #d1ecf1;
+            border: 2px solid #bee5eb;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        .warning-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        .success-box {
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .recommended { background: #28a745; color: white; }
+        .alternative { background: #ffc107; color: black; }
+        .fallback { background: #6c757d; color: white; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Android Calculator Opener</h1>
+        
+        <div class="info-box">
+            ℹ️ <strong>Info:</strong> Android menggunakan Intent URI, bukan protocol handler biasa seperti Windows/Linux
+        </div>
+
+        <!-- Method 1: Intent URI -->
+        <div class="method-card">
+            <span class="badge recommended">RECOMMENDED</span>
+            <h3>📱 Method 1: Android Intent URI</h3>
+            <p>Cara paling reliable untuk membuka calculator di Android</p>
+            <div class="button-group">
+                <button onclick="openCalculatorIntent()">
+                    Open Calculator (Intent)
+                </button>
+                <a href="intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_CALCULATOR;end" class="link-button">
+                    Open Calculator (Direct Link)
+                </a>
+            </div>
+            <div class="code">intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_CALCULATOR;end</div>
+        </div>
+
+        <!-- Method 2: Package Name -->
+        <div class="method-card">
+            <span class="badge alternative">ALTERNATIVE</span>
+            <h3>📦 Method 2: Specific Package</h3>
+            <p>Buka calculator app tertentu (tergantung manufacturer)</p>
+            <div class="button-group">
+                <button onclick="openGoogleCalculator()">
+                    Google Calculator
+                </button>
+                <button onclick="openSamsungCalculator()">
+                    Samsung Calculator
+                </button>
+                <button onclick="openMiCalculator()">
+                    Xiaomi Calculator
+                </button>
+            </div>
+        </div>
+
+        <!-- Method 3: Web Calculator Fallback -->
+        <div class="method-card">
+            <span class="badge fallback">FALLBACK</span>
+            <h3>🌐 Method 3: Web Calculator</h3>
+            <p>Jika intent tidak bekerja, gunakan web calculator</p>
+            <div class="button-group">
+                <button onclick="openWebCalculator()">
+                    Open Web Calculator
+                </button>
+            </div>
+        </div>
+
+        <!-- Method 4: Smart Fallback -->
+        <div class="method-card">
+            <span class="badge recommended">BEST PRACTICE</span>
+            <h3>🎯 Method 4: Smart Fallback</h3>
+            <p>Coba native app dulu, fallback ke web jika gagal</p>
+            <div class="button-group">
+                <button onclick="smartOpen()">
+                    Smart Open Calculator
+                </button>
+            </div>
+        </div>
+
+        <!-- Code Examples -->
+        <div class="method-card">
+            <h3>📝 Code Examples</h3>
+            
+            <p><strong>HTML Direct Link (Intent):</strong></p>
+            <div class="code">&lt;a href="intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_CALCULATOR;end"&gt;
+    Open Calculator
+&lt;/a&gt;</div>
+
+            <p><strong>JavaScript with Intent:</strong></p>
+            <div class="code">// Basic Intent
+window.location.href = "intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_CALCULATOR;end";
+
+// With fallback URL
+window.location.href = "intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_CALCULATOR;S.browser_fallback_url=https://calculator.net;end";</div>
+
+            <p><strong>Google Calculator Package:</strong></p>
+            <div class="code">intent:#Intent;component=com.google.android.calculator/com.android.calculator2.Calculator;end</div>
+
+            <p><strong>Samsung Calculator Package:</strong></p>
+            <div class="code">intent:#Intent;component=com.sec.android.app.popupcalculator/.Calculator;end</div>
+        </div>
+
+        <!-- Browser Compatibility -->
+        <div class="method-card">
+            <h3>🌐 Browser Compatibility</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Browser</th>
+                        <th>Intent Support</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Chrome Mobile</td>
+                        <td>✅ Full</td>
+                        <td>Best support</td>
+                    </tr>
+                    <tr>
+                        <td>Samsung Internet</td>
+                        <td>✅ Full</td>
+                        <td>Excellent support</td>
+                    </tr>
+                    <tr>
+                        <td>Firefox Mobile</td>
+                        <td>✅ Full</td>
+                        <td>Good support</td>
+                    </tr>
+                    <tr>
+                        <td>Edge Mobile</td>
+                        <td>✅ Full</td>
+                        <td>Good support</td>
+                    </tr>
+                    <tr>
+                        <td>Opera Mobile</td>
+                        <td>✅ Full</td>
+                        <td>Good support</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Android Versions -->
+        <div class="method-card">
+            <h3>📱 Android Calculator by Manufacturer</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Manufacturer</th>
+                        <th>Calculator App</th>
+                        <th>Package Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Google/Pixel</td>
+                        <td>Google Calculator</td>
+                        <td>com.google.android.calculator</td>
+                    </tr>
+                    <tr>
+                        <td>Samsung</td>
+                        <td>Samsung Calculator</td>
+                        <td>com.sec.android.app.popupcalculator</td>
+                    </tr>
+                    <tr>
+                        <td>Xiaomi/MIUI</td>
+                        <td>Mi Calculator</td>
+                        <td>com.miui.calculator</td>
+                    </tr>
+                    <tr>
+                        <td>Huawei</td>
+                        <td>Huawei Calculator</td>
+                        <td>com.huawei.calculator</td>
+                    </tr>
+                    <tr>
+                        <td>OnePlus</td>
+                        <td>OnePlus Calculator</td>
+                        <td>net.oneplus.calculator</td>
+                    </tr>
+                    <tr>
+                        <td>OPPO</td>
+                        <td>OPPO Calculator</td>
+                        <td>com.coloros.calculator</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Warning Box -->
+        <div class="warning-box">
+            <strong>⚠️ Perhatian:</strong><br>
+            • Tidak semua device memiliki calculator app yang sama<br>
+            • Package name berbeda per manufacturer<br>
+            • Gunakan fallback untuk compatibility terbaik<br>
+            • Test di berbagai device jika possible
+        </div>
+
+        <!-- Success Box -->
+        <div class="success-box">
+            <strong>✅ Best Practice:</strong><br>
+            Gunakan generic Intent (Method 1) dengan web fallback untuk compatibility maksimal!
+        </div>
+    </div>
+
+    <script>
+        // Method 1: Generic Android Intent (RECOMMENDED)
+        function openCalculatorIntent() {
+            try {
+                // Intent dengan fallback URL
+                const intentUrl = "intent:#Intent;" +
+                    "action=android.intent.action.MAIN;" +
+                    "category=android.intent.category.APP_CALCULATOR;" +
+                    "S.browser_fallback_url=https://www.calculator.net;" +
+                    "end";
+                
+                window.location.href = intentUrl;
+                console.log('Opening calculator via Intent');
+            } catch (e) {
+                console.error('Error:', e);
+                openWebCalculator();
+            }
+        }
+
+        // Method 2a: Google Calculator (Pixel, most Android)
+        function openGoogleCalculator() {
+            try {
+                const intentUrl = "intent:#Intent;" +
+                    "component=com.google.android.calculator/com.android.calculator2.Calculator;" +
+                    "S.browser_fallback_url=https://www.calculator.net;" +
+                    "end";
+                
+                window.location.href = intentUrl;
+                console.log('Opening Google Calculator');
+            } catch (e) {
+                console.error('Error:', e);
+                openWebCalculator();
+            }
+        }
+
+        // Method 2b: Samsung Calculator
+        function openSamsungCalculator() {
+            try {
+                const intentUrl = "intent:#Intent;" +
+                    "component=com.sec.android.app.popupcalculator/.Calculator;" +
+                    "S.browser_fallback_url=https://www.calculator.net;" +
+                    "end";
+                
+                window.location.href = intentUrl;
+                console.log('Opening Samsung Calculator');
+            } catch (e) {
+                console.error('Error:', e);
+                openWebCalculator();
+            }
+        }
+
+        // Method 2c: Xiaomi/Mi Calculator
+        function openMiCalculator() {
+            try {
+                const intentUrl = "intent:#Intent;" +
+                    "component=com.miui.calculator/.cal.CalculatorActivity;" +
+                    "S.browser_fallback_url=https://www.calculator.net;" +
+                    "end";
+                
+                window.location.href = intentUrl;
+                console.log('Opening Mi Calculator');
+            } catch (e) {
+                console.error('Error:', e);
+                openWebCalculator();
+            }
+        }
+
+        // Method 3: Web Calculator Fallback
+        function openWebCalculator() {
+            window.location.href = 'https://www.calculator.net';
+            console.log('Opening Web Calculator');
+        }
+
+        // Method 4: Smart Fallback (BEST PRACTICE)
+        function smartOpen() {
+            const start = Date.now();
+            
+            // Try native intent first
+            const intentUrl = "intent:#Intent;" +
+                "action=android.intent.action.MAIN;" +
+                "category=android.intent.category.APP_CALCULATOR;" +
+                "end";
+            
+            window.location.href = intentUrl;
+            
+            // Fallback to web if intent fails (app not found)
+            setTimeout(() => {
+                const elapsed = Date.now() - start;
+                // If still on page after 1.5s, app probably didn't open
+                if (elapsed >= 1500) {
+                    const fallback = confirm(
+                        'Calculator app tidak ditemukan. Buka web calculator?'
+                    );
+                    if (fallback) {
+                        openWebCalculator();
+                    }
+                }
+            }, 1500);
+        }
+
+        // Detect Android
+        function isAndroid() {
+            return /Android/i.test(navigator.userAgent);
+        }
+
+        // Log device info
+        console.log('User Agent:', navigator.userAgent);
+        console.log('Platform:', navigator.platform);
+        console.log('Is Android:', isAndroid());
+
+        // Auto-detect and show message
+        if (!isAndroid()) {
+            const warning = document.createElement('div');
+            warning.className = 'warning-box';
+            warning.innerHTML = '<strong>⚠️ Warning:</strong> Anda tidak menggunakan Android device. Intent URI tidak akan berfungsi di platform ini.';
+            document.querySelector('.container').insertBefore(
+                warning, 
+                document.querySelector('.method-card')
+            );
+        }
+    </script>
+</body>
+</html>
