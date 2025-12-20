@@ -5,39 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Split View 1</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; background: #e3f2fd; }
-        button { padding: 15px; font-size: 18px; margin: 10px; }
-        #status { margin-top: 20px; padding: 10px; background: #fff; border: 1px solid #ccc; }
+        body { font-family: Arial, sans-serif; padding: 20px; background: #e3f2fd; text-align: center; }
+        .split-link {
+            display: block;
+            margin: 40px auto;
+            padding: 30px;
+            font-size: 28px;
+            background: #4caf50;
+            color: white;
+            text-decoration: none;
+            border-radius: 15px;
+            max-width: 90%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .instruction {
+            font-size: 20px;
+            margin: 30px;
+            line-height: 1.6;
+        }
+        button { padding: 15px; font-size: 18px; margin: 10px; width: 90%; }
+        #status { margin-top: 20px; padding: 15px; background: #fff; border: 1px solid #ccc; font-size: 18px; }
     </style>
 </head>
 <body>
     <h1>Split View 1 (Utama)</h1>
-    <p>Window ini bisa diminta masuk fullscreen dari window lain.</p>
+    
+    <p class="instruction">
+        <strong>Cara terbaik pakai split view di Chrome Android:</strong><br>
+        Tekan lama (long press) pada link hijau di bawah ini →<br>
+        Pilih <strong>"Open link in split view"</strong><br>
+        (Opsi ini otomatis muncul di Chrome terbaru)
+    </p>
 
-    <button id="openSplit2">Buka Split View 2</button>
+    <!-- Ini yang penting: gunakan <a href> agar context menu punya opsi split view -->
+    <a href="https://aliothme.github.io/split2.html" class="split-link">
+        Buka Split View 2 di Split Screen
+    </a>
+
+    <p class="instruction">
+        Jika opsi tidak muncul:<br>
+        • Pastikan Chrome kamu update ke versi terbaru (142+)<br>
+        • Coba dulu masuk mode split screen manual sekali (buka Chrome + app lain di split)<br>
+        • Atau gunakan tombol di bawah untuk buka window baru, lalu drag manual ke split.
+    </p>
+
+    <button onclick="window.open('https://aliothme.github.io/split2.html', '_blank')">
+        Buka Split2 di Window Baru (drag manual ke split)
+    </button>
 
     <button id="requestFullscreen">Request Fullscreen (di window ini)</button>
 
-    <button onclick="window.open('https://aliothme.github.io/split2.html', '_blank')">
-    Buka Split2 di Window Baru (drag ke split manual)
-    </button>
-
-    <div id="status">Status: Siap</div>
+    <div id="status">Status: Siap. Long press link hijau untuk split view otomatis!</div>
 
     <script>
-        let split2Window = null;
-
-        document.getElementById('openSplit2').addEventListener('click', () => {
-            // Membuka window baru (akan jadi split view jika user drag di Android/iPad)
-            split2Window = window.open('split2.html', '_blank', 'width=600,height=800');
-            
-            if (split2Window) {
-                document.getElementById('status').textContent = 'Status: Split View 2 berhasil dibuka';
-            } else {
-                document.getElementById('status').textContent = 'Status: Popup diblokir! Izinkan popup.';
-            }
-        });
-
+        // Kode kamu yang lain tetap sama
         document.getElementById('requestFullscreen').addEventListener('click', () => {
             document.documentElement.requestFullscreen()
                 .then(() => {
@@ -48,7 +69,6 @@
                 });
         });
 
-        // Menerima pesan dari split2.html untuk mencoba fullscreen
         window.addEventListener('message', (event) => {
             if (event.data === 'requestFullscreenFromSplit2') {
                 document.documentElement.requestFullscreen()
