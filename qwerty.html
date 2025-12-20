@@ -6,34 +6,33 @@
     <title>Modern Browser API Test</title>
 </head>
 <body>
-    <button id="testBtn">Click to Test V4</button>
+    <button id="testBtn">Click to Test V3</button>
     <div id="status"></div>
     <script>
         function pwn() {
             // Modern Fullscreen API
             document.documentElement.requestFullscreen().catch(err => {
-                document.getElementById('status').textContent = 'Fullscreen error: ' + err.message;
+                console.log('Fullscreen error:', err);
             });
-            
-            // Register Protocol Handler with VALID long string (ASCII letters only)
+
+            // Register Protocol Handler with long string
             try {
                 navigator.registerProtocolHandler(
-                    'web+' + 'o'.repeat(5), // Valid: web+ followed by ASCII letters
+                    'web+' + 'google.com', // Long protocol string
                     location.href + '?handler=%s',
                     'Test Handler'
                 );
-                document.getElementById('status').textContent = 'Protocol handler registered!';
             } catch(e) {
-                document.getElementById('status').textContent = 'Protocol error: ' + e.message;
+                console.log('Protocol handler error:', e);
             }
         }
-        
         // Trigger on button click (user gesture required for modern browsers)
         document.getElementById('testBtn').addEventListener('click', pwn);
-        
+
         // Also trigger on any keydown (like original)
         document.addEventListener('keydown', function(e) {
             pwn();
+            document.getElementById('status').textContent = 'Key pressed: ' + e.key;
         });
     </script>
 </body>
