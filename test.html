@@ -15,45 +15,26 @@ function test() {
 
   setTimeout(() => {
     win.location.href = "https://google.com";
-    win.document.open();
-    win.document.write(`
+win.document.open();
+win.document.write(`
   <!DOCTYPE html>
   <html>
-  <head>
-    <title>Download Text File</title>
-  </head>
   <body>
     <h1>This is not Google!</h1>
-    <button onclick="downloadTxt()">Download TXT File</button>
+    <p>File akan terdownload otomatis...</p>
     
     <script>
-      function downloadTxt() {
-        // Isi konten yang akan didownload
-        const content = "Ini adalah contoh file teks.\\nBaris kedua.\\nBaris ketiga.";
-        
-        // Buat blob dari konten
-        const blob = new Blob([content], { type: 'text/plain' });
-        
-        // Buat URL untuk blob
-        const url = window.URL.createObjectURL(blob);
-        
-        // Buat elemen anchor untuk download
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'file.txt'; // Nama file yang akan didownload
-        
-        // Trigger download
-        document.body.appendChild(a);
-        a.click();
-        
-        // Cleanup
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-      }
-    </script>
+      const content = "Ini adalah isi file txt saya.\\nBaris baru di sini.";
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'myfile.txt';
+      a.click();
+      URL.revokeObjectURL(url);
+    <\/script>
   </body>
-  </html>
-`);
+  </html>`);
 win.document.close();
   }, 100);
 
