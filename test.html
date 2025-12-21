@@ -2,48 +2,52 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Open about:blank Popup</title>
+  <title>Open about:blank Popup with Fetched Content</title>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; }
   </style>
 </head>
 <body>
-  <button onclick="openPopup()">Open Popup v1</button>
+  <button onclick="openPopup()">Open Popup 2 </button>
 
   <script>
-    function openPopup() {
+    async function openPopup() {
+      const url = 'https://permission.site'; // Ganti jika butuh path spesifik, e.g., '/notification'
+
       const win = window.open(
-        "about:blank",
-        "popup",
-        "width=800,height=600,left=200,top=100,resizable=yes,scrollbars=yes"
+        'about:blank',
+        'popup',
+        'width=800,height=600,left=200,top=100,resizable=yes,scrollbars=yes'
       );
 
       if (!win) {
-        alert("Popup diblokir oleh browser. Izinkan popup untuk situs ini.");
+        alert('Popup diblokir oleh browser. Izinkan popup untuk situs ini.');
         return;
       }
 
-      win.document.open();
-      win.document.write(`
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Popup Content</title>
-  <style>
-    body, html { margin:0; padding:0; height:100%; overflow:hidden; }
-    iframe { border:none; width:100%; height:100%; }
-  </style>
-</head>
-<body>
-  <iframe 
-    src="https://permission.site"
-    sandbox="allow-scripts allow-forms allow-modals allow-popups allow-same-origin allow-top-navigation-by-user-activation">
-  </iframe>
-</body>
-</html>
-      `);
-      win.document.close();
+      try {
+        // Fetch HTML dari situs eksternal
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error('Fetch gagal: ' + response.status);
+        }
+        const html = await response.text();
+
+        // Tulis HTML ke document popup
+        win.document.open();
+        win.document.write(html);
+        win.document.close();
+
+        // Optional: Tambah style agar fullscreen jika perlu
+        win.document.body.style.margin = '0';
+        win.document.body.style.padding = '0';
+        win.document.body.style.overflow = 'hidden';
+      } catch (error) {
+        console.error('Error fetching content:', error);
+        win.document.open();
+        win.document.write('<h1>Error loading content: ' + error.message + '</h1>');
+        win.document.close();
+      }
     }
   </script>
 </body>
