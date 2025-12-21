@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Test v7</title>
+<title>Test v8</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
 
-<h1>Test v7</h1>
+<h1>Test v8</h1>
 <button onclick="test()">Test</button>
 <script>
 function test() {
@@ -20,9 +20,12 @@ function test() {
   }, 100);
 
   setTimeout(() => {
-    // ini hanya menghentikan loading, BUKAN takeover
-    win.stop();
-  }, 200);
+    try {
+      console.log("Origin:", win.location.origin);
+    } catch (e) {
+      console.log("Access blocked – origin already changed");
+    }
+  }, 150);
 }
 </script>
 
