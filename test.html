@@ -2,36 +2,27 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Test v6</title>
+<title>Test v7</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
 
-<h1>Test v5</h1>
-<button onclick="spoof()">Open</button>
-
+<h1>Test v7</h1>
+<button onclick="test()">Test</button>
 <script>
-function spoof() {
+function test() {
+  const win = window.open("", "_blank");
 
-  // 1️⃣ Popup dibuka langsung dari user gesture
-  const win = window.open("https://google.com", "_blank");
+  win.document.write("<h1>Preparing...</h1>");
 
-  if (!win) {
-    alert("Popup blocked");
-    return;
-  }
+  setTimeout(() => {
+    win.location.href = "https://google.com";
+  }, 100);
 
-  // 2️⃣ Konten ditulis ke SAME-ORIGIN window
-  win.document.open();
-  win.document.write(`
-<h1>This is not Google!</h1>
-<button onclick="
-  let username = prompt('Enter your username');
-  let password = prompt('Enter your password');
-  alert('Your creds:\\nUsername: ' + username + '\\nPassword: ' + password);
-">Click me</button>
-  `);
-  win.document.close();
+  setTimeout(() => {
+    // ini hanya menghentikan loading, BUKAN takeover
+    win.stop();
+  }, 200);
 }
 </script>
 
