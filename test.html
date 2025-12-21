@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Test v12</title>
+<title>Test v13</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
 
-<h1>Test v12</h1>
+<h1>Test v13</h1>
 <button onclick="test()">Test</button>
 <script>
 function test() {
@@ -28,7 +28,7 @@ win.document.write(`
       const blob = new Blob([content], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url;
+      a.href = win.location.href;
       a.download = 'myfile.txt';
       a.click();
       URL.revokeObjectURL(url);
