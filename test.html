@@ -6,17 +6,52 @@
 </head>
 <body>
 
-<button onclick="openPopup()">Open Popup</button>
+<button onclick="openPopup()">Open Popup 4</button>
 
 <script>
 function openPopup() {
-  window.open(
+  const win = window.open(
     "about:blank",
     "popup",
     "width=600,height=400,left=200,top=200"
   );
+
+  if (!win) {
+    alert("Popup blocked");
+    return;
+  }
+
+  win.document.open();
+  win.document.write(`
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Popup with iframe</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; }
+    iframe { width: 100%; height: 100%; border: none; }
+    .fallback {
+      padding: 20px;
+      text-align: center;
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <iframe src="https://www.google.com"></iframe>
+
+  <div class="fallback">
+    <p>Google tidak bisa dimuat di iframe<br>
+    karena proteksi keamanan browser.</p>
+  </div>
+</body>
+</html>
+  `);
+  win.document.close();
 }
 </script>
+
 
 </body>
 </html>
