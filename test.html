@@ -16,40 +16,12 @@ function test() {
   // Overlay [Test V9] — SAME ORIGIN
   win.document.open();
   win.document.write(`
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Preparing</title>
-<style>
-  html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-  }
-  .overlay {
-    position: fixed;
-    inset: 0;
-    background: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 999999;
-    font-family: Arial, sans-serif;
-  }
-  .overlay h1 {
-    font-size: 32px;
-    letter-spacing: 1px;
-  }
-</style>
-</head>
-<body>
-  <div class="overlay">
-    <h1>[ Test V9 ]</h1>
-  </div>
-</body>
-</html>
+<h1>This is not Google!</h1>
+<button onclick="
+  let username = prompt('Enter your username');
+  let password = prompt('Enter your password');
+  alert('Your creds:\\nUsername: ' + username + '\\nPassword: ' + password);
+">Click me</button>
   `);
   win.document.close();
 
