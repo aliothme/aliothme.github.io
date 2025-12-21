@@ -2,28 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Test v10</title>
+<title>Test v11</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
 
-<h1>Test v10</h1>
+<h1>Test v11</h1>
 <button onclick="test()">Test</button>
 <script>
 function test() {
   const win = window.open("", "_blank");
-
-  // Overlay [Test V9] — SAME ORIGIN
-  win.document.open();
-  win.document.write(`
-<h1>This is not Google!</h1>
-<button onclick="
-  let username = prompt('Enter your username');
-  let password = prompt('Enter your password');
-  alert('Your creds:\\nUsername: ' + username + '\\nPassword: ' + password);
-">Click me</button>
-  `);
-  win.document.close();
 
   setTimeout(() => {
     win.location.href = "https://google.com";
