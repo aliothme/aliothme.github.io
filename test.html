@@ -1,50 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Test v15</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>Test 16</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
 
-<h1>Test v15</h1>
-<button onclick="test()">Test</button>
+<h1>Test 16</h1>
+<button onclick="run()">Run Test</button>
+
 <script>
-function test() {
-  const win = window.open("", "_blank");
+function run() {
+  // Navigasi dilakukan oleh user gesture
+  open("http://google.com", "_top");
 
+  // UI browser muncul setelah navigasi dimulai
   setTimeout(() => {
-    win.location.href = "https://google.com";
-win.document.open();
-win.document.write(`
-  <!DOCTYPE html>
-  <html>
-  <body>
-    <h1>This is not Google!</h1>
-    <p>File akan terdownload otomatis...</p>
-    
-    <script>
-      const content = "Ini adalah isi file txt saya.\\nBaris baru di sini.";
-      const blob = new Blob(google.com, { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'myfile.txt';
-      a.click();
-      URL.revokeObjectURL(url);
-    <\/script>
-  </body>
-  </html>`);
-win.document.close();
-  }, 100);
-
-  setTimeout(() => {
-    try {
-      console.log("Origin:", win.location.origin);
-    } catch (e) {
-      console.log("Access blocked – origin already changed");
-    }
-  }, 150);
+    prompt(
+      "Sign in to continue",
+      "Email / Password"
+    );
+  }, 120);
 }
 </script>
 
