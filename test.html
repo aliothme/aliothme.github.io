@@ -6,11 +6,15 @@
 </head>
 <body>
 
-<button onclick="openBlank()">Open about:blank</button>
+<button onclick="openPopup()">Open Popup</button>
 
 <script>
-function openBlank() {
-  window.open("about:blank", "_blank");
+function openPopup() {
+  window.open(
+    "about:blank",
+    "popup",
+    "width=600,height=400,left=200,top=200"
+  );
 }
 </script>
 
