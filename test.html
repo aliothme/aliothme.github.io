@@ -1,64 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Test 18</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>about:blank → google.com</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
 
-<h1>Test 18</h1>
-<button onclick="run()">Run Test</button>
+<button onclick="openGoogle()">Open Google</button>
 
 <script>
-function run() {
+function openGoogle() {
+  // 1. Buka window baru (awal: about:blank)
   const win = window.open("", "_blank");
+
   if (!win) {
     alert("Popup blocked");
     return;
   }
 
-  // Phase 1: about:blank (same-origin)
-  win.document.open();
-  win.document.write(`
-<!DOCTYPE html>
-<html>
-<body style="font-family:Arial; background:#fff;">
-  <h1 id="status">This is not Google.</h1>
-  <p>Phase: about:blank</p>
-</body>
-</html>
-  `);
-  win.document.close();
-
-  // Phase 2: start navigation
-  setTimeout(() => {
-    console.log("[*] Setting location to google.com");
-    win.location.href = "https://google.com";
-  }, 20);
-
-  // Phase 3: attempt intercept during navigation
-  setTimeout(() => {
-    try {
-      console.log("[*] Attempting DOM modification during navigation");
-      win.document.body.innerHTML = `
-        <h1 style="color:red">This is not Google.</h1>
-        <p>Attempted overwrite during navigation</p>
-      `;
-      console.log("[+] DOM modification succeeded");
-    } catch (e) {
-      console.log("[-] DOM access blocked:", e.toString());
-    }
-  }, 50);
-
-  // Phase 4: inspect origin access
-  setTimeout(() => {
-    try {
-      console.log("[*] Origin:", win.location.origin);
-    } catch (e) {
-      console.log("[-] Origin access blocked");
-    }
-  }, 80);
+  // 2. Navigasi ke google.com
+  win.location.href = "https://www.google.com";
 }
 </script>
 
