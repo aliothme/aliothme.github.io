@@ -2,25 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>about:blank → google.com</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Open about:blank</title>
 </head>
 <body>
 
-<button onclick="openGoogle()">Open Google</button>
+<button onclick="openBlank()">Open about:blank</button>
 
 <script>
-function openGoogle() {
-  // 1. Buka window baru (awal: about:blank)
-  const win = window.open("", "_blank");
-
-  if (!win) {
-    alert("Popup blocked");
-    return;
-  }
-
-  // 2. Navigasi ke google.com
-  win.location.href = "https://www.google.com";
+function openBlank() {
+  window.open("about:blank", "_blank");
 }
 </script>
 
