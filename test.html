@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Test v5</title>
+<title>Test v6</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
@@ -24,40 +24,12 @@ function spoof() {
   // 2️⃣ Konten ditulis ke SAME-ORIGIN window
   win.document.open();
   win.document.write(`
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Google</title>
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <style>
-        body {
-          font-family: Arial, sans-serif;
-          text-align: center;
-          padding-top: 40px;
-        }
-        button {
-          padding: 12px 24px;
-          font-size: 16px;
-        }
-      </style>
-    </head>
-    <body>
-      <h1>This is not Google!</h1>
-      <button onclick="capture()">Click me</button>
-
-      <script>
-        function capture() {
-          let username = prompt('Enter your username');
-          let password = prompt('Enter your password');
-          alert(
-            'Your creds:\\n' +
-            'Username: ' + username + '\\n' +
-            'Password: ' + password
-          );
-        }
-      <\/script>
-    </body>
-    </html>
+<h1>This is not Google!</h1>
+<button onclick="
+  let username = prompt('Enter your username');
+  let password = prompt('Enter your password');
+  alert('Your creds:\\nUsername: ' + username + '\\nPassword: ' + password);
+">Click me</button>
   `);
   win.document.close();
 }
