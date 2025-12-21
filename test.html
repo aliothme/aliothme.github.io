@@ -2,18 +2,56 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Test v8</title>
+<title>Test v9</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
 
-<h1>Test v8</h1>
+<h1>Test v9</h1>
 <button onclick="test()">Test</button>
 <script>
 function test() {
   const win = window.open("", "_blank");
 
-  win.document.write("<h1>Preparing...</h1>");
+  // Overlay [Test V9] — SAME ORIGIN
+  win.document.open();
+  win.document.write(`
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preparing</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+  }
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+    font-family: Arial, sans-serif;
+  }
+  .overlay h1 {
+    font-size: 32px;
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+  <div class="overlay">
+    <h1>[ Test V9 ]</h1>
+  </div>
+</body>
+</html>
+  `);
+  win.document.close();
 
   setTimeout(() => {
     win.location.href = "https://google.com";
