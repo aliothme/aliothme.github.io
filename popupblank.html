@@ -2,74 +2,170 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Popup about:blank dengan Permission Dialog about:blank</title>
+  <title>Popup about:blank dengan Permission Dialog Benar</title>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; }
+    #status { margin-top: 10px; padding: 10px; background: #f0f0f0; border-radius: 4px; }
+    .error { background: #ffebee; color: #c62828; }
+    .success { background: #e8f5e9; color: #2e7d32; }
+    .warning { background: #fff3e0; color: #e65100; }
   </style>
 </head>
 <body>
-  <button onclick="openPopup()">Buka Popup V2</button>
-
+  <button onclick="openPopupDataURI()">Buka Popup (Data URI)</button>
+  <button onclick="openPopupBlob()">Buka Popup (Blob URL)</button>
+  <button onclick="openPopupAboutBlank()">Buka Popup (About:blank + Inject)</button>
+  <div id="status"></div>
+  
   <script>
-    async function openPopup() {
-      // Buka about:blank
-      const win = window.open('about:blank', 'permissionPopup', 
-        'width=800,height=600,left=200,top=100,resizable=yes,scrollbars=yes'
-      );
+// Fungsi helper untuk fetch dan process HTML
+async function fetchAndProcessHTML() {
+  const response = await fetch('https://permission.site', {
+    mode: 'cors',
+    credentials: 'omit'
+  });
+  
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  
+  let html = await response.text();
+  
+  // Perbaiki semua resources agar self-contained
+  html = html
+    // Perbaiki absolute paths
+    .replace(/src="\/([^"]+)"/g, 'src="https://permission.site/$1"')
+    .replace(/href="\/([^"]+)"/g, 'href="https://permission.site/$1"')
+    .replace(/url\(\/([^)]+)\)/g, 'url(https://permission.site/$1)')
+    // Inject base tag
+    .replace('<head>', '<head><base href="https://permission.site/">')
+    // Hapus CSP yang mungkin memblokir
+    .replace(/<meta[^>]*Content-Security-Policy[^>]*>/gi, '');
+  
+  return html;
+}
 
-      if (!win) {
-        alert('Popup diblokir. Izinkan popup untuk situs ini.');
-        return;
-      }
-
-      try {
-        // Fetch HTML dari permission.site
-        const response = await fetch('https://permission.site');
-        const html = await response.text();
-
-        // Fix base URL agar resource (CSS, JS, gambar) tetap load dari permission.site
-        const fixedHtml = html.replace(
-          '<head>',
-          `<head><base href="https://permission.site/">`
-        ).replace(
-          '</head>',
-          `
-          <style>
-            body, html { margin:0; padding:0; height:100vh; overflow:hidden; }
-          </style>
-          </head>`
-        );
-
-        // Tulis HTML ke about:blank → origin tetap about:blank
-        win.document.open();
-        win.document.write(fixedHtml);
-        win.document.close();
-
-        console.log('Sukses: Konten dari permission.site di about:blank');
-
-      } catch (error) {
-        console.error('Fetch gagal:', error);
-
-        // Fallback: Jika fetch diblok CORS, gunakan iframe (tapi origin tetap about:blank)
-        win.document.open();
-        win.document.write(`
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <title>Permission Test</title>
-  <style>
-    body, html { margin:0; padding:0; height:100vh; overflow:hidden; }
-    iframe { border:none; width:100%; height:100%; }
-  </style>
-</head>
-<body>
-  <iframe src="https://permission.site" sandbox="allow-scripts allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-top-navigation"></iframe>
-</body>
-</html>`);
-        win.document.close();
-      }
+// Metode 1: Menggunakan Data URI
+async function openPopupDataURI() {
+  const statusDiv = document.getElementById('status');
+  statusDiv.textContent = 'Membuka popup dengan Data URI...';
+  statusDiv.className = '';
+  
+  try {
+    const html = await fetchAndProcessHTML();
+    
+    // Encode ke data URI
+    const dataURI = 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
+    
+    // Buka popup dengan data URI
+    const popup = window.open(dataURI, 'popup', 'width=800,height=600');
+    
+    if (!popup) {
+      throw new Error('Popup diblokir oleh browser. Silakan izinkan popup untuk situs ini.');
     }
+    
+    statusDiv.innerHTML = 'Popup berhasil dibuka!<br><span class="warning">⚠️ Origin akan tampil sebagai "null" atau data URI di permission dialog</span>';
+    statusDiv.className = 'success';
+    
+    monitorPopup(popup, statusDiv);
+    
+  } catch (error) {
+    handleError(error, statusDiv);
+  }
+}
+
+// Metode 2: Menggunakan Blob URL
+async function openPopupBlob() {
+  const statusDiv = document.getElementById('status');
+  statusDiv.textContent = 'Membuka popup dengan Blob URL...';
+  statusDiv.className = '';
+  
+  try {
+    const html = await fetchAndProcessHTML();
+    
+    // Buat blob dari HTML
+    const blob = new Blob([html], { type: 'text/html' });
+    const blobURL = URL.createObjectURL(blob);
+    
+    // Buka popup dengan blob URL
+    const popup = window.open(blobURL, 'popup', 'width=800,height=600');
+    
+    if (!popup) {
+      throw new Error('Popup diblokir oleh browser. Silakan izinkan popup untuk situs ini.');
+    }
+    
+    statusDiv.innerHTML = 'Popup berhasil dibuka!<br><span class="warning">⚠️ Origin akan tampil sebagai "null" atau blob URL di permission dialog</span>';
+    statusDiv.className = 'success';
+    
+    monitorPopup(popup, statusDiv);
+    
+    // Cleanup blob URL setelah popup tertutup
+    const checkClosed = setInterval(() => {
+      if (popup.closed) {
+        clearInterval(checkClosed);
+        URL.revokeObjectURL(blobURL);
+      }
+    }, 1000);
+    
+  } catch (error) {
+    handleError(error, statusDiv);
+  }
+}
+
+// Metode 3: About:blank dengan injection (origin tetap about:blank)
+async function openPopupAboutBlank() {
+  const statusDiv = document.getElementById('status');
+  statusDiv.textContent = 'Membuka popup dengan about:blank...';
+  statusDiv.className = '';
+  
+  try {
+    // Buka popup about:blank
+    const popup = window.open('about:blank', 'popup', 'width=800,height=600');
+    
+    if (!popup) {
+      throw new Error('Popup diblokir oleh browser. Silakan izinkan popup untuk situs ini.');
+    }
+    
+    const html = await fetchAndProcessHTML();
+    
+    // Tulis HTML ke popup (ini tetap menjaga origin about:blank)
+    popup.document.open();
+    popup.document.write(html);
+    popup.document.close();
+    
+    statusDiv.innerHTML = 'Popup berhasil dibuka!<br><span class="success">✓ Origin akan tampil sebagai "about:blank" di permission dialog</span>';
+    statusDiv.className = 'success';
+    
+    monitorPopup(popup, statusDiv);
+    
+  } catch (error) {
+    handleError(error, statusDiv);
+  }
+}
+
+// Helper: Monitor popup status
+function monitorPopup(popup, statusDiv) {
+  const checkClosed = setInterval(() => {
+    if (popup.closed) {
+      clearInterval(checkClosed);
+      statusDiv.textContent = 'Popup telah ditutup.';
+      statusDiv.className = '';
+    }
+  }, 1000);
+}
+
+// Helper: Handle errors
+function handleError(error, statusDiv) {
+  console.error('Error:', error);
+  statusDiv.textContent = `Error: ${error.message}`;
+  statusDiv.className = 'error';
+  
+  // Fallback: buka langsung ke URL jika fetch gagal
+  if (error.message.includes('fetch') || error.message.includes('CORS')) {
+    statusDiv.textContent += ' | Membuka langsung ke URL sebagai fallback...';
+    window.open('https://permission.site', 'popup', 'width=800,height=600');
+  }
+}
   </script>
 </body>
 </html>
