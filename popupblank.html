@@ -1,81 +1,72 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Open about:blank Popup with Fetched Content </title>
+  <title>Popup about:blank dengan Permission Dialog Benar</title>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; }
   </style>
 </head>
 <body>
-  <button onclick="openPopup()">Open Popup</button>
+  <button onclick="openPopup()">Buka Popup</button>
+
   <script>
     async function openPopup() {
-      const url = 'https://permission.site';
-      const win = window.open(
-        'https://google.com',
-        'popup',
+      // Buka about:blank dulu
+      const win = window.open('about:blank', 'permissionPopup', 
         'width=800,height=600,left=200,top=100,resizable=yes,scrollbars=yes'
       );
-      
+
       if (!win) {
-        alert('Popup diblokir oleh browser. Izinkan popup untuk situs ini.');
+        alert('Popup diblokir. Izinkan popup untuk situs ini.');
         return;
       }
 
+      // Tunggu window benar-benar siap
+      await new Promise(resolve => {
+        win.onload = resolve;
+        setTimeout(resolve, 1000); // fallback
+      });
+
+      // Inject HTML dari permission.site langsung ke about:blank
       try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('HTTP ' + response.status);
-        let html = await response.text();
-        
-        // Fix base URL untuk relative paths
-        html = html.replace('<head>', `<head><base href="${url}">`);
-        
-        // Tambah style fullscreen
-        html = html.replace('</head>', '<style>body, html { margin:0; padding:0; height:100%; overflow:hidden; }</style></head>');
-        
-        win.document.open();
-        win.document.write(html);
-        win.document.close();
-        
-        console.log('✅ Berhasil fetch & inject HTML langsung');
-      } catch (error) {
-        console.warn('⚠️ Fetch gagal (CORS atau network):', error.message);
-        
-        // Fallback ke iframe
-        win.document.open();
-        win.document.write(`
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Popup - ${url}</title>
-  <style>
-    body, html { 
-      margin: 0; 
-      padding: 0; 
-      height: 100%; 
-      overflow: hidden; 
-    }
-    iframe { 
-      border: none; 
-      width: 100%; 
-      height: 100%; 
-      display: block;
-    }
-  </style>
-</head>
-<body>
-  <iframe 
-    src="${url}"
-    sandbox="allow-scripts allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-top-navigation-by-user-activation"
-    allow="geolocation; microphone; camera">
-  </iframe>
-</body>
-</html>
+        // Gunakan fetch dari about:blank sendiri (bukan dari host)
+        const html = await win.eval(`
+          (async () => {
+            try {
+              const res = await fetch('https://permission.site');
+              if (!res.ok) throw new Error('HTTP ' + res.status);
+              return await res.text();
+            } catch (e) {
+              return 'Error: ' + e.message;
+            }
+          })();
         `);
+
+        if (html.startsWith('Error')) {
+          throw new Error(html);
+        }
+
+        // Fix base URL
+        const fixedHtml = html.replace(
+          '<head>',
+          `<head><base href="https://permission.site">`
+        ).replace(
+          '</head>',
+          '<style>body,html{margin:0;padding:0;height:100vh;overflow:hidden;}</style></head>'
+        );
+
+        win.document.open();
+        win.document.write(fixedHtml);
         win.document.close();
-        console.log('✅ Fallback ke iframe berhasil');
+
+        console.log('Sukses: Fetch dari about:blank');
+      } catch (err) {
+        console.warn('Fetch gagal:', err);
+
+        // Fallback: redirect ke permission.site di dalam popup about:blank
+        win.location.href = 'https://permission.site';
+        console.log('Fallback: Redirect ke permission.site');
       }
     }
   </script>
