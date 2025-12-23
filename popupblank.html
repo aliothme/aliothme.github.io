@@ -6,16 +6,32 @@
   <style> body { font-family: Arial, sans-serif; padding: 20px; } </style>
 </head>
 <body>
-  <button onclick="openPopup()">Buka Popup</button>
+  <button onclick="openPopup()">Buka Popup v2</button>
   <script>
     async function openPopup() {
       try {
         const response = await fetch('https://permission.site');
         let html = await response.text();
-        html = html.replace('<head>', `<head><base href="https://permission.site/">`)
-                   .replace('</head>', '<style>body,html{margin:0;padding:0;height:100vh;overflow:hidden;}</style></head>');
-        const encoded = encodeURIComponent(html);
-        window.open(`data:text/html;charset=utf-8,${encoded}`, 'permissionPopup', 'width=800,height=600,left=200,top=100,resizable=yes,scrollbars=yes');
+        
+        // Perbaiki semua relative URLs menjadi absolute
+        html = html
+          .replace(/<head>/i, '<head><base href="https://permission.site/">')
+          .replace(/href="\//g, 'href="https://permission.site/')
+          .replace(/src="\//g, 'src="https://permission.site/')
+          .replace(/url\(\//g, 'url(https://permission.site/')
+          .replace(/<meta[^>]*content-security-policy[^>]*>/gi, '')
+          .replace('</head>', '<style>body,html{margin:0;padding:0;height:100vh;overflow:hidden;}</style></head>');
+        
+        // Encode HTML untuk data URL
+        const dataURL = 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
+        
+        // Buka popup dengan data URL (origin akan muncul sebagai 'null')
+        const popup = window.open(dataURL, 'permissionPopup', 'width=800,height=600,left=200,top=100,resizable=yes,scrollbars=yes');
+        
+        if (!popup) {
+          alert('Popup diblokir! Izinkan popup untuk situs ini.');
+        }
+        
       } catch (e) {
         alert('Fetch gagal: ' + e.message);
       }
