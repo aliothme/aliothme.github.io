@@ -12,7 +12,7 @@
     async function openPopup() {
       try {
         // Gunakan CORS proxy (pilih salah satu yang work)
-        const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent('https://permission.site');
+        const proxyUrl =  'https://cors-anywhere.herokuapp.com/https://permission.site/';
         // Alternatif proxy lain kalau yang atas gagal: 
         // 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://permission.site')
         // 'https://proxy.cors.sh/' + 'https://permission.site'  (butuh API key gratis kalau sering dipakai)
