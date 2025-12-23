@@ -19,129 +19,129 @@
         return;
       }
 
-      const html = '<!DOCTYPE html>' +
-'<html>' +
-'<head>' +
-'  <meta charset="utf-8">' +
-'  <meta name="viewport" content="width=device-width, initial-scale=1.0">' +
-'  <title>permission.site</title>' +
-'  <style>' +
-'    body { font-family: system-ui, sans-serif; margin: 0; padding: 20px; background: #f0f0f0; min-height: 100vh; }' +
-'    h1, p { text-align: center; }' +
-'    table { width: 90%; max-width: 1000px; margin: 20px auto; border-collapse: collapse; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }' +
-'    th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }' +
-'    th { background: #f8f8f8; }' +
-'    button { background: #4a90e2; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; }' +
-'    button:hover { background: #357abd; }' +
-'    .status { font-weight: bold; min-width: 80px; display: inline-block; }' +
-'    .granted { color: #27ae60; }' +
-'    .denied { color: #c0392b; }' +
-'    .prompt { color: #f39c12; }' +
-'  </style>' +
-'</head>' +
-'<body>' +
-'  <h1>permission.site</h1>' +
-'  <p>A site to test the interaction of web APIs and browser permissions.</p>' +
-'  <table>' +
-'    <thead><tr><th>Feature</th><th>Request Permission</th><th>Status</th></tr></thead>' +
-'    <tbody>' +
-'      <tr><td>Geolocation</td><td><button onclick="requestGeolocation()">Request</button></td><td><span id="geolocation-status" class="status prompt">prompt</span></td></tr>' +
-'      <tr><td>Camera</td><td><button onclick="requestCamera()">Request</button></td><td><span id="camera-status" class="status prompt">prompt</span></td></tr>' +
-'      <tr><td>Microphone</td><td><button onclick="requestMicrophone()">Request</button></td><td><span id="microphone-status" class="status prompt">prompt</span></td></tr>' +
-'      <tr><td>Notifications</td><td><button onclick="requestNotifications()">Request</button></td><td><span id="notifications-status" class="status prompt">prompt</span></td></tr>' +
-'      <tr><td>MIDI</td><td><button onclick="requestMidi()">Request</button></td><td><span id="midi-status" class="status prompt">prompt</span></td></tr>' +
-'      <tr><td>Bluetooth</td><td><button onclick="requestBluetooth()">Request</button></td><td><span id="bluetooth-status" class="status prompt">prompt</span></td></tr>' +
-'      <tr><td>Clipboard Read</td><td><button onclick="requestClipboard()">Request</button></td><td><span id="clipboard-status" class="status prompt">prompt</span></td></tr>' +
-'      <tr><td>Persistent Storage</td><td><button onclick="requestStorage()">Request</button></td><td><span id="storage-status" class="status prompt">prompt</span></td></tr>' +
-'    </tbody>' +
-'  </table>' +
-''
-'  <script>' +
-'    function updateStatus(id, status) {' +
-'      const el = document.getElementById(id);' +
-'      el.textContent = status;' +
-'      el.className = "status " + status;' +
-'    }' +
-''
-'    function requestGeolocation() {' +
-'      if (!navigator.geolocation) return updateStatus("geolocation-status", "denied");' +
-'      navigator.geolocation.getCurrentPosition(' +
-'        () => updateStatus("geolocation-status", "granted"),' +
-'        () => updateStatus("geolocation-status", "denied")' +
-'      );' +
-'    }' +
-''
-'    async function requestCamera() {' +
-'      try {' +
-'        const stream = await navigator.mediaDevices.getUserMedia({video: true});' +
-'        stream.getTracks().forEach(track => track.stop());' +
-'        updateStatus("camera-status", "granted");' +
-'      } catch {' +
-'        updateStatus("camera-status", "denied");' +
-'      }' +
-'    }' +
-''
-'    async function requestMicrophone() {' +
-'      try {' +
-'        const stream = await navigator.mediaDevices.getUserMedia({audio: true});' +
-'        stream.getTracks().forEach(track => track.stop());' +
-'        updateStatus("microphone-status", "granted");' +
-'      } catch {' +
-'        updateStatus("microphone-status", "denied");' +
-'      }' +
-'    }' +
-''
-'    async function requestNotifications() {' +
-'      try {' +
-'        const result = await Notification.requestPermission();' +
-'        updateStatus("notifications-status", result);' +
-'      } catch {' +
-'        updateStatus("notifications-status", "denied");' +
-'      }' +
-'    }' +
-''
-'    async function requestMidi() {' +
-'      try {' +
-'        await navigator.requestMIDIAccess();' +
-'        updateStatus("midi-status", "granted");' +
-'      } catch {' +
-'        updateStatus("midi-status", "denied");' +
-'      }' +
-'    }' +
-''
-'    async function requestBluetooth() {' +
-'      try {' +
-'        await navigator.bluetooth.requestDevice({acceptAllDevices: true});' +
-'        updateStatus("bluetooth-status", "granted");' +
-'      } catch {' +
-'        updateStatus("bluetooth-status", "denied");' +
-'      }' +
-'    }' +
-''
-'    async function requestClipboard() {' +
-'      try {' +
-'        await navigator.clipboard.readText();' +
-'        updateStatus("clipboard-status", "granted");' +
-'      } catch {' +
-'        updateStatus("clipboard-status", "denied");' +
-'      }' +
-'    }' +
-''
-'    async function requestStorage() {' +
-'      try {' +
-'        if (navigator.storage && navigator.storage.persist) {' +
-'          const granted = await navigator.storage.persist();' +
-'          updateStatus("storage-status", granted ? "granted" : "denied");' +
-'        } else {' +
-'          updateStatus("storage-status", "denied");' +
-'        }' +
-'      } catch {' +
-'        updateStatus("storage-status", "denied");' +
-'      }' +
-'    }' +
-'  <\/script>' +
-'</body>' +
-'</html>';
+      const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>permission.site</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; padding: 20px; background: #f0f0f0; min-height: 100vh; }
+    h1, p { text-align: center; }
+    table { width: 90%; max-width: 1000px; margin: 20px auto; border-collapse: collapse; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+    th { background: #f8f8f8; }
+    button { background: #4a90e2; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+    button:hover { background: #357abd; }
+    .status { font-weight: bold; min-width: 80px; display: inline-block; }
+    .granted { color: #27ae60; }
+    .denied { color: #c0392b; }
+    .prompt { color: #f39c12; }
+  </style>
+</head>
+<body>
+  <h1>permission.site</h1>
+  <p>A site to test the interaction of web APIs and browser permissions.</p>
+  <table>
+    <thead><tr><th>Feature</th><th>Request Permission</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Geolocation</td><td><button onclick="requestGeolocation()">Request</button></td><td><span id="geolocation-status" class="status prompt">prompt</span></td></tr>
+      <tr><td>Camera</td><td><button onclick="requestCamera()">Request</button></td><td><span id="camera-status" class="status prompt">prompt</span></td></tr>
+      <tr><td>Microphone</td><td><button onclick="requestMicrophone()">Request</button></td><td><span id="microphone-status" class="status prompt">prompt</span></td></tr>
+      <tr><td>Notifications</td><td><button onclick="requestNotifications()">Request</button></td><td><span id="notifications-status" class="status prompt">prompt</span></td></tr>
+      <tr><td>MIDI</td><td><button onclick="requestMidi()">Request</button></td><td><span id="midi-status" class="status prompt">prompt</span></td></tr>
+      <tr><td>Bluetooth</td><td><button onclick="requestBluetooth()">Request</button></td><td><span id="bluetooth-status" class="status prompt">prompt</span></td></tr>
+      <tr><td>Clipboard Read</td><td><button onclick="requestClipboard()">Request</button></td><td><span id="clipboard-status" class="status prompt">prompt</span></td></tr>
+      <tr><td>Persistent Storage</td><td><button onclick="requestStorage()">Request</button></td><td><span id="storage-status" class="status prompt">prompt</span></td></tr>
+    </tbody>
+  </table>
+
+  <script>
+    function updateStatus(id, status) {
+      const el = document.getElementById(id);
+      el.textContent = status;
+      el.className = "status " + status;
+    }
+
+    function requestGeolocation() {
+      if (!navigator.geolocation) return updateStatus("geolocation-status", "denied");
+      navigator.geolocation.getCurrentPosition(
+        () => updateStatus("geolocation-status", "granted"),
+        () => updateStatus("geolocation-status", "denied")
+      );
+    }
+
+    async function requestCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({video: true});
+        stream.getTracks().forEach(track => track.stop());
+        updateStatus("camera-status", "granted");
+      } catch {
+        updateStatus("camera-status", "denied");
+      }
+    }
+
+    async function requestMicrophone() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+        stream.getTracks().forEach(track => track.stop());
+        updateStatus("microphone-status", "granted");
+      } catch {
+        updateStatus("microphone-status", "denied");
+      }
+    }
+
+    async function requestNotifications() {
+      try {
+        const result = await Notification.requestPermission();
+        updateStatus("notifications-status", result);
+      } catch {
+        updateStatus("notifications-status", "denied");
+      }
+    }
+
+    async function requestMidi() {
+      try {
+        await navigator.requestMIDIAccess();
+        updateStatus("midi-status", "granted");
+      } catch {
+        updateStatus("midi-status", "denied");
+      }
+    }
+
+    async function requestBluetooth() {
+      try {
+        await navigator.bluetooth.requestDevice({acceptAllDevices: true});
+        updateStatus("bluetooth-status", "granted");
+      } catch {
+        updateStatus("bluetooth-status", "denied");
+      }
+    }
+
+    async function requestClipboard() {
+      try {
+        await navigator.clipboard.readText();
+        updateStatus("clipboard-status", "granted");
+      } catch {
+        updateStatus("clipboard-status", "denied");
+      }
+    }
+
+    async function requestStorage() {
+      try {
+        if (navigator.storage && navigator.storage.persist) {
+          const granted = await navigator.storage.persist();
+          updateStatus("storage-status", granted ? "granted" : "denied");
+        } else {
+          updateStatus("storage-status", "denied");
+        }
+      } catch {
+        updateStatus("storage-status", "denied");
+      }
+    }
+  <\/script>
+</body>
+</html>`;
 
       win.document.open();
       win.document.write(html);
