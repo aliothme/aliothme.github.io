@@ -2,38 +2,42 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Popup Data URL dengan Permission about:blank</title>
+  <title>Popup Data URL dengan Konten permission.site</title>
   <style> body { font-family: Arial, sans-serif; padding: 20px; } </style>
 </head>
 <body>
-  <button onclick="openPopup()">Buka Popup v2</button>
+  <button onclick="openPopup()">Buka Popup</button>
+
   <script>
     async function openPopup() {
       try {
-        const response = await fetch('https://permission.site');
+        // Gunakan CORS proxy (pilih salah satu yang work)
+        const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent('https://permission.site');
+        // Alternatif proxy lain kalau yang atas gagal: 
+        // 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://permission.site')
+        // 'https://proxy.cors.sh/' + 'https://permission.site'  (butuh API key gratis kalau sering dipakai)
+
+        const response = await fetch(proxyUrl);
+        if (!response.ok) throw new Error('Proxy gagal: ' + response.status);
+        
         let html = await response.text();
-        
-        // Perbaiki semua relative URLs menjadi absolute
-        html = html
-          .replace(/<head>/i, '<head><base href="https://permission.site/">')
-          .replace(/href="\//g, 'href="https://permission.site/')
-          .replace(/src="\//g, 'src="https://permission.site/')
-          .replace(/url\(\//g, 'url(https://permission.site/')
-          .replace(/<meta[^>]*content-security-policy[^>]*>/gi, '')
-          .replace('</head>', '<style>body,html{margin:0;padding:0;height:100vh;overflow:hidden;}</style></head>');
-        
-        // Encode HTML untuk data URL
-        const dataURL = 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
-        
-        // Buka popup dengan data URL (origin akan muncul sebagai 'null')
-        const popup = window.open(dataURL, 'permissionPopup', 'width=800,height=600,left=200,top=100,resizable=yes,scrollbars=yes');
-        
-        if (!popup) {
-          alert('Popup diblokir! Izinkan popup untuk situs ini.');
-        }
-        
+
+        // Fix base href agar resource (JS, CSS, gambar) load dari permission.site
+        html = html.replace('<head>', `<head><base href="https://permission.site/">`);
+
+        // Fullscreen style
+        html = html.replace('</head>', '<style>body,html{margin:0;padding:0;height:100vh;overflow:hidden;}</style></head>');
+
+        // Encode ke data URL (gunakan btoa untuk HTML besar agar lebih aman dari limit encodeURIComponent)
+        const encoded = btoa(unescape(encodeURIComponent(html)));  // Lebih baik untuk karakter spesial
+        const dataUrl = `data:text/html;base64,${encoded}`;
+
+        window.open(dataUrl, 'permissionPopup', 'width=800,height=600,left=200,top=100,resizable=yes,scrollbars=yes');
+
+        console.log('Sukses: Popup dengan konten permission.site');
       } catch (e) {
-        alert('Fetch gagal: ' + e.message);
+        alert('Error: ' + e.message + '\nCoba proxy lain atau cek console.');
+        console.error(e);
       }
     }
   </script>
