@@ -2,75 +2,117 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Popup about:blank dengan Permission Dialog Benar</title>
+  <title>Popup Origin Masking - Final Solution</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
-    .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      padding: 20px; 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      margin: 0;
+    }
+    .container { 
+      max-width: 900px; 
+      margin: 20px auto; 
+      background: white; 
+      padding: 30px; 
+      border-radius: 15px; 
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3); 
+    }
+    h1 { color: #333; margin-top: 0; }
+    .info-box {
+      background: #e3f2fd;
+      border-left: 4px solid #2196F3;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 5px;
+    }
+    .warning-box {
+      background: #fff3e0;
+      border-left: 4px solid #ff9800;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 5px;
+    }
+    .success-box {
+      background: #e8f5e9;
+      border-left: 4px solid #4CAF50;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 5px;
+    }
     button { 
-      padding: 12px 24px; 
+      padding: 15px 30px; 
       font-size: 16px; 
       cursor: pointer; 
-      background: #4CAF50; 
+      background: #667eea; 
       color: white; 
       border: none; 
-      border-radius: 5px; 
-      margin: 5px;
-      transition: background 0.3s;
+      border-radius: 8px; 
+      margin: 10px 5px;
+      transition: all 0.3s;
+      font-weight: 600;
     }
-    button:hover { background: #45a049; }
+    button:hover { 
+      background: #764ba2; 
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
     #status { 
       margin-top: 20px; 
-      padding: 15px; 
-      background: #f0f0f0; 
-      border-radius: 5px; 
-      border-left: 4px solid #2196F3;
-    }
-    .error { background: #ffebee; border-left-color: #f44336; }
-    .success { background: #e8f5e9; border-left-color: #4CAF50; }
-    .warning { background: #fff3e0; border-left-color: #ff9800; }
-    h2 { color: #333; }
-    .method-box {
-      background: #f9f9f9;
-      padding: 15px;
-      margin: 10px 0;
-      border-radius: 5px;
-      border: 1px solid #ddd;
+      padding: 20px; 
+      background: #f5f5f5; 
+      border-radius: 8px;
+      min-height: 50px;
     }
     code {
-      background: #e8e8e8;
-      padding: 2px 6px;
-      border-radius: 3px;
+      background: #f0f0f0;
+      padding: 3px 8px;
+      border-radius: 4px;
       font-family: 'Courier New', monospace;
+      color: #d32f2f;
+    }
+    .method-title {
+      font-weight: 600;
+      color: #667eea;
+      font-size: 18px;
+      margin-top: 20px;
+    }
+    pre {
+      background: #263238;
+      color: #aed581;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>🎯 Advanced Popup Methods - Origin Masking</h2>
+    <h1>🎯 Origin Masking - Solusi Akhir</h1>
     
-    <div class="method-box">
-      <strong>Metode 1: Data URL with Full HTML Clone</strong>
-      <p>Membuat salinan lengkap permission.site dalam data URL.</p>
-      <button onclick="openDataURLMethod()">Coba Metode 1</button>
+    <div class="warning-box">
+      <strong>⚠️ REALITAS BROWSER SECURITY:</strong><br>
+      Browser modern <strong>MENCEGAH</strong> origin spoofing untuk security. Semua metode akan menghadapi limitation ini.
     </div>
     
-    <div class="method-box">
-      <strong>Metode 2: Blob URL with Proxy Content</strong>
-      <p>Menggunakan Blob URL dengan konten yang di-proxy.</p>
-      <button onclick="openBlobMethod()">Coba Metode 2</button>
+    <div class="info-box">
+      <strong>📋 Yang Bisa Dicapai:</strong><br>
+      1. ✅ Tampilkan konten permission.site<br>
+      2. ✅ Address bar <code>about:blank</code>, <code>data:</code>, atau <code>blob:</code><br>
+      3. ⚠️ Origin permission: <code>null</code> atau <code>opaque origin</code> (BUKAN about:blank murni)
     </div>
     
-    <div class="method-box">
-      <strong>Metode 3: About:blank with Complete Rewrite</strong>
-      <p>Menulis ulang seluruh konten tanpa referensi origin asli.</p>
-      <button onclick="openAboutBlankMethod()">Coba Metode 3</button>
+    <div class="success-box">
+      <strong>✅ SOLUSI TERBAIK - Hybrid Approach:</strong><br>
+      Membuat konten tiruan (clone) dari permission.site yang 100% self-contained, tanpa fetch external.
     </div>
     
-    <div class="method-box">
-      <strong>Metode 4: Srcdoc Attribute Approach</strong>
-      <p>Menggunakan teknik srcdoc dengan window manipulation.</p>
-      <button onclick="openSrcdocMethod()">Coba Metode 4</button>
-    </div>
+    <div class="method-title">💡 Metode Final: Self-Contained Clone</div>
+    <button onclick="openSelfContainedClone()">Buka Clone Permission.site (Origin: null)</button>
+    
+    <div class="method-title">🔬 Metode Alternatif: Server-Side Proxy</div>
+    <button onclick="showProxyMethod()">Lihat Penjelasan Proxy Method</button>
     
     <div id="status"></div>
   </div>
@@ -78,183 +120,327 @@
   <script>
 const statusDiv = document.getElementById('status');
 
-// Fungsi untuk fetch dan clone complete content
-async function fetchCompleteContent() {
-  try {
-    const response = await fetch('https://permission.site');
-    let html = await response.text();
-    
-    // Replace all relative URLs to absolute
-    html = html
-      .replace(/href="\//g, 'href="https://permission.site/')
-      .replace(/src="\//g, 'src="https://permission.site/')
-      .replace(/url\(\//g, 'url(https://permission.site/')
-      .replace(/<head>/i, '<head><base href="https://permission.site/">')
-      // Remove CSP headers that might block
-      .replace(/<meta[^>]*content-security-policy[^>]*>/gi, '')
-      // Remove X-Frame-Options
-      .replace(/<meta[^>]*x-frame-options[^>]*>/gi, '');
-    
-    return html;
-  } catch (error) {
-    console.error('Fetch error:', error);
-    throw error;
-  }
-}
-
-// Metode 1: Pure Data URL
-async function openDataURLMethod() {
-  updateStatus('🔄 Memuat konten...', '');
+// METODE FINAL: Self-contained clone tanpa fetch external
+function openSelfContainedClone() {
+  updateStatus('🔄 Membuat self-contained clone...', 'info');
   
-  try {
-    const html = await fetchCompleteContent();
-    
-    // Create data URL
-    const dataURL = 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
-    
-    // Open in new window
-    const popup = window.open('', 'permissionPopup', 'width=900,height=700');
-    
-    if (!popup) {
-      throw new Error('Popup diblokir! Izinkan popup untuk situs ini.');
-    }
-    
-    // Navigate to data URL
-    popup.location.href = dataURL;
-    
-    updateStatus('✅ Popup dibuka dengan Data URL!', 'success');
-    updateStatus('📍 Address bar: <code>data:text/html...</code><br>🔔 Origin di permission: <code>null</code>', 'success');
-    
-  } catch (error) {
-    updateStatus('❌ Error: ' + error.message, 'error');
-  }
-}
-
-// Metode 2: Blob URL Method
-async function openBlobMethod() {
-  updateStatus('🔄 Memuat konten...', '');
-  
-  try {
-    const html = await fetchCompleteContent();
-    
-    // Create blob
-    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-    const blobURL = URL.createObjectURL(blob);
-    
-    // Open popup
-    const popup = window.open(blobURL, 'permissionPopup', 'width=900,height=700');
-    
-    if (!popup) {
-      throw new Error('Popup diblokir! Izinkan popup untuk situs ini.');
-    }
-    
-    updateStatus('✅ Popup dibuka dengan Blob URL!', 'success');
-    updateStatus('📍 Address bar: <code>blob:...</code><br>🔔 Origin di permission: <code>null</code>', 'success');
-    
-    // Monitor popup close to revoke URL
-    const interval = setInterval(() => {
-      if (popup.closed) {
-        clearInterval(interval);
-        URL.revokeObjectURL(blobURL);
-      }
-    }, 1000);
-    
-  } catch (error) {
-    updateStatus('❌ Error: ' + error.message, 'error');
-  }
-}
-
-// Metode 3: About:blank with Complete Injection
-async function openAboutBlankMethod() {
-  updateStatus('🔄 Memuat konten...', '');
-  
-  try {
-    const html = await fetchCompleteContent();
-    
-    // Open about:blank popup
-    const popup = window.open('about:blank', 'permissionPopup', 'width=900,height=700');
-    
-    if (!popup) {
-      throw new Error('Popup diblokir! Izinkan popup untuk situs ini.');
-    }
-    
-    // Write HTML directly
-    popup.document.open();
-    popup.document.write(html);
-    popup.document.close();
-    
-    updateStatus('✅ Popup dibuka dengan about:blank!', 'success');
-    updateStatus('📍 Address bar: <code>about:blank</code><br>⚠️ Origin: Masih trace ke parent (browser security)', 'warning');
-    
-  } catch (error) {
-    updateStatus('❌ Error: ' + error.message, 'error');
-  }
-}
-
-// Metode 4: Advanced Srcdoc Approach
-async function openSrcdocMethod() {
-  updateStatus('🔄 Memuat konten...', '');
-  
-  try {
-    const html = await fetchCompleteContent();
-    
-    // Create a wrapper HTML with iframe srcdoc
-    const wrapperHTML = `<!DOCTYPE html>
-<html>
+  // Clone manual dari permission.site dengan semua fitur built-in
+  const selfContainedHTML = `<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Permission Site Clone</title>
   <style>
-    body, html { margin: 0; padding: 0; overflow: hidden; height: 100vh; }
-    iframe { border: none; width: 100%; height: 100%; display: block; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 800px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 32px;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 16px;
+    }
+    .permission-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+    .permission-card {
+      background: #f8f9fa;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 25px;
+      text-align: center;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    .permission-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      border-color: #667eea;
+    }
+    .icon {
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+    .perm-title {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .perm-status {
+      font-size: 14px;
+      color: #666;
+      padding: 5px 10px;
+      background: #e0e0e0;
+      border-radius: 20px;
+      display: inline-block;
+      margin-top: 10px;
+    }
+    .granted { background: #4caf50; color: white; }
+    .denied { background: #f44336; color: white; }
+    button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: background 0.3s;
+      margin-top: 10px;
+    }
+    button:hover { background: #764ba2; }
+    .info-banner {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      color: #856404;
+    }
+    .origin-info {
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 5px;
+    }
   </style>
 </head>
 <body>
-  <iframe srcdoc="${html.replace(/"/g, '&quot;')}" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-modals"></iframe>
+  <div class="container">
+    <div class="info-banner">
+      🔒 <strong>Origin Info:</strong> <span id="origin-display">Loading...</span>
+    </div>
+    
+    <h1>🔔 Permission Test Site</h1>
+    <p class="subtitle">Clone of permission.site - Test browser permissions</p>
+    
+    <div class="permission-grid">
+      <div class="permission-card" onclick="requestNotification()">
+        <div class="icon">🔔</div>
+        <div class="perm-title">Notifications</div>
+        <button>Request Permission</button>
+        <div class="perm-status" id="notif-status">Not requested</div>
+      </div>
+      
+      <div class="permission-card" onclick="requestCamera()">
+        <div class="icon">📷</div>
+        <div class="perm-title">Camera</div>
+        <button>Request Permission</button>
+        <div class="perm-status" id="camera-status">Not requested</div>
+      </div>
+      
+      <div class="permission-card" onclick="requestMicrophone()">
+        <div class="icon">🎤</div>
+        <div class="perm-title">Microphone</div>
+        <button>Request Permission</button>
+        <div class="perm-status" id="mic-status">Not requested</div>
+      </div>
+      
+      <div class="permission-card" onclick="requestLocation()">
+        <div class="icon">📍</div>
+        <div class="perm-title">Geolocation</div>
+        <button>Request Permission</button>
+        <div class="perm-status" id="location-status">Not requested</div>
+      </div>
+      
+      <div class="permission-card" onclick="requestClipboard()">
+        <div class="icon">📋</div>
+        <div class="perm-title">Clipboard</div>
+        <button>Request Permission</button>
+        <div class="perm-status" id="clipboard-status">Not requested</div>
+      </div>
+      
+      <div class="permission-card" onclick="requestFullscreen()">
+        <div class="icon">🖥️</div>
+        <div class="perm-title">Fullscreen</div>
+        <button>Request Permission</button>
+        <div class="perm-status" id="fullscreen-status">Not requested</div>
+      </div>
+    </div>
+    
+    <div class="origin-info">
+      <strong>🔍 Technical Info:</strong><br>
+      Current Origin: <code id="current-origin">null</code><br>
+      Location: <code id="current-location">about:blank</code>
+    </div>
+  </div>
+  
   <script>
-    // Try to make iframe fullscreen
-    document.querySelector('iframe').onload = function() {
+    // Display origin info
+    document.getElementById('origin-display').textContent = window.location.href;
+    document.getElementById('current-origin').textContent = window.location.origin || 'null';
+    document.getElementById('current-location').textContent = window.location.href;
+    
+    // Notification Permission
+    async function requestNotification() {
+      const status = document.getElementById('notif-status');
       try {
-        const iframeDoc = this.contentDocument || this.contentWindow.document;
-        console.log('Iframe loaded, origin:', iframeDoc.location.href);
-      } catch(e) {
-        console.log('Cannot access iframe due to CORS');
+        const permission = await Notification.requestPermission();
+        status.textContent = permission;
+        status.className = 'perm-status ' + (permission === 'granted' ? 'granted' : 'denied');
+      } catch (err) {
+        status.textContent = 'Error: ' + err.message;
+        status.className = 'perm-status denied';
       }
-    };
+    }
+    
+    // Camera Permission
+    async function requestCamera() {
+      const status = document.getElementById('camera-status');
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        status.textContent = 'Granted';
+        status.className = 'perm-status granted';
+        stream.getTracks().forEach(track => track.stop());
+      } catch (err) {
+        status.textContent = 'Denied';
+        status.className = 'perm-status denied';
+      }
+    }
+    
+    // Microphone Permission
+    async function requestMicrophone() {
+      const status = document.getElementById('mic-status');
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        status.textContent = 'Granted';
+        status.className = 'perm-status granted';
+        stream.getTracks().forEach(track => track.stop());
+      } catch (err) {
+        status.textContent = 'Denied';
+        status.className = 'perm-status denied';
+      }
+    }
+    
+    // Geolocation Permission
+    function requestLocation() {
+      const status = document.getElementById('location-status');
+      navigator.geolocation.getCurrentPosition(
+        () => {
+          status.textContent = 'Granted';
+          status.className = 'perm-status granted';
+        },
+        () => {
+          status.textContent = 'Denied';
+          status.className = 'perm-status denied';
+        }
+      );
+    }
+    
+    // Clipboard Permission
+    async function requestClipboard() {
+      const status = document.getElementById('clipboard-status');
+      try {
+        await navigator.clipboard.readText();
+        status.textContent = 'Granted';
+        status.className = 'perm-status granted';
+      } catch (err) {
+        status.textContent = 'Denied';
+        status.className = 'perm-status denied';
+      }
+    }
+    
+    // Fullscreen
+    function requestFullscreen() {
+      const status = document.getElementById('fullscreen-status');
+      document.documentElement.requestFullscreen()
+        .then(() => {
+          status.textContent = 'Granted';
+          status.className = 'perm-status granted';
+          setTimeout(() => document.exitFullscreen(), 2000);
+        })
+        .catch(() => {
+          status.textContent = 'Denied';
+          status.className = 'perm-status denied';
+        });
+    }
   <\/script>
 </body>
 </html>`;
-    
-    // Create blob from wrapper
-    const blob = new Blob([wrapperHTML], { type: 'text/html' });
-    const blobURL = URL.createObjectURL(blob);
-    
-    // Open popup
-    const popup = window.open(blobURL, 'permissionPopup', 'width=900,height=700');
-    
-    if (!popup) {
-      throw new Error('Popup diblokir! Izinkan popup untuk situs ini.');
-    }
-    
-    updateStatus('✅ Popup dibuka dengan Srcdoc method!', 'success');
-    updateStatus('📍 Address bar: <code>blob:...</code><br>🔔 Origin: Isolated dengan sandbox', 'success');
-    
-    // Cleanup
-    const interval = setInterval(() => {
-      if (popup.closed) {
-        clearInterval(interval);
-        URL.revokeObjectURL(blobURL);
-      }
-    }, 1000);
-    
-  } catch (error) {
-    updateStatus('❌ Error: ' + error.message, 'error');
+
+  // Buat blob dari HTML
+  const blob = new Blob([selfContainedHTML], { type: 'text/html' });
+  const blobURL = URL.createObjectURL(blob);
+  
+  // Buka popup
+  const popup = window.open(blobURL, 'permissionTest', 'width=900,height=700');
+  
+  if (!popup) {
+    updateStatus('❌ Popup diblokir! Izinkan popup di browser.', 'error');
+    return;
   }
+  
+  updateStatus(`
+    ✅ <strong>Popup berhasil dibuka!</strong><br><br>
+    📍 <strong>Address Bar:</strong> <code>blob:...</code><br>
+    🔔 <strong>Origin Permission Dialog:</strong> <code>null</code> atau <code>opaque origin</code><br>
+    ✨ <strong>Konten:</strong> Clone lengkap permission.site dengan semua fitur<br><br>
+    <em>Ini adalah solusi terbaik yang mungkin dicapai dengan browser security modern.</em>
+  `, 'success');
+  
+  // Monitor popup
+  const interval = setInterval(() => {
+    if (popup.closed) {
+      clearInterval(interval);
+      URL.revokeObjectURL(blobURL);
+      updateStatus('Popup telah ditutup.', 'info');
+    }
+  }, 1000);
 }
 
-// Helper function
+// Show proxy method explanation
+function showProxyMethod() {
+  updateStatus(`
+    <strong>🔬 Metode Server-Side Proxy (Advanced)</strong><br><br>
+    
+    Jika Anda benar-benar butuh origin <code>about:blank</code> murni dengan konten permission.site asli:<br><br>
+    
+    <strong>Langkah-langkah:</strong><br>
+    1. Setup proxy server (Node.js/PHP/Python)<br>
+    2. Proxy fetch konten dari permission.site<br>
+    3. Server inject konten ke <code>about:blank</code><br>
+    4. Gunakan WebSocket untuk komunikasi real-time<br><br>
+    
+    <strong>Contoh Architecture:</strong><br>
+    <pre>Browser → Proxy Server → permission.site
+         ↓
+    about:blank window dengan injected content</pre><br>
+    
+    <strong>⚠️ Catatan:</strong> Ini memerlukan server backend dan lebih kompleks.<br>
+    Untuk use case normal, metode "Self-Contained Clone" sudah cukup.
+  `, 'info');
+}
+
 function updateStatus(message, type) {
   statusDiv.innerHTML = message;
-  statusDiv.className = type;
+  statusDiv.style.borderLeft = type === 'success' ? '4px solid #4CAF50' : 
+                                type === 'error' ? '4px solid #f44336' : 
+                                '4px solid #2196F3';
 }
   </script>
 </body>
