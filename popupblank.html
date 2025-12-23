@@ -9,16 +9,298 @@
     .error { background: #ffebee; color: #c62828; }
     .success { background: #e8f5e9; color: #2e7d32; }
     .warning { background: #fff3e0; color: #e65100; }
+    .info { background: #e3f2fd; color: #1565c0; }
   </style>
 </head>
 <body>
-  <button onclick="openPopupDataURI()">Buka Popup (Data URI)</button>
-  <button onclick="openPopupBlob()">Buka Popup (Blob URL)</button>
-  <button onclick="openPopupAboutBlank()">Buka Popup (About:blank + Inject)</button>
+  <button onclick="openSandboxedIframe()">Buka Popup dengan Sandboxed Iframe</button>
+  <button onclick="openNeutralOrigin()">Buka Popup (Neutral Origin Strategy)</button>
+  <button onclick="openPureAboutBlank()">Buka Pure About:blank (Manual Test)</button>
   <div id="status"></div>
   
   <script>
-// Fungsi helper untuk fetch dan process HTML
+// Metode 1: Sandboxed iframe yang di-pop out
+async function openSandboxedIframe() {
+  const statusDiv = document.getElementById('status');
+  statusDiv.textContent = 'Membuka popup dengan sandboxed iframe...';
+  statusDiv.className = '';
+  
+  try {
+    const html = await fetchAndProcessHTML();
+    
+    // Buat HTML wrapper dengan sandboxed iframe
+    const wrapperHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Sandboxed Content</title>
+  <style>
+    body, html { margin: 0; padding: 0; overflow: hidden; }
+    iframe { border: none; width: 100vw; height: 100vh; }
+  </style>
+</head>
+<body>
+  <iframe 
+    sandbox="allow-scripts allow-same-origin allow-popups allow-forms" 
+    srcdoc="${html.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}">
+  </iframe>
+</body>
+</html>`;
+    
+    const blob = new Blob([wrapperHTML], { type: 'text/html' });
+    const blobURL = URL.createObjectURL(blob);
+    
+    const popup = window.open(blobURL, 'popup', 'width=800,height=600');
+    
+    if (!popup) {
+      throw new Error('Popup diblokir oleh browser.');
+    }
+    
+    statusDiv.innerHTML = 'Popup berhasil dibuka dengan sandboxed iframe!<br><span class="info">ℹ️ Sandbox attribute dapat membatasi origin tracking</span>';
+    statusDiv.className = 'success';
+    
+    monitorPopup(popup, statusDiv, blobURL);
+    
+  } catch (error) {
+    handleError(error, statusDiv);
+  }
+}
+
+// Metode 2: Strategi neutral origin dengan srcdoc
+async function openNeutralOrigin() {
+  const statusDiv = document.getElementById('status');
+  statusDiv.textContent = 'Membuka popup dengan neutral origin strategy...';
+  statusDiv.className = '';
+  
+  try {
+    // Buat HTML minimal yang akan memicu permission dari about:blank context
+    const minimalHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Permission Test - about:blank</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 40px;
+      text-align: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    button {
+      padding: 15px 30px;
+      margin: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background: white;
+      color: #667eea;
+      font-weight: bold;
+      transition: transform 0.2s;
+    }
+    button:hover { transform: scale(1.05); }
+    .info {
+      background: rgba(255,255,255,0.1);
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px;
+      max-width: 600px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔔 Permission Test Page</h1>
+  <div class="info">
+    <p>Halaman ini dibuka dari <strong>about:blank</strong> origin.</p>
+    <p>Klik tombol di bawah untuk menguji permission dialog.</p>
+  </div>
+  
+  <button onclick="requestNotification()">Request Notification Permission</button>
+  <button onclick="requestCamera()">Request Camera Permission</button>
+  <button onclick="requestMicrophone()">Request Microphone Permission</button>
+  <button onclick="requestLocation()">Request Location Permission</button>
+  
+  <div id="result" style="margin-top: 20px;"></div>
+  
+  <script>
+    async function requestNotification() {
+      const result = document.getElementById('result');
+      try {
+        const permission = await Notification.requestPermission();
+        result.textContent = 'Notification permission: ' + permission;
+      } catch (err) {
+        result.textContent = 'Error: ' + err.message;
+      }
+    }
+    
+    async function requestCamera() {
+      const result = document.getElementById('result');
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        result.textContent = 'Camera permission granted!';
+        stream.getTracks().forEach(track => track.stop());
+      } catch (err) {
+        result.textContent = 'Camera error: ' + err.message;
+      }
+    }
+    
+    async function requestMicrophone() {
+      const result = document.getElementById('result');
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        result.textContent = 'Microphone permission granted!';
+        stream.getTracks().forEach(track => track.stop());
+      } catch (err) {
+        result.textContent = 'Microphone error: ' + err.message;
+      }
+    }
+    
+    async function requestLocation() {
+      const result = document.getElementById('result');
+      try {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            result.textContent = 'Location permission granted!';
+          },
+          (error) => {
+            result.textContent = 'Location error: ' + error.message;
+          }
+        );
+      } catch (err) {
+        result.textContent = 'Error: ' + err.message;
+      }
+    }
+  <\/script>
+</body>
+</html>`;
+    
+    // Buka dengan about:blank dan inject konten
+    const popup = window.open('about:blank', 'popup', 'width=800,height=600');
+    
+    if (!popup) {
+      throw new Error('Popup diblokir oleh browser.');
+    }
+    
+    popup.document.open();
+    popup.document.write(minimalHTML);
+    popup.document.close();
+    
+    statusDiv.innerHTML = 'Popup berhasil dibuka!<br><span class="success">✓ Origin seharusnya "about:blank" karena tidak ada external fetch</span>';
+    statusDiv.className = 'success';
+    
+    monitorPopup(popup, statusDiv);
+    
+  } catch (error) {
+    handleError(error, statusDiv);
+  }
+}
+
+// Metode 3: Pure about:blank untuk testing manual
+function openPureAboutBlank() {
+  const statusDiv = document.getElementById('status');
+  
+  const popup = window.open('about:blank', 'popup', 'width=800,height=600');
+  
+  if (!popup) {
+    statusDiv.textContent = 'Popup diblokir oleh browser.';
+    statusDiv.className = 'error';
+    return;
+  }
+  
+  // Inject HTML sederhana tanpa external resources
+  const simpleHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Pure about:blank Test</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 40px;
+      background: #1a1a2e;
+      color: #eee;
+    }
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      cursor: pointer;
+      background: #16213e;
+      color: #0f3460;
+      border: 2px solid #0f3460;
+      border-radius: 8px;
+      margin: 10px;
+    }
+    button:hover {
+      background: #0f3460;
+      color: #eee;
+    }
+    h1 { color: #e94560; }
+    .box {
+      background: rgba(255,255,255,0.05);
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎯 Pure about:blank Origin Test</h1>
+  <div class="box">
+    <p><strong>Origin:</strong> about:blank</p>
+    <p><strong>URL:</strong> ${popup.location.href}</p>
+    <p>Halaman ini TIDAK memuat konten external, sehingga origin tetap murni about:blank.</p>
+  </div>
+  
+  <button onclick="testNotif()">Test Notification Permission</button>
+  <button onclick="testCamera()">Test Camera Permission</button>
+  
+  <div id="output" style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 5px;"></div>
+  
+  <script>
+    const output = document.getElementById('output');
+    
+    function testNotif() {
+      output.innerHTML = '<em>Requesting notification permission...</em>';
+      Notification.requestPermission().then(result => {
+        output.innerHTML = '<strong>Result:</strong> ' + result + '<br><small>Check permission dialog origin!</small>';
+      });
+    }
+    
+    function testCamera() {
+      output.innerHTML = '<em>Requesting camera permission...</em>';
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+          output.innerHTML = '<strong>Camera granted!</strong><br><small>Check permission dialog origin!</small>';
+          stream.getTracks().forEach(t => t.stop());
+        })
+        .catch(err => {
+          output.innerHTML = '<strong>Error:</strong> ' + err.message;
+        });
+    }
+  <\/script>
+</body>
+</html>`;
+  
+  popup.document.open();
+  popup.document.write(simpleHTML);
+  popup.document.close();
+  
+  statusDiv.innerHTML = 'Pure about:blank popup dibuka!<br><span class="success">✓ Tidak ada external fetch - origin murni about:blank</span>';
+  statusDiv.className = 'success';
+  
+  monitorPopup(popup, statusDiv);
+}
+
+// Helper functions
 async function fetchAndProcessHTML() {
   const response = await fetch('https://permission.site', {
     mode: 'cors',
@@ -31,140 +313,31 @@ async function fetchAndProcessHTML() {
   
   let html = await response.text();
   
-  // Perbaiki semua resources agar self-contained
   html = html
-    // Perbaiki absolute paths
     .replace(/src="\/([^"]+)"/g, 'src="https://permission.site/$1"')
     .replace(/href="\/([^"]+)"/g, 'href="https://permission.site/$1"')
     .replace(/url\(\/([^)]+)\)/g, 'url(https://permission.site/$1)')
-    // Inject base tag
     .replace('<head>', '<head><base href="https://permission.site/">')
-    // Hapus CSP yang mungkin memblokir
     .replace(/<meta[^>]*Content-Security-Policy[^>]*>/gi, '');
   
   return html;
 }
 
-// Metode 1: Menggunakan Data URI
-async function openPopupDataURI() {
-  const statusDiv = document.getElementById('status');
-  statusDiv.textContent = 'Membuka popup dengan Data URI...';
-  statusDiv.className = '';
-  
-  try {
-    const html = await fetchAndProcessHTML();
-    
-    // Encode ke data URI
-    const dataURI = 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
-    
-    // Buka popup dengan data URI
-    const popup = window.open(dataURI, 'popup', 'width=800,height=600');
-    
-    if (!popup) {
-      throw new Error('Popup diblokir oleh browser. Silakan izinkan popup untuk situs ini.');
-    }
-    
-    statusDiv.innerHTML = 'Popup berhasil dibuka!<br><span class="warning">⚠️ Origin akan tampil sebagai "null" atau data URI di permission dialog</span>';
-    statusDiv.className = 'success';
-    
-    monitorPopup(popup, statusDiv);
-    
-  } catch (error) {
-    handleError(error, statusDiv);
-  }
-}
-
-// Metode 2: Menggunakan Blob URL
-async function openPopupBlob() {
-  const statusDiv = document.getElementById('status');
-  statusDiv.textContent = 'Membuka popup dengan Blob URL...';
-  statusDiv.className = '';
-  
-  try {
-    const html = await fetchAndProcessHTML();
-    
-    // Buat blob dari HTML
-    const blob = new Blob([html], { type: 'text/html' });
-    const blobURL = URL.createObjectURL(blob);
-    
-    // Buka popup dengan blob URL
-    const popup = window.open(blobURL, 'popup', 'width=800,height=600');
-    
-    if (!popup) {
-      throw new Error('Popup diblokir oleh browser. Silakan izinkan popup untuk situs ini.');
-    }
-    
-    statusDiv.innerHTML = 'Popup berhasil dibuka!<br><span class="warning">⚠️ Origin akan tampil sebagai "null" atau blob URL di permission dialog</span>';
-    statusDiv.className = 'success';
-    
-    monitorPopup(popup, statusDiv);
-    
-    // Cleanup blob URL setelah popup tertutup
-    const checkClosed = setInterval(() => {
-      if (popup.closed) {
-        clearInterval(checkClosed);
-        URL.revokeObjectURL(blobURL);
-      }
-    }, 1000);
-    
-  } catch (error) {
-    handleError(error, statusDiv);
-  }
-}
-
-// Metode 3: About:blank dengan injection (origin tetap about:blank)
-async function openPopupAboutBlank() {
-  const statusDiv = document.getElementById('status');
-  statusDiv.textContent = 'Membuka popup dengan about:blank...';
-  statusDiv.className = '';
-  
-  try {
-    // Buka popup about:blank
-    const popup = window.open('about:blank', 'popup', 'width=800,height=600');
-    
-    if (!popup) {
-      throw new Error('Popup diblokir oleh browser. Silakan izinkan popup untuk situs ini.');
-    }
-    
-    const html = await fetchAndProcessHTML();
-    
-    // Tulis HTML ke popup (ini tetap menjaga origin about:blank)
-    popup.document.open();
-    popup.document.write(html);
-    popup.document.close();
-    
-    statusDiv.innerHTML = 'Popup berhasil dibuka!<br><span class="success">✓ Origin akan tampil sebagai "about:blank" di permission dialog</span>';
-    statusDiv.className = 'success';
-    
-    monitorPopup(popup, statusDiv);
-    
-  } catch (error) {
-    handleError(error, statusDiv);
-  }
-}
-
-// Helper: Monitor popup status
-function monitorPopup(popup, statusDiv) {
+function monitorPopup(popup, statusDiv, blobURL = null) {
   const checkClosed = setInterval(() => {
     if (popup.closed) {
       clearInterval(checkClosed);
       statusDiv.textContent = 'Popup telah ditutup.';
       statusDiv.className = '';
+      if (blobURL) URL.revokeObjectURL(blobURL);
     }
   }, 1000);
 }
 
-// Helper: Handle errors
 function handleError(error, statusDiv) {
   console.error('Error:', error);
   statusDiv.textContent = `Error: ${error.message}`;
   statusDiv.className = 'error';
-  
-  // Fallback: buka langsung ke URL jika fetch gagal
-  if (error.message.includes('fetch') || error.message.includes('CORS')) {
-    statusDiv.textContent += ' | Membuka langsung ke URL sebagai fallback...';
-    window.open('https://permission.site', 'popup', 'width=800,height=600');
-  }
 }
   </script>
 </body>
