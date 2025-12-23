@@ -2,76 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Open about:blank Popup with Fetched Content</title>
+  <title>Open about:blank Popup</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
+    body { font-family: Arial, sans-serif; padding: 20px; }
   </style>
 </head>
 <body>
-  <button onclick="openPopup()">Open Popup (about:blank origin)</button>
+  <button onclick="openBlankPopup()">Buka Popup about:blank</button>
 
   <script>
-    async function openPopup() {
-      const targetUrl = "https://permission.site"; // Ganti dengan situs targetmu
-
-      // 1. Buka window about:blank dengan ukuran & posisi
-      const popup = window.open(
-        "about:blank",
-        "_blank", // atau nama unik seperti "blankPopup"
+    function openBlankPopup() {
+      // 1. Buka popup about:blank
+      const popup = window.open("about:blank", "_blank", 
         "width=800,height=600,left=200,top=100,resizable=yes,scrollbars=yes,noopener,noreferrer"
       );
 
       if (!popup) {
-        alert("Popup diblokir oleh browser.\nIzinkan popup untuk situs ini (klik ikon gembok → Pop-ups and redirects → Allow).");
+        alert("Popup diblokir. Izinkan popup di browser.");
         return;
       }
 
-      try {
-        // 2. Fetch konten target
-        const response = await fetch(targetUrl);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-        let html = await response.text();
-
-        // 3. Penting: Hapus semua <base> tag yang mungkin ada
-        html = html.replace(/<base[^>]*>/gi, "");
-
-        // 4. Inject <base> ke targetUrl asli agar link & resource tetap bekerja
-        html = html.replace(
-          /<head[^>]*>/i,
-          `<head><base href="${targetUrl}">`
-        );
-
-        // 5. Tambah style agar konten fullscreen
-        html = html.replace(
-          /<\/head>/i,
-          `<style>
-            html, body {
-              margin: 0 !important;
-              padding: 0 !important;
-              height: 100% !important;
-              overflow: hidden !important;
-              background: #000 !important;
-            }
-          </style></head>`
-        );
-
-        // 6. Tulis konten ke popup
-        popup.document.open();
-        popup.document.write(html);
-        popup.document.close();
-
-        console.log("Konten berhasil di-inject ke about:blank");
-
-      } catch (err) {
-        console.warn("Fetch gagal:", err);
-
-        // Fallback: gunakan iframe di dalam about:blank
-        popup.document.open();
-        popup.document.write(`
+      // 2. Tulis dokumen sederhana yang akan memuat konten via iframe
+      popup.document.open();
+      popup.document.write(`
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -94,21 +47,26 @@
   </style>
 </head>
 <body>
-  <iframe
-    src="${targetUrl}"
+  <iframe id="contentFrame" 
+    src="https://permission.site"
     sandbox="allow-scripts allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-top-navigation-by-user-activation allow-storage-access-by-user-activation"
-    allow="geolocation; microphone; camera; fullscreen; payment; display-capture; clipboard-read; clipboard-write"
-    allowfullscreen
-  ></iframe>
+    allow="geolocation *; microphone *; camera *; fullscreen *; payment *; display-capture *; clipboard-read *; clipboard-write *; notifications *"
+    allowfullscreen>
+  </iframe>
+
+  <script>
+    // 3. Optional: fokus ke iframe agar permission request muncul di popup
+    const frame = document.getElementById('contentFrame');
+    frame.onload = () => {
+      frame.contentWindow.focus();
+    };
+  </script>
 </body>
 </html>
-        `);
-        popup.document.close();
+      `);
+      popup.document.close();
 
-        console.log("Fallback iframe di about:blank digunakan");
-      }
-
-      // 7. Fokus ke popup
+      // 4. Fokus ke popup agar user melihatnya
       popup.focus();
     }
   </script>
