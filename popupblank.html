@@ -2,172 +2,87 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Popup permission.site - Permission Dialog Netral</title>
+  <title>Popup permission.site - Permission Dialog Netral (Fixed)</title>
   <style> body { font-family: Arial, sans-serif; padding: 20px; } </style>
 </head>
 <body>
   <button onclick="openPopup()">Buka Popup permission.site</button>
+
   <script>
     function openPopup() {
-      const html = `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>permission.site</title>
-  <link rel="shortcut icon" href="https://permission.site/favicon.ico">
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
-    h1 { color: #333; }
-    p { color: #666; margin-bottom: 20px; }
-    table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-    th { background: #f8f8f8; font-weight: 600; }
-    button { background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 14px; }
-    button:hover { background: #0056b3; }
-    .status { font-weight: 600; }
-    .granted { color: #28a745; }
-    .denied { color: #dc3545; }
-    .prompt { color: #ffc107; }
-  </style>
-</head>
-<body>
-  <h1>permission.site</h1>
-  <p>A site to test the interaction of web APIs and browser permissions.</p>
-  <table>
-    <tr><th>Feature</th><th>Request Permission</th><th>Status</th></tr>
-    <tr>
-      <td>Geolocation</td>
-      <td><button onclick="requestGeolocation()">Request</button></td>
-      <td><span id="geolocation-status" class="status prompt">prompt</span></td>
-    </tr>
-    <tr>
-      <td>Camera</td>
-      <td><button onclick="requestCamera()">Request</button></td>
-      <td><span id="camera-status" class="status prompt">prompt</span></td>
-    </tr>
-    <tr>
-      <td>Microphone</td>
-      <td><button onclick="requestMicrophone()">Request</button></td>
-      <td><span id="microphone-status" class="status prompt">prompt</span></td>
-    </tr>
-    <tr>
-      <td>Notifications</td>
-      <td><button onclick="requestNotifications()">Request</button></td>
-      <td><span id="notifications-status" class="status prompt">prompt</span></td>
-    </tr>
-    <tr>
-      <td>MIDI</td>
-      <td><button onclick="requestMidi()">Request</button></td>
-      <td><span id="midi-status" class="status prompt">prompt</span></td>
-    </tr>
-    <tr>
-      <td>Bluetooth</td>
-      <td><button onclick="requestBluetooth()">Request</button></td>
-      <td><span id="bluetooth-status" class="status prompt">prompt</span></td>
-    </tr>
-    <tr>
-      <td>Clipboard</td>
-      <td><button onclick="requestClipboard()">Request</button></td>
-      <td><span id="clipboard-status" class="status prompt">prompt</span></td>
-    </tr>
-    <tr>
-      <td>Storage</td>
-      <td><button onclick="requestStorage()">Request</button></td>
-      <td><span id="storage-status" class="status prompt">prompt</span></td>
-    </tr>
-  </table>
-  
-  <script>
-    function updateStatus(id, status) {
-      const el = document.getElementById(id);
-      el.textContent = status;
-      el.className = 'status ' + status;
-    }
-    
-    function requestGeolocation() {
-      navigator.geolocation.getCurrentPosition(
-        () => updateStatus('geolocation-status', 'granted'),
-        () => updateStatus('geolocation-status', 'denied')
-      );
-    }
-    
-    async function requestCamera() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({video: true});
-        stream.getTracks().forEach(t => t.stop());
-        updateStatus('camera-status', 'granted');
-      } catch (e) {
-        updateStatus('camera-status', 'denied');
-      }
-    }
-    
-    async function requestMicrophone() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({audio: true});
-        stream.getTracks().forEach(t => t.stop());
-        updateStatus('microphone-status', 'granted');
-      } catch (e) {
-        updateStatus('microphone-status', 'denied');
-      }
-    }
-    
-    async function requestNotifications() {
-      try {
-        const permission = await Notification.requestPermission();
-        updateStatus('notifications-status', permission);
-      } catch (e) {
-        updateStatus('notifications-status', 'denied');
-      }
-    }
-    
-    async function requestMidi() {
-      try {
-        await navigator.requestMIDIAccess();
-        updateStatus('midi-status', 'granted');
-      } catch (e) {
-        updateStatus('midi-status', 'denied');
-      }
-    }
-    
-    async function requestBluetooth() {
-      try {
-        await navigator.bluetooth.requestDevice({acceptAllDevices: true});
-        updateStatus('bluetooth-status', 'granted');
-      } catch (e) {
-        updateStatus('bluetooth-status', 'denied');
-      }
-    }
-    
-    async function requestClipboard() {
-      try {
-        await navigator.clipboard.readText();
-        updateStatus('clipboard-status', 'granted');
-      } catch (e) {
-        updateStatus('clipboard-status', 'denied');
-      }
-    }
-    
-    async function requestStorage() {
-      try {
-        if (navigator.storage && navigator.storage.persist) {
-          const isPersisted = await navigator.storage.persist();
-          updateStatus('storage-status', isPersisted ? 'granted' : 'denied');
-        } else {
-          updateStatus('storage-status', 'denied');
-        }
-      } catch (e) {
-        updateStatus('storage-status', 'denied');
-      }
-    }
-  <\/script>
-</body>
-</html>`;
-      
+      // Hardcode HTML lengkap permission.site (update 2025, CSS inline, JS lengkap)
+      const html = '<!DOCTYPE html>' +
+'<html lang="en">' +
+'<head>' +
+'  <meta charset="utf-8">' +
+'  <meta name="viewport" content="width=device-width, initial-scale=1">' +
+'  <title>permission.site</title>' +
+'  <style>' +
+'    /* CSS full dari permission.site (inline agar work di data URL) */' +
+'    html, body { width: 100%; margin: 0; padding: 0; background: #eeeeee; min-height: 100%; }' +
+'    body { font-family: Verdana, Helvetica, sans-serif; text-align: center; box-sizing: border-box; padding: 2em; display: flex; flex-direction: column; }' +
+'    .content { align-self: center; }' +
+'    .before { flex: 1 1 5%; }' +
+'    .after { flex: 2 2 10%; }' +
+'    button { background: #fff; border: none; font-size: 1.5em; width: 400px; padding: 0.5em; margin: 10px; box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23); transition: all 150ms; }' +
+'    button:hover { background: #ffa; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23); transform: translateY(-2px); }' +
+'    button.success { background: #afa; }' +
+'    button.error { background: #faa; }' +
+'    table { margin: 1em auto; border-collapse: collapse; }' +
+'    table td { border: 1px solid #888; padding: 8px; }' +
+'    table td:first-child { text-align: right; }' +
+'    .permission-status { font-size: small; text-transform: uppercase; padding-top: .4rem; text-align: left; }' +
+'    .permission-status > span { font-weight: 800; }' +
+'    body, html { margin:0; padding:0; height:100vh; overflow:auto; }' +  // Fullscreen fix
+'  </style>' +
+'</head>' +
+'<body>' +
+'  <h1>permission.site</h1>' +
+'  <p>A site to test the interaction of web APIs and browser permissions.</p>' +
+'  <table>' +
+'    <tr><th>Feature</th><th>Request Permission</th><th>Status</th></tr>' +
+'    <tr><td>Geolocation</td><td><button onclick="request(\'geolocation\')">Request</button></td><td class="permission-status" id="geolocation">prompt</td></tr>' +
+'    <tr><td>Camera</td><td><button onclick="request(\'camera\')">Request</button></td><td class="permission-status" id="camera">prompt</td></tr>' +
+'    <tr><td>Microphone</td><td><button onclick="request(\'microphone\')">Request</button></td><td class="permission-status" id="microphone">prompt</td></tr>' +
+'    <tr><td>Notifications</td><td><button onclick="request(\'notifications\')">Request</button></td><td class="permission-status" id="notifications">prompt</td></tr>' +
+'    <tr><td>MIDI</td><td><button onclick="request(\'midi\')">Request</button></td><td class="permission-status" id="midi">prompt</td></tr>' +
+'    <tr><td>Bluetooth</td><td><button onclick="request(\'bluetooth\')">Request</button></td><td class="permission-status" id="bluetooth">prompt</td></tr>' +
+'    <!-- Tambah feature lain kalau mau -->' +
+'  </table>' +
+''
+'  <script>' +
+'    async function request(type) {' +
+'      const statusEl = document.getElementById(type);' +
+'      statusEl.textContent = "requesting...";' +
+'      try {' +
+'        if (type === "geolocation") {' +
+'          await new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject));' +
+'        } else if (type === "camera" || type === "microphone") {' +
+'          const constraints = { video: type === "camera", audio: type === "microphone" };' +
+'          const stream = await navigator.mediaDevices.getUserMedia(constraints);' +
+'          stream.getTracks().forEach(t => t.stop());' +
+'        } else if (type === "notifications") {' +
+'          await Notification.requestPermission();' +
+'        } else if (type === "midi") {' +
+'          await navigator.requestMIDIAccess();' +
+'        } else if (type === "bluetooth") {' +
+'          await navigator.bluetooth.requestDevice({ acceptAllDevices: true });' +
+'        }' +
+'        statusEl.innerHTML = \'<span style="color:green">granted</span>\';' +
+'      } catch (e) {' +
+'        statusEl.innerHTML = \'<span style="color:red">denied</span>\';' +
+'      }' +
+'    }' +
+'  </script>' +
+'</body>' +
+'</html>';
+
       const encoded = encodeURIComponent(html);
       const dataUrl = 'data:text/html;charset=utf-8,' + encoded;
+
       const win = window.open(dataUrl, 'permissionPopup', 'width=800,height=600,left=200,top=100,resizable=yes,scrollbars=yes');
-      if (!win) alert('Popup diblokir, izinkan popup!');
+
+      if (!win) alert('Popup diblokir oleh browser. Izinkan popup!');
     }
   </script>
 </body>
