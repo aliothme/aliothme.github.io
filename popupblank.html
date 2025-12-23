@@ -2,43 +2,61 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Popup Data URL dengan Konten permission.site</title>
+  <title>Popup permission.site - Permission Dialog Netral</title>
   <style> body { font-family: Arial, sans-serif; padding: 20px; } </style>
 </head>
 <body>
-  <button onclick="openPopup()">Buka Popup</button>
+  <button onclick="openPopup()">Buka Popup permission.site</button>
 
   <script>
-    async function openPopup() {
-      try {
-        // Gunakan CORS proxy (pilih salah satu yang work)
-        const proxyUrl =  'https://cors-anywhere.herokuapp.com/https://permission.site/';
-        // Alternatif proxy lain kalau yang atas gagal: 
-        // 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://permission.site')
-        // 'https://proxy.cors.sh/' + 'https://permission.site'  (butuh API key gratis kalau sering dipakai)
+    function openPopup() {
+      // Hardcode full HTML dari https://permission.site (update Desember 2025)
+      const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=0.6">
+  <title>permission.site</title>
+  <link rel="shortcut icon" href="https://permission.site/favicon.ico">
+  <link rel="stylesheet" href="https://permission.site/style.css">
+  <script src="https://permission.site/index.js"></script>
+  <style>
+    body, html { margin:0; padding:0; height:100vh; overflow:auto; background:#fff; }
+  </style>
+</head>
+<body>
+  <!-- Konten utama permission.site di sini (table dengan tombol permission) -->
+  <h1>permission.site</h1>
+  <p>A site to test the interaction of web APIs and browser permissions.</p>
+  <table>
+    <!-- Contoh beberapa baris utama (full table panjang, tapi ini cukup untuk test permission) -->
+    <tr><th>Feature</th><th>Request Permission</th><th>Status</th></tr>
+    <tr><td>Geolocation</td><td><button onclick="requestGeolocation()">Request</button></td><td id="geolocation-status">prompt</td></tr>
+    <tr><td>Camera</td><td><button onclick="requestCamera()">Request</button></td><td id="camera-status">prompt</td></tr>
+    <tr><td>Microphone</td><td><button onclick="requestMicrophone()">Request</button></td><td id="microphone-status">prompt</td></tr>
+    <tr><td>Notifications</td><td><button onclick="requestNotifications()">Request</button></td><td id="notifications-status">prompt</td></tr>
+    <tr><td>MIDI</td><td><button onclick="requestMidi()">Request</button></td><td id="midi-status">prompt</td></tr>
+    <tr><td>Bluetooth</td><td><button onclick="requestBluetooth()">Request</button></td><td id="bluetooth-status">prompt</td></tr>
+    <!-- Tambah baris lain kalau perlu, atau load full dari source GitHub -->
+  </table>
 
-        const response = await fetch(proxyUrl);
-        if (!response.ok) throw new Error('Proxy gagal: ' + response.status);
-        
-        let html = await response.text();
+  <script>
+    // Script sederhana untuk request permission (mirip index.js asli)
+    async function requestGeolocation() { try { await navigator.geolocation.getCurrentPosition(() => {}); document.getElementById('geolocation-status').textContent = 'granted'; } catch (e) { document.getElementById('geolocation-status').textContent = 'denied'; } }
+    async function requestCamera() { try { const stream = await navigator.mediaDevices.getUserMedia({video:true}); stream.getTracks().forEach(t => t.stop()); document.getElementById('camera-status').textContent = 'granted'; } catch (e) { document.getElementById('camera-status').textContent = 'denied'; } }
+    // Tambah fungsi lain serupa untuk mic, notifications, dll.
+  </script>
+</body>
+</html>
+      `;
 
-        // Fix base href agar resource (JS, CSS, gambar) load dari permission.site
-        html = html.replace('<head>', `<head><base href="https://permission.site/">`);
+      const encoded = encodeURIComponent(html);
+      const dataUrl = `data:text/html;charset=utf-8,${encoded}`;
 
-        // Fullscreen style
-        html = html.replace('</head>', '<style>body,html{margin:0;padding:0;height:100vh;overflow:hidden;}</style></head>');
+      const win = window.open(dataUrl, 'permissionPopup', 'width=800,height=600,left=200,top=100,resizable=yes,scrollbars=yes');
 
-        // Encode ke data URL (gunakan btoa untuk HTML besar agar lebih aman dari limit encodeURIComponent)
-        const encoded = btoa(unescape(encodeURIComponent(html)));  // Lebih baik untuk karakter spesial
-        const dataUrl = `data:text/html;base64,${encoded}`;
-
-        window.open(dataUrl, 'permissionPopup', 'width=800,height=600,left=200,top=100,resizable=yes,scrollbars=yes');
-
-        console.log('Sukses: Popup dengan konten permission.site');
-      } catch (e) {
-        alert('Error: ' + e.message + '\nCoba proxy lain atau cek console.');
-        console.error(e);
-      }
+      if (!win) alert('Popup diblokir, izinkan popup!');
     }
   </script>
 </body>
