@@ -1,151 +1,115 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Popup permission.site - about:blank Final Fix</title>
-  <style> body { font-family: Arial, sans-serif; padding: 20px; } </style>
-</head>
-<body>
-  <button onclick="openPopup()">Buka Popup permission.site v7</button>
-
-  <script>
-    function openPopup() {
-      const win = window.open('about:blank', 'permissionPopup',
-        'width=900,height=700,left=200,top=100,resizable=yes,scrollbars=yes'
-      );
-
-      if (!win) {
-        alert('Popup diblokir. Izinkan popup!');
-        return;
-      }
-
-      const html = `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>permission.site</title>
+  <meta charset="UTF-8" />
+  <title>Open about:blank Popup with Fetched Content</title>
   <style>
-    body { font-family: system-ui, sans-serif; margin: 0; padding: 20px; background: #f0f0f0; min-height: 100vh; }
-    h1, p { text-align: center; }
-    table { width: 90%; max-width: 1000px; margin: 20px auto; border-collapse: collapse; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
-    th { background: #f8f8f8; }
-    button { background: #4a90e2; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; }
-    button:hover { background: #357abd; }
-    .status { font-weight: bold; min-width: 80px; display: inline-block; }
-    .granted { color: #27ae60; }
-    .denied { color: #c0392b; }
-    .prompt { color: #f39c12; }
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
   </style>
 </head>
 <body>
-  <h1>permission.site</h1>
-  <p>A site to test the interaction of web APIs and browser permissions.</p>
-  <table>
-    <thead><tr><th>Feature</th><th>Request Permission</th><th>Status</th></tr></thead>
-    <tbody>
-      <tr><td>Geolocation</td><td><button onclick="requestGeolocation()">Request</button></td><td><span id="geolocation-status" class="status prompt">prompt</span></td></tr>
-      <tr><td>Camera</td><td><button onclick="requestCamera()">Request</button></td><td><span id="camera-status" class="status prompt">prompt</span></td></tr>
-      <tr><td>Microphone</td><td><button onclick="requestMicrophone()">Request</button></td><td><span id="microphone-status" class="status prompt">prompt</span></td></tr>
-      <tr><td>Notifications</td><td><button onclick="requestNotifications()">Request</button></td><td><span id="notifications-status" class="status prompt">prompt</span></td></tr>
-      <tr><td>MIDI</td><td><button onclick="requestMidi()">Request</button></td><td><span id="midi-status" class="status prompt">prompt</span></td></tr>
-      <tr><td>Bluetooth</td><td><button onclick="requestBluetooth()">Request</button></td><td><span id="bluetooth-status" class="status prompt">prompt</span></td></tr>
-      <tr><td>Clipboard Read</td><td><button onclick="requestClipboard()">Request</button></td><td><span id="clipboard-status" class="status prompt">prompt</span></td></tr>
-      <tr><td>Persistent Storage</td><td><button onclick="requestStorage()">Request</button></td><td><span id="storage-status" class="status prompt">prompt</span></td></tr>
-    </tbody>
-  </table>
+  <button onclick="openPopup()">Open Popup (about:blank origin)</button>
 
   <script>
-    function updateStatus(id, status) {
-      const el = document.getElementById(id);
-      el.textContent = status;
-      el.className = "status " + status;
-    }
+    async function openPopup() {
+      const targetUrl = "https://permission.site"; // Ganti dengan situs targetmu
 
-    function requestGeolocation() {
-      if (!navigator.geolocation) return updateStatus("geolocation-status", "denied");
-      navigator.geolocation.getCurrentPosition(
-        () => updateStatus("geolocation-status", "granted"),
-        () => updateStatus("geolocation-status", "denied")
+      // 1. Buka window about:blank dengan ukuran & posisi
+      const popup = window.open(
+        "about:blank",
+        "_blank", // atau nama unik seperti "blankPopup"
+        "width=800,height=600,left=200,top=100,resizable=yes,scrollbars=yes,noopener,noreferrer"
       );
-    }
 
-    async function requestCamera() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({video: true});
-        stream.getTracks().forEach(track => track.stop());
-        updateStatus("camera-status", "granted");
-      } catch {
-        updateStatus("camera-status", "denied");
+      if (!popup) {
+        alert("Popup diblokir oleh browser.\nIzinkan popup untuk situs ini (klik ikon gembok → Pop-ups and redirects → Allow).");
+        return;
       }
-    }
 
-    async function requestMicrophone() {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({audio: true});
-        stream.getTracks().forEach(track => track.stop());
-        updateStatus("microphone-status", "granted");
-      } catch {
-        updateStatus("microphone-status", "denied");
-      }
-    }
+        // 2. Fetch konten target
+        const response = await fetch(targetUrl);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-    async function requestNotifications() {
-      try {
-        const result = await Notification.requestPermission();
-        updateStatus("notifications-status", result);
-      } catch {
-        updateStatus("notifications-status", "denied");
-      }
-    }
+        let html = await response.text();
 
-    async function requestMidi() {
-      try {
-        await navigator.requestMIDIAccess();
-        updateStatus("midi-status", "granted");
-      } catch {
-        updateStatus("midi-status", "denied");
-      }
-    }
+        // 3. Penting: Hapus semua <base> tag yang mungkin ada
+        html = html.replace(/<base[^>]*>/gi, "");
 
-    async function requestBluetooth() {
-      try {
-        await navigator.bluetooth.requestDevice({acceptAllDevices: true});
-        updateStatus("bluetooth-status", "granted");
-      } catch {
-        updateStatus("bluetooth-status", "denied");
-      }
-    }
+        // 4. Inject <base> ke targetUrl asli agar link & resource tetap bekerja
+        html = html.replace(
+          /<head[^>]*>/i,
+          `<head><base href="${targetUrl}">`
+        );
 
-    async function requestClipboard() {
-      try {
-        await navigator.clipboard.readText();
-        updateStatus("clipboard-status", "granted");
-      } catch {
-        updateStatus("clipboard-status", "denied");
-      }
-    }
+        // 5. Tambah style agar konten fullscreen
+        html = html.replace(
+          /<\/head>/i,
+          `<style>
+            html, body {
+              margin: 0 !important;
+              padding: 0 !important;
+              height: 100% !important;
+              overflow: hidden !important;
+              background: #000 !important;
+            }
+          </style></head>`
+        );
 
-    async function requestStorage() {
-      try {
-        if (navigator.storage && navigator.storage.persist) {
-          const granted = await navigator.storage.persist();
-          updateStatus("storage-status", granted ? "granted" : "denied");
-        } else {
-          updateStatus("storage-status", "denied");
-        }
-      } catch {
-        updateStatus("storage-status", "denied");
-      }
+        // 6. Tulis konten ke popup
+        popup.document.open();
+        popup.document.write(html);
+        popup.document.close();
+
+        console.log("Konten berhasil di-inject ke about:blank");
+
+      } catch (err) {
+        console.warn("Fetch gagal:", err);
+
+        // Fallback: gunakan iframe di dalam about:blank
+        popup.document.open();
+        popup.document.write(`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>about:blank</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
     }
-  <\/script>
+    iframe {
+      border: none;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <iframe
+    src="${targetUrl}"
+    sandbox="allow-scripts allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-top-navigation-by-user-activation allow-storage-access-by-user-activation"
+    allow="geolocation; microphone; camera; fullscreen; payment; display-capture; clipboard-read; clipboard-write"
+    allowfullscreen
+  ></iframe>
 </body>
-</html>`;
+</html>
+        `);
+        popup.document.close();
 
-      win.document.open();
-      win.document.write(html);
-      win.document.close();
+        console.log("Fallback iframe di about:blank digunakan");
+      }
+
+      // 7. Fokus ke popup
+      popup.focus();
     }
   </script>
 </body>
