@@ -6,7 +6,7 @@ self.addEventListener('install', (event) => {
                 '/',
                 '/test.html',
                 '/manifest.json',
-                '/icon.jpeg' // Ganti kalau lo punya ikon
+                '/icon.png' // Ganti kalau lo punya ikon
             ]);
         })
     );
