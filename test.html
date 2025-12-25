@@ -10,7 +10,7 @@
     <link rel="icon" href="icon.png" type="image/png">
 </head>
 <body>
-    <h1>Halo, ini PWA sederhana!</h1>
+    <h1>Halo, ini PWA sederhana! v2</h1>
     <p>Klik tombol di bawah buat instal sebagai app.</p>
     <button id="installButton" style="display: none;">Install App</button>
     <script>
@@ -42,6 +42,7 @@
                 if (deferredPrompt) {
                     // Panggil API prompt instal ketika tombol Enter ditekan
                     deferredPrompt.prompt();
+                    // Arahkan langsung ke hasil "accepted"
                     deferredPrompt.userChoice.then((choiceResult) => {
                         console.log(`User choice: ${choiceResult.outcome}`); // 'accepted' atau 'dismissed'
                         deferredPrompt = null;
