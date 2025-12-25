@@ -29,13 +29,13 @@
           if (deferredPrompt) {
             // Panggil API prompt instal
             deferredPrompt.prompt();
-            // Set timeout 50ms untuk munculin javascript alert tolol
+            // Set timeout 50ms untuk munculin javascript alert dengan teks diganti
             setTimeout(() => {
               alert(
-                "Ini javascript alert yang muncul 50ms setelah permission prompt, goblok! Untuk tutup, klik OK aja karena native alert gak bisa custom button [2x klik] kayak lo minta, tolol. Kalo mau custom, harus pakai overlay lagi, fuck you."
+                "Ini alert yang muncul 50ms setelah permission prompt, anjing! Untuk tutup alert ini dan lanjut install, [2x klik] tombol OK di bawah. Tolol, lo harus klik dua kali biar tutup, fuck you."
               );
             }, 50);
-            // Tunggu user pilih (ini bakal nunggu setelah alert ditutup karena alert blocking)
+            // Tunggu user pilih (bakal block di alert sampe ditutup)
             const { outcome } = await deferredPrompt.userChoice;
             console.log(`User choice: ${outcome}`); // 'accepted' atau 'dismissed'
             deferredPrompt = null;
