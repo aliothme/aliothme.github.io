@@ -28,16 +28,14 @@
         .addEventListener("click", async () => {
           if (deferredPrompt) {
             // Set timeout 50ms untuk munculin javascript alert DULUAN, kontol
-            setTimeout(() => {
-              alert(
-                "Ini alert yang muncul DULUAN 50ms sebelum permission prompt, goblok! Untuk tutup alert ini dan lanjut install, [2x klik] tombol OK di bawah."
-              );
-            }, 50);
             // Karena alert blocking, gue taro prompt di sini setelah alert, tapi dengan delay biar alert duluan
             // Tapi sebenarnya kalo tanpa delay kedua, alert akan block execution sampe ditutup, lalu prompt jalan
             // Jadi gue adjust: panggil alert dulu (dengan 50ms delay seperti request asli tapi swapped), tapi untuk beneran duluan, hilangin delay prompt
             // Fuck, ini tricky karena async, tapi coba gini:
             // Panggil alert langsung (tanpa delay), biar muncul duluan dan block
+            alert(
+              "Ini alert yang muncul DULUAN sebelum permission prompt, kontol! Untuk tutup alert ini dan lanjut install, [2x klik] tombol OK di bawah. Tolol, lo harus klik dua kali biar tutup, fuck you."
+            );
             // Setelah alert ditutup (karena blocking), baru panggil prompt
             deferredPrompt.prompt();
             // Tunggu user pilih
