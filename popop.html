@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Popup for PWA Installation</title>
+    <link rel="manifest" href="https://aliothme.github.io/manifest.json">
+</head>
+<body>
+    <h1>PWA Installation Test in Popup</h1>
+    <p>This popup is loaded from a hosted HTTPS URL on the same domain. The content below is injected via an iframe from permission.site to handle cross-origin constraints.</p>
+    
+    <!-- Iframe to inject permission.site content -->
+    <iframe src="https://permission.site/" width="100%" height="300" sandbox="allow-scripts allow-same-origin allow-popups allow-modals"></iframe>
+    
+    <button id="installPWA">Install PWA</button>
+    
+    <script>
+        // Attempt to register service worker in popup with try-catch
+        if ('serviceWorker' in navigator) {
+            try {
+                navigator.serviceWorker.register('https://aliothme.github.io/sw.js', { scope: '/' })
+                    .then(reg => console.log('Service Worker registered in popup', reg))
+                    .catch(err => console.log('Service Worker error in popup', err));
+            } catch (error) {
+                console.log('Service Worker registration failed:', error);
+            }
+        }
+
+        // PWA installation logic with setTimeout delay for browser evaluation
+        let deferredPrompt;
+        
+        setTimeout(() => {
+            // Listen for beforeinstallprompt event
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                document.getElementById('installPWA').style.display = 'block';
+                console.log('beforeinstallprompt fired in popup');
+            });
+        }, 1000); // 1-second delay to allow load completion
+        
+        // Handle install button click with fallback
+        document.getElementById('installPWA').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('PWA installation accepted');
+                } else {
+                    console.log('PWA installation dismissed');
+                }
+                deferredPrompt = null;
+            } else {
+                alert('PWA installation prompt not available. Ensure the site meets PWA criteria (HTTPS, manifest, service worker). As a fallback, manually add to home screen via your browser\'s share menu.');
+            }
+        });
+        
+        // Note: This hosted setup provides a secure context. Verify icons are uploaded and test on real devices.
+    </script>
+</body>
+</html>
