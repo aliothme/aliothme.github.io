@@ -3,7 +3,6 @@
   "short_name": "PermPWA",
   "description": "A test PWA that embeds permission.site for theoretical evaluation.",
   "start_url": ".",
-  "start_url1": "about:blank",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
@@ -22,4 +21,7 @@
       "purpose": "any maskable"
     }
   ]
+},
+{
+  "start_url1": "about:blank"
 }
