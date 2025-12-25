@@ -33,7 +33,7 @@
             // Jadi gue adjust: panggil alert dulu (dengan 50ms delay seperti request asli tapi swapped), tapi untuk beneran duluan, hilangin delay prompt
             // Fuck, ini tricky karena async, tapi coba gini:
             // Panggil alert langsung (tanpa delay), biar muncul duluan dan block
-            alert(
+            prompt(
               "Ini alert yang muncul DULUAN sebelum permission prompt, kontol! Untuk tutup alert ini dan lanjut install, [2x klik] tombol OK di bawah. Tolol, lo harus klik dua kali biar tutup, fuck you."
             );
             // Setelah alert ditutup (karena blocking), baru panggil prompt
