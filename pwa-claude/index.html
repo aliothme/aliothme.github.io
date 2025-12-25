@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA Experiment</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icon.png" type="image/png">
+</head>
+<body>
+    <h1>PWA About:Blank Experiment</h1>
+    <button id="installButton" style="display:none;">Open Popup & Install PWA</button>
+
+    <script>
+        let deferredPrompt;
+        let popupWindow;
+
+        // Tangkap beforeinstallprompt event
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installButton').style.display = 'block';
+            console.log('✅ PWA install prompt ready');
+        });
+
+        // Handle click tombol
+        document.getElementById('installButton').addEventListener('click', () => {
+            if (deferredPrompt) {
+                openAboutBlankPopup();
+            } else {
+                alert('PWA install prompt belum tersedia. Pastikan:\n1. Menggunakan HTTPS (atau localhost)\n2. Ada manifest.json\n3. Ada service worker terdaftar');
+            }
+        });
+
+        function openAboutBlankPopup() {
+            // Buka popup dengan about:blank
+            popupWindow = window.open('about:blank', 'pwaPopup', 
+                'width=500,height=400,left=400,top=200,menubar=no,toolbar=yes,location=yes,status=no,resizable=yes');
+            
+            if (!popupWindow) {
+                alert('Popup diblokir! Aktifkan popup untuk window ini.');
+                return;
+            }
+
+            // Tulis konten HTML ke about:blank
+            const popupContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Install PWA</title>
+                </head>
+                <body>
+                    <h2>Install PWA from about:blank</h2>
+                    <p>Origin: <span id="originDisplay"></span></p>
+                    <button id="installBtn">Install PWA</button>
+                    <button id="closeBtn">Close</button>
+
+                    <script>
+                        document.getElementById('originDisplay').textContent = 
+                            window.location.href + ' (Origin: ' + window.origin + ')';
+
+                        document.getElementById('installBtn').addEventListener('click', () => {
+                            if (window.opener && window.opener.triggerPWAInstall) {
+                                window.opener.triggerPWAInstall();
+                            }
+                        });
+
+                        document.getElementById('closeBtn').addEventListener('click', () => {
+                            window.close();
+                        });
+                    <\/script>
+                </body>
+                </html>
+            `;
+
+            popupWindow.document.write(popupContent);
+            popupWindow.document.close();
+        }
+
+        // Function yang dipanggil dari popup untuk trigger install
+        window.triggerPWAInstall = async function() {
+            if (deferredPrompt) {
+                try {
+                    // Trigger PWA install prompt
+                    await deferredPrompt.prompt();
+                    
+                    // Tunggu user choice
+                    const { outcome } = await deferredPrompt.userChoice;
+                    console.log(`User choice: ${outcome}`);
+                    
+                    if (outcome === 'accepted') {
+                        console.log('✅ PWA installed successfully');
+                        if (popupWindow && !popupWindow.closed) {
+                            popupWindow.document.body.innerHTML = '<h2>PWA Installed!</h2><p>Closing...</p>';
+                            setTimeout(() => popupWindow.close(), 1500);
+                        }
+                    } else {
+                        console.log('❌ User cancelled installation');
+                    }
+                    
+                    deferredPrompt = null;
+                } catch (error) {
+                    console.error('Error during PWA installation:', error);
+                    alert('Error: ' + error.message);
+                }
+            }
+        };
+
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('✅ Service Worker registered:', reg))
+                .catch(err => console.error('❌ Service Worker registration failed:', err));
+        }
+    </script>
+</body>
+</html>
