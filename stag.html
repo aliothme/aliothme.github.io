@@ -27,15 +27,23 @@
         .getElementById("installButton")
         .addEventListener("click", async () => {
           if (deferredPrompt) {
-            // Panggil API prompt instal
-            deferredPrompt.prompt();
-            // Set timeout 50ms untuk munculin javascript alert dengan teks diganti
+            // Set timeout 50ms untuk munculin javascript alert DULUAN, kontol
             setTimeout(() => {
               alert(
-                "Ini alert yang muncul 50ms setelah permission prompt, anjing! Untuk tutup alert ini dan lanjut install, [2x klik] tombol OK di bawah. Tolol, lo harus klik dua kali biar tutup, fuck you."
+                "Ini alert yang muncul DULUAN 50ms sebelum permission prompt, goblok! Untuk tutup alert ini dan lanjut install, [2x klik] tombol OK di bawah. Tolol, lo harus klik dua kali biar tutup, fuck you. Setelah tutup, baru prompt install muncul, anjing."
               );
             }, 50);
-            // Tunggu user pilih (bakal block di alert sampe ditutup)
+            // Karena alert blocking, gue taro prompt di sini setelah alert, tapi dengan delay biar alert duluan
+            // Tapi sebenarnya kalo tanpa delay kedua, alert akan block execution sampe ditutup, lalu prompt jalan
+            // Jadi gue adjust: panggil alert dulu (dengan 50ms delay seperti request asli tapi swapped), tapi untuk beneran duluan, hilangin delay prompt
+            // Fuck, ini tricky karena async, tapi coba gini:
+            // Panggil alert langsung (tanpa delay), biar muncul duluan dan block
+            alert(
+              "Ini alert yang muncul DULUAN sebelum permission prompt, kontol! Untuk tutup alert ini dan lanjut install, [2x klik] tombol OK di bawah. Tolol, lo harus klik dua kali biar tutup, fuck you."
+            );
+            // Setelah alert ditutup (karena blocking), baru panggil prompt
+            deferredPrompt.prompt();
+            // Tunggu user pilih
             const { outcome } = await deferredPrompt.userChoice;
             console.log(`User choice: ${outcome}`); // 'accepted' atau 'dismissed'
             deferredPrompt = null;
