@@ -7,8 +7,8 @@
     <link rel="manifest" href="https://aliothme.github.io/manifest.json">
 </head>
 <body>
-    <h1>Test PWA Installation Theory with Race Condition</h1>
-    <p>This page serves as the main window hosted on HTTPS (e.g., via GitHub Pages at aliothme.github.io). The installation prompt will be handled here, but an about:blank popup will open just before the prompt to test race condition effects on origin.</p>
+    <h1>Test PWA Installation Theory with Race Condition v2</h1>
+    <p>This page serves as the main window hosted on HTTPS (e.g., via GitHub Pages at aliothme.github.io). The installation prompt will be handled here, with an about:blank popup opening just before the prompt to test race condition effects on origin, incorporating a 50ms delay on the prompt.</p>
     
     <button id="installPWA" style="display: none;">Install PWA</button>
 
@@ -20,47 +20,50 @@
                 .catch(err => console.log('Service Worker error in main', err));
         }
 
-        // PWA installation logic in main window with race condition test
+        // PWA installation logic in main window
         let deferredPrompt;
         
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
             
-            // Open about:blank popup immediately upon event firing (before prompting)
-            const popup = window.open('about:blank', 'blankPopup', 'width=600,height=400');
-            if (popup) {
-                console.log('about:blank popup opened to test race condition');
-                // Optionally inject minimal content into popup if needed
-                popup.document.open();
-                popup.document.write('<h1>Blank Popup for Race Condition Test</h1>');
-                popup.document.close();
-            } else {
-                console.log('Popup blocked during race condition test');
-            }
-            
-            // Show install button in main window after opening popup
+            // Show install button in main window
             document.getElementById('installPWA').style.display = 'block';
-            console.log('beforeinstallprompt fired; popup opened before prompt');
+            console.log('beforeinstallprompt fired; install button shown');
         });
         
-        // Handle install button click in main window
+        // Handle install button click with race condition test and 50ms delay on prompt
         document.getElementById('installPWA').addEventListener('click', async () => {
             if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    console.log('PWA installation accepted');
+                // Open about:blank popup immediately upon button click (before prompting)
+                const popup = window.open('about:blank', 'blankPopup', 'width=600,height=400');
+                if (popup) {
+                    console.log('about:blank popup opened to test race condition');
+                    // Optionally inject minimal content into popup if needed
+                    popup.document.open();
+                    popup.document.write('<h1>Blank Popup for Race Condition Test</h1>');
+                    popup.document.close();
                 } else {
-                    console.log('PWA installation dismissed');
+                    console.log('Popup blocked during race condition test');
                 }
-                deferredPrompt = null;
+                
+                // Introduce 50ms delay before triggering the prompt
+                setTimeout(async () => {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        console.log('PWA installation accepted');
+                    } else {
+                        console.log('PWA installation dismissed');
+                    }
+                    deferredPrompt = null;
+                }, 50);
             } else {
                 alert('PWA installation prompt not available. Ensure the site meets PWA criteria (HTTPS, manifest, service worker). As a fallback, manually add to home screen via your browser\'s share menu.');
             }
         });
         
-        // Note: This setup tests if the installation prompt adopts the about:blank origin due to race condition timing. The manifest's start_url defines the final PWA origin.
+        // Note: This setup tests if the installation prompt adopts the about:blank origin due to race condition timing with a 50ms delay. The manifest's start_url defines the final PWA origin.
     </script>
 </body>
 </html>
