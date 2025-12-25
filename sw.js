@@ -4,7 +4,7 @@ self.addEventListener('install', (event) => {
         caches.open('pwa-cache').then((cache) => {
             return cache.addAll([
                 '/',
-                '/test.html',
+                '/stag.html',
                 '/manifest.json',
                 '/icon.png' // Ganti kalau lo punya ikon
             ]);
