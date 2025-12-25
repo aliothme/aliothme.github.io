@@ -15,6 +15,13 @@
         let deferredPrompt;
         let popupWindow;
 
+        // Redirect to permission.site if opened as PWA
+        if (window.matchMedia('(display-mode: standalone)').matches || 
+            window.navigator.standalone === true) {
+            console.log('Opened as PWA, redirecting to permission.site...');
+            window.location.href = 'https://permission.site';
+        }
+
         // Tangkap beforeinstallprompt event
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
