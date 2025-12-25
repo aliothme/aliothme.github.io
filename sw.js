@@ -6,7 +6,7 @@ self.addEventListener('install', (event) => {
                 '/',
                 '/stag.html',
                 '/manifest.json',
-                '/icon.png' // Ganti kalau lo punya ikon
+                '/icon.png'
             ]);
         })
     );
