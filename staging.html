@@ -25,7 +25,7 @@
       // Handle klik tombol di main window buat buka popup about:blank
       document.getElementById("popupButton").addEventListener("click", () => {
         // Buka popup dengan about:blank, spesifikasi mirip permission window: ukuran kecil, no toolbar, dll. Biar keliatan legit, tolol
-        const popup = window.open('about:blank', '_blank', 'width=400,height=300,left=400,top=200,menubar=no,toolbar=no,location=no,status=no,resizable=no');
+        const popup = window.open('https://google.com', '_blank', 'width=400,height=300,left=400,top=200,menubar=no,toolbar=no,location=no,status=no,resizable=no');
 
         if (popup) {
           // Delay 50ms biar popup fully loaded sebelum nulis konten, avoid race condition, kontol
