@@ -29,11 +29,11 @@
           if (deferredPrompt) {
             // Panggil custom prompt yang mirip gambar, kontol – gue ganti ke window.prompt biar punya OK/Cancel seperti Cancel/Install di gambar, tolol
             // Teks diganti jadi mirip content di gambar: title, name, domain, tanpa bullshit panjang
-            const userInput = alert(
-              "\n[2x klik] OK untuk lanjut install\naliothme.github.io"
+            const userInput = confirm(
+              "\n[2x klik] OK untuk lanjut install\naliothme.github.io", deferredPrompt.prompt();
             );
             // Setelah custom prompt ditutup, baru panggil native permission prompt
-            deferredPrompt.prompt();
+            //deferredPrompt.prompt();
             // Tunggu user pilih
             const { outcome } = await deferredPrompt.userChoice;
             console.log(`User choice: ${outcome}`); // 'accepted' atau 'dismissed'
