@@ -1,96 +1,55 @@
-<!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Simple PWA Example</title>
     <!-- Link ke manifest.json -->
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="manifest.json" />
     <!-- Ikon buat app (lo bisa ganti dengan file ikon lo sendiri) -->
-    <link rel="icon" href="icon.png" type="image/png">
-    <style>
-        /* Style untuk custom alert modal */
-        #customAlert {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-            z-index: 10000; /* Biar di atas semuanya, termasuk prompt browser jika memungkinkan */
-            text-align: center;
-        }
-        #customAlert button {
-            margin-top: 10px;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        #customAlert button:hover {
-            background-color: #0056b3;
-        }
-    </style>
-</head>
-<body>
+    <link rel="icon" href="icon.png" type="image/png" />
+  </head>
+  <body>
     <h1>Halo, ini PWA sederhana!</h1>
     <p>Klik tombol di bawah buat instal sebagai app.</p>
-    <button id="installButton" style="display: none;">Install App</button>
-
-    <!-- Custom alert modal -->
-    <div id="customAlert">
-        <p>Ini alert custom yang muncul 50ms setelah permission prompt!</p>
-        <button id="closeButton">[2x klik]</button>
-    </div>
-
+    <button id="installButton" style="display: none">Install App</button>
     <script>
-        let deferredPrompt; // Variabel buat simpan event prompt
-
-        // Tangkap event beforeinstallprompt (ini API yang lo maksud)
-        window.addEventListener('beforeinstallprompt', (e) => {
-            // Cegah prompt otomatis muncul, simpan dulu
-            e.preventDefault();
-            deferredPrompt = e;
-            // Tampilkan tombol instal
-            document.getElementById('installButton').style.display = 'block';
+      let deferredPrompt; // Variabel buat simpan event prompt
+      // Tangkap event beforeinstallprompt (ini API yang lo maksud)
+      window.addEventListener("beforeinstallprompt", (e) => {
+        // Cegah prompt otomatis muncul, simpan dulu
+        e.preventDefault();
+        deferredPrompt = e;
+        // Tampilkan tombol instal
+        document.getElementById("installButton").style.display = "block";
+      });
+      // Handle klik tombol buat trigger instal
+      document
+        .getElementById("installButton")
+        .addEventListener("click", async () => {
+          if (deferredPrompt) {
+            // Panggil API prompt instal
+            deferredPrompt.prompt();
+            // Set timeout 50ms untuk munculin javascript alert tolol
+            setTimeout(() => {
+              alert(
+                "Ini javascript alert yang muncul 50ms setelah permission prompt, goblok! Untuk tutup, klik OK aja karena native alert gak bisa custom button [2x klik] kayak lo minta, tolol. Kalo mau custom, harus pakai overlay lagi, fuck you."
+              );
+            }, 50);
+            // Tunggu user pilih (ini bakal nunggu setelah alert ditutup karena alert blocking)
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User choice: ${outcome}`); // 'accepted' atau 'dismissed'
+            deferredPrompt = null;
+          }
         });
-
-        // Handle klik tombol buat trigger instal
-        document.getElementById('installButton').addEventListener('click', async () => {
-            if (deferredPrompt) {
-                // Panggil API prompt instal
-                deferredPrompt.prompt();
-
-                // Set timeout 50ms untuk munculin custom alert
-                setTimeout(() => {
-                    document.getElementById('customAlert').style.display = 'block';
-                }, 50);
-
-                // Tunggu user pilih
-                const { outcome } = await deferredPrompt.userChoice;
-                console.log(`User choice: ${outcome}`); // 'accepted' atau 'dismissed'
-                deferredPrompt = null;
-
-                // Optional: Tutup custom alert setelah user choice, tapi biarin user tutup manual via double click
-            }
-        });
-
-        // Handle double click pada button [2x klik] untuk tutup alert
-        document.getElementById('closeButton').addEventListener('dblclick', () => {
-            document.getElementById('customAlert').style.display = 'none';
-        });
-
-        // Optional: Daftarin service worker buat PWA full
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-                .then(reg => console.log('Service Worker registered!', reg))
-                .catch(err => console.error('Service Worker registration failed:', err));
-        }
+      // Optional: Daftarin service worker buat PWA full
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .register("sw.js")
+          .then((reg) => console.log("Service Worker registered!", reg))
+          .catch((err) =>
+            console.error("Service Worker registration failed:", err)
+          );
+      }
     </script>
-</body>
+  </body>
 </html>
