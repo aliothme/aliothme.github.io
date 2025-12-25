@@ -7,90 +7,60 @@
     <link rel="manifest" href="https://aliothme.github.io/manifest.json">
 </head>
 <body>
-    <h1>Test PWA Installation Theory v5</h1>
-    <p>This page serves as the main window hosted on HTTPS (e.g., via GitHub Pages at aliothme.github.io). Click the button below to open a popup window for testing.</p>
+    <h1>Test PWA Installation Theory with Race Condition</h1>
+    <p>This page serves as the main window hosted on HTTPS (e.g., via GitHub Pages at aliothme.github.io). The installation prompt will be handled here, but an about:blank popup will open just before the prompt to test race condition effects on origin.</p>
     
-    <button id="openPopup">Open Popup for PWA Install</button>
+    <button id="installPWA" style="display: none;">Install PWA</button>
 
     <script>
-        // Register service worker in main window only
+        // Register service worker in main window
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('https://aliothme.github.io/sw.js', { scope: '/' })
                 .then(reg => console.log('Service Worker registered in main', reg))
                 .catch(err => console.log('Service Worker error in main', err));
         }
 
-        // Function to open the popup and inject content
-        document.getElementById('openPopup').addEventListener('click', function() {
-            // Open popup with about:blank
-            const popup = window.open('about:blank', 'pwaPopup', 'width=600,height=400');
-
+        // PWA installation logic in main window with race condition test
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Open about:blank popup immediately upon event firing (before prompting)
+            const popup = window.open('about:blank', 'blankPopup', 'width=600,height=400');
             if (popup) {
-                // Inject content immediately
+                console.log('about:blank popup opened to test race condition');
+                // Optionally inject minimal content into popup if needed
                 popup.document.open();
-                popup.document.write(`
-                    <!DOCTYPE html>
-                    <html lang="en">
-                    <head>
-                        <meta charset="UTF-8">
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                        <title>Popup for PWA Installation</title>
-                        <link rel="manifest" href="https://aliothme.github.io/manifest.json">
-                    </head>
-                    <body>
-                        <h1>PWA Installation Test in Popup</h1>
-                        <p>This popup is loaded from about:blank. The content below is injected via an iframe from permission.site to handle cross-origin constraints.</p>
-                        
-                        <!-- Iframe to inject permission.site content -->
-                        <iframe src="https://permission.site/" width="100%" height="300" sandbox="allow-scripts allow-same-origin allow-popups allow-modals"></iframe>
-                        
-                        <button id="installPWA">Install PWA</button>
-                        
-                        <script>
-                            // PWA installation logic in popup (inherits service worker from main window)
-                            let deferredPrompt;
-                            
-                            // Use setTimeout for delayed listener addition to allow document state stabilization
-                            setTimeout(() => {
-                                try {
-                                    window.addEventListener('beforeinstallprompt', (e) => {
-                                        e.preventDefault();
-                                        deferredPrompt = e;
-                                        document.getElementById('installPWA').style.display = 'block';
-                                        console.log('beforeinstallprompt fired in popup');
-                                    });
-                                    console.log('Listener added after delay');
-                                } catch (error) {
-                                    console.error('Error adding beforeinstallprompt listener:', error);
-                                }
-                            }, 500); // 500ms delay for browser evaluation
-                            
-                            // Handle install button click with fallback
-                            document.getElementById('installPWA').addEventListener('click', async () => {
-                                if (deferredPrompt) {
-                                    deferredPrompt.prompt();
-                                    const { outcome } = await deferredPrompt.userChoice;
-                                    if (outcome === 'accepted') {
-                                        console.log('PWA installation accepted');
-                                    } else {
-                                        console.log('PWA installation dismissed');
-                                    }
-                                    deferredPrompt = null;
-                                } else {
-                                    alert('PWA installation prompt not available. Ensure the site meets PWA criteria (HTTPS, manifest, service worker). As a fallback, manually add to home screen via your browser\\'s share menu.');
-                                }
-                            });
-                            
-                            // Note: The actual PWA manifest and service worker are served from aliothme.github.io. This setup leverages origin inheritance for secure context.
-                        <\/script>
-                    </body>
-                    </html>
-                `);
+                popup.document.write('<h1>Blank Popup for Race Condition Test</h1>');
                 popup.document.close();
             } else {
-                alert('Popup blocked. Please allow popups for this site.');
+                console.log('Popup blocked during race condition test');
+            }
+            
+            // Show install button in main window after opening popup
+            document.getElementById('installPWA').style.display = 'block';
+            console.log('beforeinstallprompt fired; popup opened before prompt');
+        });
+        
+        // Handle install button click in main window
+        document.getElementById('installPWA').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('PWA installation accepted');
+                } else {
+                    console.log('PWA installation dismissed');
+                }
+                deferredPrompt = null;
+            } else {
+                alert('PWA installation prompt not available. Ensure the site meets PWA criteria (HTTPS, manifest, service worker). As a fallback, manually add to home screen via your browser\'s share menu.');
             }
         });
+        
+        // Note: This setup tests if the installation prompt adopts the about:blank origin due to race condition timing. The manifest's start_url defines the final PWA origin.
     </script>
 </body>
 </html>
