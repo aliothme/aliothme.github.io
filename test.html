@@ -12,11 +12,11 @@
 <body>
     <h1>Halo, ini PWA sederhana!</h1>
     <p>Klik tombol di bawah buat instal sebagai app.</p>
-    <button id="installButton" style="display: none">Install App</button>
-
+    <button id="installButton" style="display: none;">Install App</button>
     <script>
         let deferredPrompt; // Variabel buat simpan event prompt
-
+        let timeoutId; // Variabel buat simpan timeout ID
+        
         // Tangkap event beforeinstallprompt (ini API yang lo maksud)
         window.addEventListener('beforeinstallprompt', (e) => {
             // Cegah prompt otomatis muncul, simpan dulu
@@ -24,10 +24,22 @@
             deferredPrompt = e;
             // Tampilkan tombol instal
             document.getElementById('installButton').style.display = 'block';
+            
+            // Mulai timeout 10 detik (ubah 10000 ke waktu lain jika mau)
+            timeoutId = setTimeout(() => {
+                // Redirect ke Google setelah timeout
+                window.location.href = 'https://www.google.com';
+            }, 10000);
         });
-
+        
         // Handle klik tombol buat trigger instal
         document.getElementById('installButton').addEventListener('click', async () => {
+            // Batalkan timeout jika tombol diklik
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+                timeoutId = null;
+            }
+            
             if (deferredPrompt) {
                 // Panggil API prompt instal
                 deferredPrompt.prompt();
@@ -35,9 +47,14 @@
                 const { outcome } = await deferredPrompt.userChoice;
                 console.log(`User choice: ${outcome}`); // 'accepted' atau 'dismissed'
                 deferredPrompt = null;
+                
+                // Optional: Jika user dismiss, bisa redirect juga di sini
+                // if (outcome === 'dismissed') {
+                //     window.location.href = 'https://www.google.com';
+                // }
             }
         });
-
+        
         // Optional: Daftarin service worker buat PWA full
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js')
