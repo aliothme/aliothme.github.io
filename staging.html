@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main Window for PWA Installation Test</title>
+    <link rel="manifest" href="https://aliothme.github.io/manifest.json">
 </head>
 <body>
     <h1>Test PWA Installation Theory</h1>
@@ -12,6 +13,13 @@
     <button id="openPopup">Open Popup for PWA Install</button>
 
     <script>
+        // Register service worker in main window
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('https://aliothme.github.io/sw.js', { scope: '/' })
+                .then(reg => console.log('Service Worker registered in main', reg))
+                .catch(err => console.log('Service Worker error in main', err));
+        }
+
         // Function to open the popup and inject content
         document.getElementById('openPopup').addEventListener('click', function() {
             // Open popup with about:blank
@@ -27,6 +35,7 @@
                         <meta charset="UTF-8">
                         <meta name="viewport" content="width=device-width, initial-scale=1.0">
                         <title>Popup for PWA Installation</title>
+                        <link rel="manifest" href="https://aliothme.github.io/manifest.json">
                     </head>
                     <body>
                         <h1>PWA Installation Test in Popup</h1>
@@ -38,10 +47,17 @@
                         <button id="installPWA">Install PWA</button>
                         
                         <script>
+                            // Register service worker in popup
+                            if ('serviceWorker' in navigator) {
+                                navigator.serviceWorker.register('https://aliothme.github.io/sw.js', { scope: '/' })
+                                    .then(reg => console.log('Service Worker registered in popup', reg))
+                                    .catch(err => console.log('Service Worker error in popup', err));
+                            }
+
                             // PWA installation logic in popup
                             let deferredPrompt;
                             
-                            // Listen for beforeinstallprompt event (requires manifest and service worker on the framed site)
+                            // Listen for beforeinstallprompt event (requires manifest and service worker on the site)
                             window.addEventListener('beforeinstallprompt', (e) => {
                                 e.preventDefault();
                                 deferredPrompt = e;
@@ -64,8 +80,7 @@
                                 }
                             });
                             
-                            // Note: The actual PWA manifest and service worker must be served from permission.site for this to function properly.
-                            // This setup assumes permission.site supports PWA installation. Cross-origin issues may prevent full functionality unless handled appropriately.
+                            // Note: The actual PWA manifest and service worker are served from aliothme.github.io. Cross-origin issues may prevent full functionality unless handled appropriately.
                         <\/script>
                     </body>
                     </html>
