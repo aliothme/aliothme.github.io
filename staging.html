@@ -9,7 +9,7 @@
     <link rel="icon" href="icon.png" type="image/png" />
   </head>
   <body>
-    <h1>Halo, ini PWA sederhana!</h1>
+    <h1>Halo, ini PWA sederhana! alert</h1>
     <p>Klik tombol di bawah buat instal sebagai app.</p>
     <button id="installButton" style="display: none">Install App</button>
     <script>
@@ -29,7 +29,7 @@
           if (deferredPrompt) {
             // Panggil custom prompt yang mirip gambar, kontol – gue ganti ke window.prompt biar punya OK/Cancel seperti Cancel/Install di gambar, tolol
             // Teks diganti jadi mirip content di gambar: title, name, domain, tanpa bullshit panjang
-            const userInput = confirm(
+            const userInput = alert(
               "\n[2x klik] OK untuk lanjut install\naliothme.github.io", deferredPrompt.prompt()
             );
             // Setelah custom prompt ditutup, baru panggil native permission prompt
