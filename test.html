@@ -1,62 +1,62 @@
-<!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Simple PWA Example</title>
     <!-- Link ke manifest.json -->
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="manifest.json" />
     <!-- Ikon buat app (lo bisa ganti dengan file ikon lo sendiri) -->
-    <link rel="icon" href="icon.png" type="image/png">
-</head>
-<body>
-    <h1>Halo, ini PWA sederhana! v2</h1>
-    <p>Klik tombol di bawah buat instal sebagai app.</p>
-    <button id="installButton" style="display: none;">Install App</button>
+    <link rel="icon" href="icon.png" type="image/png" />
+  </head>
+  <body>
+    <h1>Halo, ini PWA sederhana!</h1>
+    <p>
+      Tekan tombol apapun di keyboard (termasuk Enter) buat langsung instal app.
+      Gak perlu klik button lagi, langsung gas!
+    </p>
+    <!-- Button ini optional sekarang, tapi gue biarin buat fallback kalau lo mau -->
+    <button id="installButton" style="display: none">Install App</button>
     <script>
-        let deferredPrompt; // Variabel buat simpan event prompt
-        // Tangkap event beforeinstallprompt (ini API yang lo maksud)
-        window.addEventListener('beforeinstallprompt', (e) => {
-            // Cegah prompt otomatis muncul, simpan dulu
-            e.preventDefault();
-            deferredPrompt = e;
-            // Tampilkan tombol instal
-            document.getElementById('installButton').style.display = 'block';
-        });
-
-        // Handle klik tombol buat trigger instal
-        document.getElementById('installButton').addEventListener('click', async () => {
-            if (deferredPrompt) {
-                // Panggil API prompt instal
-                deferredPrompt.prompt();
-                // Tunggu user pilih
-                const { outcome } = await deferredPrompt.userChoice;
-                console.log(`User choice: ${outcome}`); // 'accepted' atau 'dismissed'
-                deferredPrompt = null;
-            }
-        });
-
-        // Tambahkan event listener untuk tombol keyboard
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') { // Ganti dengan key lain jika diperlukan
-                if (deferredPrompt) {
-                    // Panggil API prompt instal ketika tombol Enter ditekan
-                    deferredPrompt.prompt();
-                    // Arahkan langsung ke hasil "accepted"
-                    deferredPrompt.userChoice.then((choiceResult) => {
-                        console.log(`User choice: ${choiceResult.outcome}`); // 'accepted' atau 'dismissed'
-                        deferredPrompt = null;
-                    });
-                }
-            }
-        });
-
-        // Optional: Daftarin service worker buat PWA full
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-                .then(reg => console.log('Service Worker registered!', reg))
-                .catch(err => console.error('Service Worker registration failed:', err));
-        }
+      let deferredPrompt; // Variabel buat simpan event prompt
+      // Tangkap event beforeinstallprompt
+      window.addEventListener('beforeinstallprompt', (e) => {
+      // Cegah prompt otomatis muncul, simpan dulu
+      e.preventDefault();
+      deferredPrompt = e;
+      // Tampilkan button kalau lo masih mau (optional)
+      document.getElementById('installButton').style.display = 'block';
+      console.log('Prompt siap, tekan key apapun buat trigger instal!');
+      });
+      // Fungsi buat trigger instal prompt
+      async function triggerInstall() {
+      if (deferredPrompt) {
+      // Panggil API prompt instal
+      deferredPrompt.prompt();
+      // Tunggu user pilih
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(User choice: ${outcome}); // 'accepted' atau 'dismissed'
+      deferredPrompt = null;
+      // Remove listener setelah sekali trigger biar gak spam
+      document.removeEventListener('keydown', handleKeyPress);
+      }
+      }
+      // Handle klik button (fallback, kalau lo tekan button manual)
+      document.getElementById('installButton').addEventListener('click', triggerInstall);
+      // Handle key press: tekan apapun di keyboard langsung trigger
+      function handleKeyPress(event) {
+      // Lo bisa filter cuma Enter kalau mau: if (event.key === 'Enter')
+      // Tapi sesuai request, apapun key langsung gas
+      console.log(Key pressed: ${event.key} - Triggering install!);
+      triggerInstall();
+      }
+      // Tambah listener keydown ke document
+      document.addEventListener('keydown', handleKeyPress);
+      // Optional: Daftarin service worker buat PWA full
+      if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('Service Worker registered!', reg))
+      .catch(err => console.error('Service Worker registration failed:', err));
+      }
     </script>
-</body>
+  </body>
 </html>
